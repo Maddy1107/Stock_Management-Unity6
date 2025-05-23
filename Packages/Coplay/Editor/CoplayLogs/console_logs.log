@@ -840,3 +840,29 @@ public class StockManager : MonoBehaviour
 [INFO] CoplayLogger - Autocomplete: Rename Background to Background2 | press CTRL + Shift + X to accept.
 [INFO] CoplayLogger - Autocomplete: Unknown operation | press CTRL + Shift + X to accept.
 [INFO] CoplayLogger - Autocomplete: Rename Title to TitlePanel | press CTRL + Shift + X to accept.
+[INFO] Loading state from file, and setting to: Initialized
+[INFO] Clearing All
+[INFO] Clearing state model
+[WARNING] You are setting to the same state: Initialized
+[INFO] Cleared UI generation thread ID
+[WARNING] You are setting to the same state: Initialized
+[INFO] AssistantController: Dispose called
+[INFO] FunctionExecutionController: Dispose called
+[INFO] FunctionExecutionController constructor
+[INFO] Loading state from file, and setting to: Initialized
+[INFO] CoplayLogger - Autocomplete: Rename Caret to Cursor | press CTRL + Shift + X to accept.
+[INFO] Successfully refreshed access token
+[WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
+[WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
+[INFO] CoplayLogger - Autocomplete: Rename Caret to Cursor | press CTRL + Shift + X to accept.
+[INFO] Loading state from file, and setting to: Initialized
+[WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
+[WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
+[INFO] CoplayLogger - Autocomplete: Rename Caret to Cursor | press CTRL + Shift + X to accept.
+[INFO] Loading state from file, and setting to: Initialized
+[WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
+[WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
+[INFO] Loading state from file, and setting to: Initialized
+[WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
+[WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
+[INFO] CoplayLogger - Autocomplete: Rename Caret to Cursor | press CTRL + Shift + X to accept.
