@@ -5,34 +5,40 @@ using UnityEngine.UI;
 
 public class ProductItem : MonoBehaviour
 {
-    public TMP_Text nameText;
-    public Button toggleButton;
+    [SerializeField] private TMP_Text nameText;
+    [SerializeField] private Button toggleButton;
+    [SerializeField] private Sprite removeSprite;
+    [SerializeField] private Sprite addSprite;
 
     public string ProductName { get; private set; }
     public bool IsInMail { get; private set; }
-    public Sprite removeSprite;
-    public Sprite addSprite;
-    public Action<ProductItem> OnToggleClicked; // Changed from event
+    public Action<ProductItem> OnToggleClicked;
 
-    public void Initialize(string productName, bool isInMail)
+    public void Initialize(string displayName, string productName, bool isInMail)
     {
         ProductName = productName;
         IsInMail = isInMail;
 
         if (nameText != null)
-            nameText.text = productName;
+            nameText.text = displayName;
 
         if (toggleButton != null)
         {
             toggleButton.onClick.RemoveAllListeners();
-            toggleButton.onClick.AddListener(() =>
-            {
-                OnToggleClicked?.Invoke(this);
-            });
-
-            toggleButton.GetComponentInChildren<TMP_Text>().text = isInMail ? "-" : "+";
-            toggleButton.GetComponent<Image>().sprite = isInMail ? removeSprite : addSprite;
-
+            toggleButton.onClick.AddListener(OnToggleButtonClicked);
+            SetButtonSprite(isInMail);
         }
+    }
+
+    private void OnToggleButtonClicked()
+    {
+        OnToggleClicked?.Invoke(this);
+    }
+
+    public void SetButtonSprite(bool isInMail)
+    {
+        var image = toggleButton?.GetComponent<Image>();
+        if (image != null)
+            image.sprite = isInMail ? removeSprite : addSprite;
     }
 }

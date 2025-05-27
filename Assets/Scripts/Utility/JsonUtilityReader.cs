@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class JsonUtilityReader
 {
-    public static Dictionary<string, List<string>> ReadCategoryJson(string fileName)
+    public static List<string> ReadProductJson(string fileName)
     {
         string jsonPath = Path.Combine(Application.streamingAssetsPath, fileName);
 
@@ -16,6 +16,6 @@ public static class JsonUtilityReader
         }
 
         string jsonContent = File.ReadAllText(jsonPath);
-        return JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(jsonContent);
+        return JsonConvert.DeserializeObject<List<string>>(jsonContent);
     }
 }

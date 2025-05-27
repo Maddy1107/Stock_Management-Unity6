@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 public class GUIManager : MonoBehaviour
@@ -8,7 +9,6 @@ public class GUIManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private SelectMailPopup selectMailPopup;
     [SerializeField] private GameObject startScreenPopup;
-
     [SerializeField] private GameObject mailScreenGO;
     [SerializeField] private GameObject mainmenuPanelGO;
 
@@ -23,10 +23,9 @@ public class GUIManager : MonoBehaviour
         }
         Instance = this;
 
-        if (mailScreenGO != null)
-            mailScreen = mailScreenGO.GetComponent<MailScreen>();
+        mailScreen = mailScreenGO ? mailScreenGO.GetComponent<MailScreen>() : null;
 
-        if (selectMailPopup != null)
+        if (selectMailPopup)
             selectMailPopup.OnTypeSelected = HandleMailTypeSelected;
     }
 
@@ -35,48 +34,64 @@ public class GUIManager : MonoBehaviour
         ShowOnly(mainmenuPanelGO);
     }
 
-    private void HandleMailTypeSelected(string type)
+    private void HandleMailTypeSelected(MailType type)
     {
-        Debug.Log("Mail type selected: " + type);
+        Debug.Log($"Mail type selected: {type}");
 
-        if (mailScreen != null)
+        if (mailScreen)
         {
-            mailScreen.OpenWithType(type);
             ShowOnly(mailScreenGO);
+            mailScreen.Open(type);
         }
+    }
+
+    public void ShowFinalEmailScreen(string emailContent,TMP_Text mailText = null)
+    {
+        mailScreen?.BuildFullEmail(emailContent, mailText);
     }
 
     public void ShowSelectMailPopup()
     {
-        if (selectMailPopup != null)
+        if (selectMailPopup)
             selectMailPopup.gameObject.SetActive(true);
     }
 
     public void ShowMainMenuPanel(Texture2D texture = null, string name = "")
     {
-        if (mainmenuPanelGO != null)
-        {
-            ShowOnly(mainmenuPanelGO);
-            mainmenuPanelGO.GetComponent<MainMenuPanel>().Initialize(texture, name);
-        }
+        if (!mainmenuPanelGO) return;
+
+        ShowOnly(mainmenuPanelGO);
+        var mainMenuPanel = mainmenuPanelGO.GetComponent<MainMenuPanel>();
+        if (mainMenuPanel)
+            mainMenuPanel.Initialize(texture, name);
     }
 
     private void ShowOnly(GameObject targetGO)
     {
-        if (mainmenuPanelGO != null) mainmenuPanelGO.SetActive(mainmenuPanelGO == targetGO);
-        if (mailScreenGO != null) mailScreenGO.SetActive(mailScreenGO == targetGO);
+        if (mainmenuPanelGO)
+            mainmenuPanelGO.SetActive(mainmenuPanelGO == targetGO);
+        if (mailScreenGO)
+            mailScreenGO.SetActive(mailScreenGO == targetGO);
     }
 
     public void CheckProfileData()
     {
-        (string name, Texture2D texture) = startScreenPopup.GetComponent<AboutPanel>().LoadSavedData();
-        if (!string.IsNullOrEmpty(name) && texture != null)
+        var aboutPanel = startScreenPopup ? startScreenPopup.GetComponent<AboutPanel>() : null;
+        if (aboutPanel == null)
+        {
+            Debug.LogWarning("AboutPanel not found on startScreenPopup.");
+            return;
+        }
+
+        (string name, Texture2D texture) = aboutPanel.LoadSavedData();
+        if (!string.IsNullOrEmpty(name) && texture)
         {
             ShowMainMenuPanel(texture, name);
         }
         else
         {
-            startScreenPopup.gameObject.SetActive(true);
+            if (startScreenPopup)
+                startScreenPopup.SetActive(true);
         }
     }
 }
