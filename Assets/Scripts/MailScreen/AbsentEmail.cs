@@ -14,7 +14,7 @@ public class AbsentEmail : MonoBehaviour
 
     void OnEnable()
     {
-        BuildAbsentEmail();
+        Reset();
         numberOfDates.onValueChanged.RemoveAllListeners();
         numberOfDates.onValueChanged.AddListener(OnNumberOfDatesChanged);
     }
@@ -33,8 +33,6 @@ public class AbsentEmail : MonoBehaviour
             {
                 GameObject dateObject = Instantiate(selectDataPrefab, dateContainer.transform);
                 dateObject.GetComponentInChildren<TMP_Text>().text = $"Select Date {i + 1}";
-                dateObject.GetComponent<Button>().onClick.RemoveAllListeners();
-                dateObject.GetComponent<Button>().onClick.AddListener(() => SelectDate(dateObject));
             }
         }
         else
@@ -45,16 +43,17 @@ public class AbsentEmail : MonoBehaviour
 
     public List<string> dates = new List<string>();
 
-    public void SelectDate(GameObject dateObject)
+    public void AddDate(string dateObject)
     {
-        DatePicker.Instance.ShowDatePicker((day, month, year) =>
+        if (!string.IsNullOrEmpty(dateObject) && !dates.Contains(dateObject))
         {
-            string monthName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(month);
-            dates.Add($"{day:D2} {monthName}");
-            dateObject.GetComponentInChildren<TMP_Text>().text = $"{day:D2} {monthName}";
+            dates.Add(dateObject);
             BuildAbsentEmail();
-        });
-
+        }
+        else
+        {
+            Debug.LogWarning("Date is either empty or already added.");
+        }
     }
 
     public void BuildAbsentEmail()
@@ -76,7 +75,19 @@ public class AbsentEmail : MonoBehaviour
         sb.AppendLine();
         sb.AppendLine("It will be very nice if you can fix the issue.");
 
-        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString().TrimEnd(','),absentText);
+        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString().TrimEnd(','), absentText);
+    }
+
+    public void Reset()
+    {
+        numberOfDates.text = "";
+        dates.Clear();
+
+        foreach (Transform child in dateContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        BuildAbsentEmail();
     }
 
 }

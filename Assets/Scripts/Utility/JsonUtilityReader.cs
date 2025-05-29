@@ -7,15 +7,13 @@ public static class JsonUtilityReader
 {
     public static List<string> ReadProductJson(string fileName)
     {
-        string jsonPath = Path.Combine(Application.streamingAssetsPath, fileName);
-
-        if (!File.Exists(jsonPath))
+        TextAsset jsonAsset = Resources.Load<TextAsset>(Path.GetFileNameWithoutExtension(fileName));
+        if (jsonAsset == null)
         {
-            Debug.LogError("JSON file not found at: " + jsonPath);
+            Debug.LogError("JSON file not found in Resources: " + fileName);
             return null;
         }
-
-        string jsonContent = File.ReadAllText(jsonPath);
+        string jsonContent = jsonAsset.text;
         return JsonConvert.DeserializeObject<List<string>>(jsonContent);
     }
 }

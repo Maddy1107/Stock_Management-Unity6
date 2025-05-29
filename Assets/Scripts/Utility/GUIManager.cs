@@ -74,8 +74,14 @@ public class GUIManager : MonoBehaviour
             mailScreenGO.SetActive(mailScreenGO == targetGO);
     }
 
+    private bool hasCheckedProfileData = false;
+
     public void CheckProfileData()
     {
+        if (hasCheckedProfileData)
+            return;
+        hasCheckedProfileData = true;
+
         var aboutPanel = startScreenPopup ? startScreenPopup.GetComponent<AboutPanel>() : null;
         if (aboutPanel == null)
         {

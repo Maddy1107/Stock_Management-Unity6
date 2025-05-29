@@ -25,7 +25,7 @@ public class ProductMail : MonoBehaviour
     void OnEnable()
     {
         OpenScreen();
-        productList = JsonUtilityReader.ReadProductJson("product_list.json");
+        productList = JsonUtilityReader.ReadProductJson("product_list");
         productParent = productContent.transform;
         mailParent = mailContent.transform;
 
