@@ -50,6 +50,9 @@ public class MailScreen : MonoBehaviour
     private void HandleBackButton()
     {
         gameObject.SetActive(false);
+        productContent?.SetActive(false);
+        absentContent?.SetActive(false);
+        ResetMailScreen();
         GUIManager.Instance.ShowMainMenuPanel();
     }
 
@@ -57,7 +60,7 @@ public class MailScreen : MonoBehaviour
     {
         if (productContent != null)
         {
-            var productMail = productContent.GetComponent<ProductMail>();
+            var productMail = productContent.GetComponentInParent<ProductMail>();
             if (productMail != null)
                 productMail.OpenScreen();
         }
@@ -73,7 +76,7 @@ public class MailScreen : MonoBehaviour
             case MailType.Received:
                 if (productContent != null)
                 {
-                    var productMail = productContent.GetComponent<ProductMail>();
+                    var productMail = productContent.GetComponentInParent<ProductMail>();
                     if (productMail != null)
                         productMail.OpenWithType(type);
                 }
@@ -91,7 +94,6 @@ public class MailScreen : MonoBehaviour
         sb.AppendLine("Dear Team,");
         sb.AppendLine();
         sb.AppendLine(content);
-        sb.AppendLine();
         sb.AppendLine("Thank you \nPriyanka Roy");
         sb.AppendLine();
 
@@ -109,5 +111,13 @@ public class MailScreen : MonoBehaviour
     public void ResetMailScreen()
     {
         emailContent = string.Empty;
+        productContent?.SetActive(false);
+        absentContent?.SetActive(false);
+        if (productContent != null)
+        {
+            var productMail = productContent.GetComponent<ProductMail>();
+            if (productMail != null)
+                productMail.ResetProductScreen();
+        }
     }
 }

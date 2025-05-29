@@ -11,6 +11,7 @@ public class ProductMail : MonoBehaviour
     public GameObject productContent;
     public GameObject productPrefab;
     public GameObject finalMailContent;
+    public GameObject productSelectContent;
     public TMP_InputField searchInputField;
     public Button clearSearchButton, buildEmailButton;
 
@@ -53,13 +54,13 @@ public class ProductMail : MonoBehaviour
 
     public void OpenScreen()
     {
-        gameObject.SetActive(true);
+        productSelectContent.SetActive(true);
         finalMailContent.SetActive(false);
     }
 
     public void OpenWithType(MailType type)
     {
-        gameObject.SetActive(true);
+        productSelectContent.SetActive(true);
         headerText = $"Below are the {(type == MailType.Required ? "required" : "received")} products:";
         ResetProductScreen();
     }
@@ -186,7 +187,7 @@ public class ProductMail : MonoBehaviour
         }
 
         GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), mailText);
-        gameObject.SetActive(false);
+        productSelectContent.SetActive(false);
         finalMailContent.SetActive(true);
     }
 

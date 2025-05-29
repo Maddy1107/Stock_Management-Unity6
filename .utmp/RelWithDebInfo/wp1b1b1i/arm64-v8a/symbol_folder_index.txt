@@ -1,0 +1,1 @@
+C:\Users\NilankarD\Desktop\Github\Stock_Management-Unity\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\wp1b1b1i\obj\arm64-v8a
