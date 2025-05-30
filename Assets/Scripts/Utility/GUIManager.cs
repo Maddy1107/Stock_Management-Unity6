@@ -1,4 +1,3 @@
-using System;
 using TMPro;
 using UnityEngine;
 
@@ -10,9 +9,10 @@ public class GUIManager : MonoBehaviour
     [SerializeField] private SelectMailPopup selectMailPopup;
     [SerializeField] private GameObject startScreenPopup;
     [SerializeField] private GameObject mailScreenGO;
-    [SerializeField] private GameObject mainmenuPanelGO;
+    [SerializeField] private GameObject mainMenuPanelGO;
 
     private MailScreen mailScreen;
+    private bool hasCheckedProfileData = false;
 
     private void Awake()
     {
@@ -21,24 +21,23 @@ public class GUIManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
+        mailScreen = mailScreenGO?.GetComponent<MailScreen>();
 
-        mailScreen = mailScreenGO ? mailScreenGO.GetComponent<MailScreen>() : null;
-
-        if (selectMailPopup)
-            selectMailPopup.OnTypeSelected = HandleMailTypeSelected;
+        if (selectMailPopup != null)
+            selectMailPopup.OnTypeSelected += HandleMailTypeSelected;
     }
 
     private void OnEnable()
     {
-        ShowOnly(mainmenuPanelGO);
+        ShowOnly(mainMenuPanelGO);
     }
 
     private void HandleMailTypeSelected(MailType type)
     {
         Debug.Log($"Mail type selected: {type}");
-
-        if (mailScreen)
+        if (mailScreen != null)
         {
             ShowOnly(mailScreenGO);
             mailScreen.Open(type);
@@ -52,37 +51,36 @@ public class GUIManager : MonoBehaviour
 
     public void ShowSelectMailPopup()
     {
-        if (selectMailPopup)
-            selectMailPopup.gameObject.SetActive(true);
+        if (selectMailPopup != null)
+            selectMailPopup.GetComponent<PopupAnimator>().Show();
     }
 
     public void ShowMainMenuPanel(Texture2D texture = null, string name = "")
     {
-        if (!mainmenuPanelGO) return;
+        if (!mainMenuPanelGO) return;
 
-        ShowOnly(mainmenuPanelGO);
-        var mainMenuPanel = mainmenuPanelGO.GetComponent<MainMenuPanel>();
-        if (mainMenuPanel)
-            mainMenuPanel.Initialize(texture, name);
+        ShowOnly(mainMenuPanelGO);
+        var mainMenuPanel = mainMenuPanelGO.GetComponent<MainMenuPanel>();
+        mainMenuPanel?.Initialize(texture, name);
     }
 
     private void ShowOnly(GameObject targetGO)
     {
-        if (mainmenuPanelGO)
-            mainmenuPanelGO.SetActive(mainmenuPanelGO == targetGO);
-        if (mailScreenGO)
+        if (mainMenuPanelGO != null)
+            mainMenuPanelGO.SetActive(mainMenuPanelGO == targetGO);
+
+        if (mailScreenGO != null)
             mailScreenGO.SetActive(mailScreenGO == targetGO);
     }
 
-    private bool hasCheckedProfileData = false;
-
     public void CheckProfileData()
     {
-        if (hasCheckedProfileData)
-            return;
+        if (hasCheckedProfileData) return;
         hasCheckedProfileData = true;
 
-        var aboutPanel = startScreenPopup ? startScreenPopup.GetComponent<AboutPanel>() : null;
+        if (startScreenPopup == null) return;
+
+        var aboutPanel = startScreenPopup.GetComponent<AboutPanel>();
         if (aboutPanel == null)
         {
             Debug.LogWarning("AboutPanel not found on startScreenPopup.");
@@ -90,14 +88,13 @@ public class GUIManager : MonoBehaviour
         }
 
         (string name, Texture2D texture) = aboutPanel.LoadSavedData();
-        if (!string.IsNullOrEmpty(name) && texture)
+        if (!string.IsNullOrWhiteSpace(name) && texture != null)
         {
             ShowMainMenuPanel(texture, name);
         }
         else
         {
-            if (startScreenPopup)
-                startScreenPopup.SetActive(true);
+            startScreenPopup.GetComponent<PopupAnimator>().Show();
         }
     }
 

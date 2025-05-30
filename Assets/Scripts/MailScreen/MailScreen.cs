@@ -1,6 +1,6 @@
 using System.Text;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public enum MailType
@@ -12,12 +12,24 @@ public enum MailType
 
 public class MailScreen : MonoBehaviour
 {
+    public static MailScreen Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
     [Header("UI References")]
-    [SerializeField] private Button copyButton;
     [SerializeField] private Button backButton;
     [SerializeField] private Button updateButton;
     [SerializeField] private GameObject productContent;
     [SerializeField] private GameObject absentContent;
+
     private string emailContent;
 
     private void OnEnable()
@@ -26,25 +38,16 @@ public class MailScreen : MonoBehaviour
         SetupButtonListeners();
     }
 
+    private void OnDisable()
+    {
+        backButton.onClick.RemoveListener(HandleBackButton);
+        updateButton.onClick.RemoveListener(OpenProductContent);
+    }
+
     private void SetupButtonListeners()
     {
-        if (copyButton != null)
-        {
-            copyButton.onClick.RemoveAllListeners();
-            copyButton.onClick.AddListener(CopyToClipboard);
-        }
-
-        if (backButton != null)
-        {
-            backButton.onClick.RemoveAllListeners();
-            backButton.onClick.AddListener(HandleBackButton);
-        }
-
-        if (updateButton != null)
-        {
-            updateButton.onClick.RemoveAllListeners();
-            updateButton.onClick.AddListener(OpenProductContent);
-        }
+        backButton.onClick.AddListener(HandleBackButton);
+        updateButton.onClick.AddListener(OpenProductContent);
     }
 
     private void HandleBackButton()
@@ -58,12 +61,8 @@ public class MailScreen : MonoBehaviour
 
     private void OpenProductContent()
     {
-        if (productContent != null)
-        {
-            var productMail = productContent.GetComponentInParent<ProductMail>();
-            if (productMail != null)
-                productMail.OpenScreen();
-        }
+        var productMail = productContent?.GetComponentInParent<ProductMail>();
+        productMail?.OpenScreen();
     }
 
     public void Open(MailType type)
@@ -74,53 +73,43 @@ public class MailScreen : MonoBehaviour
         {
             case MailType.Required:
             case MailType.Received:
-                if (productContent != null)
-                {
-                    var productMail = productContent.GetComponentInParent<ProductMail>();
-                    if (productMail != null)
-                        productMail.OpenWithType(type);
-                }
+                var productMail = productContent?.GetComponentInParent<ProductMail>();
+                productMail?.OpenWithType(type);
                 break;
+
             case MailType.Absent:
-                if (absentContent != null)
-                    absentContent.SetActive(true);
+                absentContent?.SetActive(true);
                 break;
         }
     }
 
-    public void BuildFullEmail(string content,TMP_Text mailtext)
+    public void BuildFullEmail(string content, TMP_Text mailText)
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("Dear Team,");
-        sb.AppendLine();
-        sb.AppendLine(content);
-        sb.AppendLine("Thank you \nPriyanka Roy");
-        sb.AppendLine();
+        var sb = new StringBuilder()
+            .AppendLine("Dear Team,")
+            .AppendLine()
+            .AppendLine(content)
+            .AppendLine("Thank you \nPriyanka Roy\n");
 
         emailContent = sb.ToString();
-        if (mailtext != null)
-            mailtext.text = emailContent;
+        if (mailText != null)
+            mailText.text = emailContent;
     }
 
-    private void CopyToClipboard()
+    public void CopyToClipboard()
     {
         GUIUtility.systemCopyBuffer = emailContent ?? string.Empty;
         Debug.Log($"Copied to clipboard:\n{emailContent}");
         GUIManager.Instance.ShowAndroidToast("Copied to clipboard");
     }
 
-
-
-    public void ResetMailScreen()
+    private void ResetMailScreen()
     {
         emailContent = string.Empty;
         productContent?.SetActive(false);
         absentContent?.SetActive(false);
-        if (productContent != null)
-        {
-            var productMail = productContent.GetComponent<ProductMail>();
-            if (productMail != null)
-                productMail.ResetProductScreen();
-        }
+
+        var productMail = productContent?.GetComponent<ProductMail>();
+        productMail?.ResetProductScreen();
     }
 }

@@ -1,124 +1,174 @@
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
-using UI.Dates;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class AbsentEmail : MonoBehaviour
 {
-    public TMP_InputField numberOfDates;
-    public GameObject selectDataPrefab;
-    public GameObject dateContainer;
-    public TMP_Text absentText;
+    [SerializeField] private TMP_InputField numberOfDatesInput;
+    [SerializeField] private GameObject selectDatePrefab;
+    [SerializeField] private Transform dateContainer;
+    [SerializeField] private TMP_Text absentText;
+    [SerializeField] private Button copyButton;
 
-    private string[] dates;
+    private TMP_Text[] selectedDates;
+    private string[] _previousDates;
 
-    void OnEnable()
+    private void OnEnable()
     {
-        Reset();
-        numberOfDates.onValueChanged.RemoveAllListeners();
-        numberOfDates.onValueChanged.AddListener(OnNumberOfDatesChanged);
-        numberOfDates.ActivateInputField();
+        ResetUI();
+        numberOfDatesInput.onValueChanged.AddListener(OnNumberOfDatesChanged);
+        numberOfDatesInput.ActivateInputField();
+        copyButton.onClick.AddListener(() => MailScreen.Instance.CopyToClipboard());
     }
 
-    public void OnNumberOfDatesChanged(string value)
+    private void OnDisable()
     {
-        foreach (Transform child in dateContainer.transform)
-        {
-            Destroy(child.gameObject);
-        }
+        numberOfDatesInput.onValueChanged.RemoveListener(OnNumberOfDatesChanged);
+        copyButton.onClick.RemoveListener(() => MailScreen.Instance.CopyToClipboard());
+    }
 
-        int count;
-        if (int.TryParse(value, out count) && count > 0)
-        {
-            Initialize(count);
-            for (int i = 0; i < count; i++)
-            {
-                GameObject dateObject = Instantiate(selectDataPrefab, dateContainer.transform);
-                TMP_Text buttonLabel = dateObject.GetComponentInChildren<TMP_Text>();
-                if (buttonLabel != null)
-                    buttonLabel.text = $"Select Date";
-                
-                dateObject.GetComponent<DatePicker>().currentIndex = i;
-            }
-        }
-        else
+    private void OnNumberOfDatesChanged(string input)
+    {
+        ClearChildren(dateContainer);
+
+        if (!int.TryParse(input, out int count) || count <= 0)
         {
             Debug.LogWarning("Invalid number of dates entered.");
+            return;
+        }
+
+        selectedDates = new TMP_Text[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject dateGO = Instantiate(selectDatePrefab, dateContainer);
+            var buttonText = dateGO.GetComponentInChildren<TMP_Text>();
+            if (buttonText != null)
+                buttonText.text = "Select Date";
+
+            selectedDates[i] = dateGO.GetComponentInChildren<TMP_Text>();
+            dateGO.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                DatePicker.Instance.Show(dateGO.GetComponent<Button>());
+            });
         }
     }
 
-    private void Initialize(int count)
+    void Update()
     {
-        dates = new string[count];
-    }
-
-    public void PickDate(string date, int index)
-    {
-        if (index >= 0 && index < dates.Length)
+        if (selectedDates != null)
         {
-            dates[index] = date;
-
-            if (dateContainer.transform.childCount > index)
+            bool changed = false;
+            if (_previousDates == null || _previousDates.Length != selectedDates.Length)
             {
-                var buttonText = dateContainer.transform.GetChild(index).GetComponentInChildren<TMP_Text>();
-                if (buttonText != null)
+                _previousDates = new string[selectedDates.Length];
+                changed = true;
+            }
+
+            HashSet<string> seenDates = new HashSet<string>();
+            bool duplicateFound = false;
+
+            for (int i = 0; i < selectedDates.Length; i++)
+            {
+                string currentText = selectedDates[i]?.text ?? "";
+                if (_previousDates[i] != currentText)
                 {
-                    buttonText.text = date;
+                    _previousDates[i] = currentText;
+                    changed = true;
+                }
+
+                if (!string.IsNullOrEmpty(currentText) && currentText != "Select Date")
+                {
+                    if (!seenDates.Add(currentText))
+                    {
+                        duplicateFound = true;
+                        selectedDates[i].text = "Select Date";
+                        GUIManager.Instance.ShowAndroidToast("Duplicate date selected. Please select unique dates.");
+                    }
                 }
             }
 
-            BuildAbsentEmail();
+            if (changed && !duplicateFound)
+            {
+                BuildEmail();
+            }
+            
+        }
+
+        if (selectedDates != null && selectedDates.Length > 0)
+        {
+            bool allSelected = true;
+            HashSet<string> uniqueDates = new HashSet<string>();
+
+            foreach (var date in selectedDates)
+            {
+                string text = date?.text ?? "";
+                if (string.IsNullOrEmpty(text) || text == "Select Date" || !uniqueDates.Add(text))
+                {
+                    allSelected = false;
+                    break;
+                }
+            }
+
+            copyButton.interactable = allSelected;
         }
         else
         {
-            Debug.LogWarning($"Invalid index {index} for setting date.");
+            copyButton.interactable = false;
         }
     }
 
-
-    private void BuildAbsentEmail()
+    private void BuildEmail()
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("This is to inform that the following dates are marked as absent in GreytHR:");
-        sb.AppendLine();
+        var sb = new StringBuilder("This is to inform that the following dates are marked as absent in GreytHR:\n\n");
 
-        bool hasDates = false;
-        foreach (var date in dates)
-        {
-            if (!string.IsNullOrEmpty(date))
-            {
-                sb.Append($"{date}, ");
-                hasDates = true;
-            }
-        }
+        bool hasDates = selectedDates != null && selectedDates.Length > 0;
+        int count = 0;
+
         if (hasDates)
         {
+            foreach (var date in selectedDates)
+            {
+                if (!string.IsNullOrEmpty(date.text) && date.text != "Select Date")
+                {
+                    sb.Append($"{date.text}, ");
+                    hasDates = true;
+                }
+                else
+                {
+                    count++;
+                }
+            }
+
+            sb.Length -= 2; // Trim last comma
             sb.AppendLine();
         }
-
-        if (!hasDates)
+        if(!hasDates || count == selectedDates.Length)
         {
+            sb.AppendLine();
             sb.AppendLine("No Dates Selected.");
         }
 
-        sb.AppendLine();
-        sb.AppendLine("It will be very nice if you can fix the issue.");
+        sb.AppendLine("\nIt will be very nice if you can fix the issue.");
 
-        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString().TrimEnd(',', ' '), absentText);
+        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), absentText);
     }
 
-    public void Reset()
+    public void ResetUI()
     {
-        numberOfDates.text = "";
-        dates = new string[0];
+        numberOfDatesInput.text = "";
+        selectedDates = null;
+        ClearChildren(dateContainer);
+        BuildEmail();
+    }
 
-        foreach (Transform child in dateContainer.transform)
+    private void ClearChildren(Transform container)
+    {
+        foreach (Transform child in container)
         {
             Destroy(child.gameObject);
         }
-
-        BuildAbsentEmail();
     }
 }

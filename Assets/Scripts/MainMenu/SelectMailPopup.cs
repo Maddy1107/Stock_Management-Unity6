@@ -10,42 +10,33 @@ public class SelectMailPopup : MonoBehaviour
     [SerializeField] private Button receiveButton;
     [SerializeField] private Button absentButton;
 
-    public Action<MailType> OnTypeSelected;
+    public event Action<MailType> OnTypeSelected;
 
     private void OnEnable()
     {
-        AddListeners();
+        closeButton?.onClick.AddListener(ClosePopup);
+        requireButton?.onClick.AddListener(() => SelectType(MailType.Required));
+        receiveButton?.onClick.AddListener(() => SelectType(MailType.Received));
+        absentButton?.onClick.AddListener(() => SelectType(MailType.Absent));
     }
 
     private void OnDisable()
     {
-        RemoveListeners();
+        closeButton?.onClick.RemoveListener(ClosePopup);
+        requireButton?.onClick.RemoveAllListeners();
+        receiveButton?.onClick.RemoveAllListeners();
+        absentButton?.onClick.RemoveAllListeners();
     }
 
-    private void AddListeners()
+    private void SelectType(MailType type)
     {
-        if (closeButton != null) closeButton.onClick.AddListener(ClosePopup);
-        if (requireButton != null) requireButton.onClick.AddListener(() => OnMailTypeSelected(MailType.Required));
-        if (receiveButton != null) receiveButton.onClick.AddListener(() => OnMailTypeSelected(MailType.Received));
-        if (absentButton != null) absentButton.onClick.AddListener(() => OnMailTypeSelected(MailType.Absent));
-    }
-
-    private void RemoveListeners()
-    {
-        if (closeButton != null) closeButton.onClick.RemoveListener(ClosePopup);
-        if (requireButton != null) requireButton.onClick.RemoveAllListeners();
-        if (receiveButton != null) receiveButton.onClick.RemoveAllListeners();
-        if (absentButton != null) absentButton.onClick.RemoveAllListeners();
-    }
-
-    private void OnMailTypeSelected(MailType type)
-    {
-        OnTypeSelected?.Invoke(type);
         ClosePopup();
+        gameObject.SetActive(false);
+        OnTypeSelected?.Invoke(type);
     }
 
-    public void ClosePopup()
+    private void ClosePopup()
     {
-        gameObject.SetActive(false);
+        GetComponent<PopupAnimator>()?.Hide();
     }
 }

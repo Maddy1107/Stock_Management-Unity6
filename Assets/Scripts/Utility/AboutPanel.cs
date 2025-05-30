@@ -10,27 +10,28 @@ public class AboutPanel : MonoBehaviour
     public Button uploadButton;
     public TMP_InputField nameInputField;
     public TMP_Text uploadedImageText;
-    public Button submitButton, closeButton;
+    public Button submitButton;
+    public Button closeButton;
 
     private Texture2D uploadedTexture;
 
-    private string imageSavePath => Path.Combine(Application.persistentDataPath, "profile_image.png");
-    private const string nameKey = "SavedUserName";
+    private string ImageSavePath => Path.Combine(Application.persistentDataPath, "profile_image.png");
+    private const string NameKey = "SavedUserName";
 
     void Start()
     {
         uploadButton.onClick.AddListener(PickImage);
         submitButton.onClick.AddListener(Submit);
         closeButton.onClick.AddListener(ClosePopup);
+
         uploadedImageText.text = "No image selected";
 
-        // Attempt to load and use saved data
-        var (name, texture) = LoadSavedData();
+        var (savedName, savedTexture) = LoadSavedData();
 
-        if (!string.IsNullOrEmpty(name) && texture != null)
+        if (!string.IsNullOrEmpty(savedName) && savedTexture != null)
         {
-            GUIManager.Instance.ShowMainMenuPanel(texture, name);
-            gameObject.SetActive(false);
+            GUIManager.Instance.ShowMainMenuPanel(savedTexture, savedName);
+            ClosePopup();
         }
     }
 
@@ -40,114 +41,125 @@ public class AboutPanel : MonoBehaviour
         string path = UnityEditor.EditorUtility.OpenFilePanel("Select Image", "", "png,jpg,jpeg");
         if (!string.IsNullOrEmpty(path))
         {
-            uploadedImageText.text = Path.GetFileName(path);
-            StartCoroutine(LoadImage(path));
+            StartCoroutine(LoadAndDisplayImage(path));
         }
 #else
-        NativeGallery.GetImageFromGallery((path) =>
+        NativeGallery.GetImageFromGallery(path =>
         {
-            if (path != null)
+            if (!string.IsNullOrEmpty(path))
             {
-                uploadedImageText.text = Path.GetFileName(path);
-                StartCoroutine(LoadImage(path));
+                StartCoroutine(LoadAndDisplayImage(path));
             }
         }, "Select an image", "image/*");
 #endif
     }
 
-    IEnumerator LoadImage(string path)
+    IEnumerator LoadAndDisplayImage(string path)
     {
-        Texture2D nonReadableTexture = NativeGallery.LoadImageAtPath(path, 1024);
-        if (nonReadableTexture == null)
+        uploadedImageText.text = Path.GetFileName(path);
+
+        // Load texture with NativeGallery
+        Texture2D loadedTexture = NativeGallery.LoadImageAtPath(path, 1024);
+        if (loadedTexture == null)
         {
-            Debug.LogWarning("Couldn't load texture from " + path);
+            Debug.LogWarning($"Failed to load image at {path}");
             yield break;
         }
 
-        // Create a new readable texture using RenderTexture
-        Texture2D readableTexture = new Texture2D(nonReadableTexture.width, nonReadableTexture.height, TextureFormat.RGBA32, false);
+        // Convert non-readable texture to readable
+        uploadedTexture = CreateReadableTexture(loadedTexture);
 
-        RenderTexture tmp = RenderTexture.GetTemporary(
-            nonReadableTexture.width,
-            nonReadableTexture.height,
-            0,
-            RenderTextureFormat.Default,
-            RenderTextureReadWrite.Linear);
+        // Save image as PNG file
+        SaveTextureToFile(uploadedTexture);
 
-        Graphics.Blit(nonReadableTexture, tmp);
+        yield return null;
+    }
+
+    private Texture2D CreateReadableTexture(Texture2D source)
+    {
+        RenderTexture rt = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+        Graphics.Blit(source, rt);
+
         RenderTexture previous = RenderTexture.active;
-        RenderTexture.active = tmp;
+        RenderTexture.active = rt;
 
-        readableTexture.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
-        readableTexture.Apply();
+        Texture2D readableTex = new Texture2D(source.width, source.height, TextureFormat.RGBA32, false);
+        readableTex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        readableTex.Apply();
 
         RenderTexture.active = previous;
-        RenderTexture.ReleaseTemporary(tmp);
+        RenderTexture.ReleaseTemporary(rt);
 
-        uploadedTexture = readableTexture;
+        return readableTex;
+    }
 
+    private void SaveTextureToFile(Texture2D texture)
+    {
         try
         {
-            byte[] pngData = uploadedTexture.EncodeToPNG();
-            File.WriteAllBytes(imageSavePath, pngData);
-            uploadedImageText.text = Path.GetFileName(path);
+            byte[] pngData = texture.EncodeToPNG();
+            File.WriteAllBytes(ImageSavePath, pngData);
         }
         catch (System.Exception ex)
         {
-            Debug.LogError("Failed to save image: " + ex.Message);
+            Debug.LogError($"Failed to save image to {ImageSavePath}: {ex.Message}");
         }
     }
-
-
 
     public void Submit()
     {
         string userName = nameInputField.text?.Trim();
 
-        if (string.IsNullOrEmpty(userName) || uploadedTexture == null)
+        if (string.IsNullOrEmpty(userName))
         {
-            Debug.LogWarning("Name and image are required before submission.");
+            Debug.LogWarning("User name cannot be empty.");
             return;
         }
 
-        PlayerPrefs.SetString(nameKey, userName);
+        if (uploadedTexture == null)
+        {
+            Debug.LogWarning("Please upload an image before submitting.");
+            return;
+        }
+
+        PlayerPrefs.SetString(NameKey, userName);
         PlayerPrefs.Save();
 
         GUIManager.Instance.ShowMainMenuPanel(uploadedTexture, userName);
-        gameObject.SetActive(false);
+        ClosePopup();
     }
 
     public (string, Texture2D) LoadSavedData()
     {
-        string name = PlayerPrefs.GetString(nameKey, null);
-        Texture2D texture = null;
+        string savedName = PlayerPrefs.GetString(NameKey, null);
+        Texture2D savedTexture = null;
 
-        if (File.Exists(imageSavePath))
+        if (File.Exists(ImageSavePath))
         {
             try
             {
-                byte[] data = File.ReadAllBytes(imageSavePath);
-                if (data != null && data.Length > 0)
+                byte[] imageData = File.ReadAllBytes(ImageSavePath);
+                if (imageData != null && imageData.Length > 0)
                 {
-                    texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                    if (!texture.LoadImage(data))
+                    savedTexture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                    if (!savedTexture.LoadImage(imageData))
                     {
-                        Debug.LogWarning("Failed to decode saved image.");
-                        texture = null;
+                        Debug.LogWarning("Failed to load saved image data.");
+                        savedTexture = null;
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                Debug.LogError("Error reading saved image: " + ex.Message);
+                Debug.LogError($"Error loading saved image: {ex.Message}");
             }
         }
 
-        return (name, texture);
+        return (savedName, savedTexture);
     }
 
     public void ClosePopup()
     {
-        gameObject.SetActive(false);
+        GetComponent<PopupAnimator>()?.Hide();
     }
 }

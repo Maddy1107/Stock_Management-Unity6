@@ -12,7 +12,8 @@ public class ProductItem : MonoBehaviour
 
     public string ProductName { get; private set; }
     public bool IsInMail { get; private set; }
-    public Action<ProductItem> OnToggleClicked;
+
+    public event Action<ProductItem> OnToggleClicked;
 
     public void Initialize(string displayName, string productName, bool isInMail)
     {
@@ -25,20 +26,23 @@ public class ProductItem : MonoBehaviour
         if (toggleButton != null)
         {
             toggleButton.onClick.RemoveAllListeners();
-            toggleButton.onClick.AddListener(OnToggleButtonClicked);
+            toggleButton.onClick.AddListener(HandleToggleClicked);
             SetButtonSprite(isInMail);
         }
     }
 
-    private void OnToggleButtonClicked()
+    private void HandleToggleClicked()
     {
         OnToggleClicked?.Invoke(this);
     }
 
     public void SetButtonSprite(bool isInMail)
     {
-        var image = toggleButton?.GetComponent<Image>();
-        if (image != null)
+        IsInMail = isInMail;
+
+        if (toggleButton?.GetComponent<Image>() is Image image)
+        {
             image.sprite = isInMail ? removeSprite : addSprite;
+        }
     }
 }
