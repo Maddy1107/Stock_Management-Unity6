@@ -50,6 +50,7 @@ public class ProductMail : MonoBehaviour
             buildEmailButton.onClick.RemoveAllListeners();
             buildEmailButton.onClick.AddListener(BuildEmailBody);
         }
+        searchInputField?.ActivateInputField();
     }
 
     public void OpenScreen()

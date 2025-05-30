@@ -45,7 +45,7 @@ public class GUIManager : MonoBehaviour
         }
     }
 
-    public void ShowFinalEmailScreen(string emailContent,TMP_Text mailText = null)
+    public void ShowFinalEmailScreen(string emailContent, TMP_Text mailText = null)
     {
         mailScreen?.BuildFullEmail(emailContent, mailText);
     }
@@ -99,5 +99,24 @@ public class GUIManager : MonoBehaviour
             if (startScreenPopup)
                 startScreenPopup.SetActive(true);
         }
+    }
+
+    public void ShowAndroidToast(string message)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer"))
+        {
+            AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            activity.Call("runOnUiThread", new AndroidJavaRunnable(() =>
+            {
+                AndroidJavaClass toastClass = new("android.widget.Toast");
+                AndroidJavaObject toast = toastClass.CallStatic<AndroidJavaObject>(
+                    "makeText", activity, message, toastClass.GetStatic<int>("LENGTH_SHORT"));
+                toast.Call("show");
+            }));
+        }
+#else
+        Debug.Log("Toast: " + message);
+#endif
     }
 }

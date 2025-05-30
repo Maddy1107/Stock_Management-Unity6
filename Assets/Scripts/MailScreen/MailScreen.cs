@@ -104,36 +104,11 @@ public class MailScreen : MonoBehaviour
 
     private void CopyToClipboard()
     {
-    #if UNITY_EDITOR
         GUIUtility.systemCopyBuffer = emailContent ?? string.Empty;
         Debug.Log($"Copied to clipboard:\n{emailContent}");
-
-    #elif UNITY_ANDROID
-        try
-        {
-            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-            using (AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
-            using (AndroidJavaObject clipboardService = activity.Call<AndroidJavaObject>("getSystemService", "clipboard"))
-            using (AndroidJavaObject clipData = new AndroidJavaClass("android.content.ClipData")
-                    .CallStatic<AndroidJavaObject>("newPlainText", "label", emailContent ?? string.Empty)))
-            {
-                clipboardService.Call("setPrimaryClip", clipData);
-                Debug.Log($"Copied to clipboard:\n{emailContent}");
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning("Failed to copy to clipboard on Android: " + e.Message);
-        }
-
-    #elif UNITY_IOS
-        // You will need a native iOS plugin to support clipboard on iOS.
-        Debug.LogWarning("Copy to clipboard on iOS requires native plugin support.");
-
-    #else
-        Debug.LogWarning("Copy to clipboard is not supported on this platform.");
-    #endif
+        GUIManager.Instance.ShowAndroidToast("Copied to clipboard");
     }
+
 
 
     public void ResetMailScreen()

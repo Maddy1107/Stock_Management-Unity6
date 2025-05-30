@@ -23,6 +23,8 @@ namespace UI.Dates
                 SetProperty(ref m_DateSelectionMode, value);
             }
         }
+        
+        public int currentIndex = 0;
 
         [SerializeField]
         private SerializableDate m_SelectedDate;
@@ -44,8 +46,10 @@ namespace UI.Dates
                 AbsentEmail absentEmail = FindAnyObjectByType<AbsentEmail>();
                 if (absentEmail != null)
                 {
-                    absentEmail.AddDate(SelectedDate.Date.ToString(Config.Format.DateFormat));
+                    string formattedDate = SelectedDate.Date.ToString(Config.Format.DateFormat);
+                    absentEmail.PickDate(formattedDate, currentIndex);
                 }
+
 
                 UpdateInputFieldText();
                 if (Config.Misc.CloseWhenDateSelected) Hide();
