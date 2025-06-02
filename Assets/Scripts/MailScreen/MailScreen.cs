@@ -104,51 +104,62 @@ public class MailScreen : MonoBehaviour
 
     public void CopyToClipboard()
     {
-        GUIUtility.systemCopyBuffer = subjectText + "\n" + emailBodyText ?? string.Empty;
+        GUIUtility.systemCopyBuffer = subjectText + "\n\n" + emailBodyText ?? string.Empty;
         Debug.Log($"Copied to clipboard:\n{emailBodyText}");
         GUIManager.Instance.ShowAndroidToast("Copied to clipboard");
 
-        OpenOutlook(subjectText, emailBodyText);
+        //OpenOutlook(subjectText, emailBodyText);
     }
 
-    public void OpenOutlook(string subject, string body)
+    public static void OpenOutlook(string subject, string body)
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
         try
         {
+            Debug.Log("[EmailUtility] Attempting to open Outlook...");
+
             string outlookPackage = "com.microsoft.office.outlook";
 
             using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
             using (AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
             using (AndroidJavaObject packageManager = activity.Call<AndroidJavaObject>("getPackageManager"))
-            using (AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", "android.intent.action.SENDTO"))
-            using (AndroidJavaObject uri = new AndroidJavaClass("android.net.Uri")
-                    .CallStatic<AndroidJavaObject>("parse", "mailto:")) // No "to" address
+            using (AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", "android.intent.action.SEND"))
             {
-                intent.Call<AndroidJavaObject>("setData", uri);
+                Debug.Log("[EmailUtility] Intent created with ACTION_SEND");
+
+                intent.Call<AndroidJavaObject>("setType", "message/rfc822");
+                Debug.Log("[EmailUtility] MIME type set to message/rfc822");
+
                 intent.Call<AndroidJavaObject>("putExtra", "android.intent.extra.SUBJECT", subject);
                 intent.Call<AndroidJavaObject>("putExtra", "android.intent.extra.TEXT", body);
-                intent.Call<AndroidJavaObject>("setPackage", outlookPackage);
+                Debug.Log($"[EmailUtility] Subject: {subject}");
+                Debug.Log($"[EmailUtility] Body: {body}");
 
-                // Confirm Outlook is installed
+                intent.Call<AndroidJavaObject>("setPackage", outlookPackage);
+                Debug.Log("[EmailUtility] Outlook package set: com.microsoft.office.outlook");
+
+                // Verify Outlook is available
                 AndroidJavaObject resolveInfo = packageManager.Call<AndroidJavaObject>("resolveActivity", intent, 0);
                 if (resolveInfo == null)
                 {
-                    Debug.LogWarning("Outlook app not installed on device.");
+                    Debug.LogWarning("[EmailUtility] Outlook not installed or cannot handle intent.");
                     return;
                 }
 
+                Debug.Log("[EmailUtility] Outlook is available. Launching intent...");
                 activity.Call("startActivity", intent);
+                Debug.Log("[EmailUtility] Outlook intent launched successfully.");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError("Failed to launch Outlook: " + ex.Message);
+            Debug.LogError("[EmailUtility] Exception occurred: " + ex.Message);
         }
 #else
-        Debug.Log("This feature only works on an Android device.");
+        Debug.Log("[EmailUtility] This function only works on a real Android device.");
 #endif
     }
+
 
     private void ResetMailScreen()
     {
