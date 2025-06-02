@@ -44,9 +44,9 @@ public class GUIManager : MonoBehaviour
         }
     }
 
-    public void ShowFinalEmailScreen(string emailContent, TMP_Text mailText = null)
+    public void ShowFinalEmailScreen(string emailContent, TMP_Text mailText = null, string subject = "")
     {
-        mailScreen?.BuildFullEmail(emailContent, mailText);
+        mailScreen?.BuildFullEmail(emailContent, mailText, subject);
     }
 
     public void ShowSelectMailPopup()
@@ -55,13 +55,13 @@ public class GUIManager : MonoBehaviour
             selectMailPopup.GetComponent<PopupAnimator>().Show();
     }
 
-    public void ShowMainMenuPanel(Texture2D texture = null, string name = "")
+    public void ShowMainMenuPanel(string name = "")
     {
         if (!mainMenuPanelGO) return;
 
         ShowOnly(mainMenuPanelGO);
         var mainMenuPanel = mainMenuPanelGO.GetComponent<MainMenuPanel>();
-        mainMenuPanel?.Initialize(texture, name);
+        mainMenuPanel?.Initialize(name);
     }
 
     private void ShowOnly(GameObject targetGO)
@@ -87,10 +87,10 @@ public class GUIManager : MonoBehaviour
             return;
         }
 
-        (string name, Texture2D texture) = aboutPanel.LoadSavedData();
-        if (!string.IsNullOrWhiteSpace(name) && texture != null)
+        string name = aboutPanel.LoadSavedData();
+        if (!string.IsNullOrWhiteSpace(name))
         {
-            ShowMainMenuPanel(texture, name);
+            ShowMainMenuPanel(name);
         }
         else
         {

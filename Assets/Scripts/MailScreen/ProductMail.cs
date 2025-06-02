@@ -23,7 +23,7 @@ public class ProductMail : MonoBehaviour
     private Transform productParent;
     private Transform mailParent;
     private string headerText;
-
+    private MailType currentMailType;
     private void OnEnable()
     {
         OpenScreen();
@@ -66,6 +66,7 @@ public class ProductMail : MonoBehaviour
 
     public void OpenWithType(MailType type)
     {
+        currentMailType = type;
         productSelectContent.SetActive(true);
         headerText = $"Below are the {(type == MailType.Required ? "required" : "received")} products:";
         ResetProductScreen();
@@ -188,7 +189,7 @@ public class ProductMail : MonoBehaviour
             sb.AppendLine($"{index++}. {name}");
         }
 
-        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), mailText);
+        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), mailText, $"Product {currentMailType}");
         productSelectContent.SetActive(false);
         finalMailContent.SetActive(true);
     }

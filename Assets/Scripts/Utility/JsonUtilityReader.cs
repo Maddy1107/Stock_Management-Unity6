@@ -5,11 +5,6 @@ using UnityEngine;
 
 public static class JsonUtilityReader
 {
-    /// <summary>
-    /// Reads a product list from a JSON file in the Resources folder.
-    /// </summary>
-    /// <param name="fileName">Name of the JSON file (without extension).</param>
-    /// <returns>List of product names, or null if loading fails.</returns>
     public static List<string> ReadProductJson(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))

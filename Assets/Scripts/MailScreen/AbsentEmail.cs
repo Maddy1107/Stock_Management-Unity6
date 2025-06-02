@@ -159,10 +159,10 @@ public class AbsentEmail : MonoBehaviour
 
         if (!hasValidDate || count == selectedDates.Length)
         {
-            sb.AppendLine("\nNo Dates Selected.");
+            sb.AppendLine(".0No Dates Selected.");
         }
         sb.AppendLine("\nIt will be very nice if you can fix the issue.");
-        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), absentText);
+        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), absentText, "Absent Dates fixed in GreytHR");
     }
 
     private void OnCopyClicked()

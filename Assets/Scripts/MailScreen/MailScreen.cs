@@ -30,7 +30,8 @@ public class MailScreen : MonoBehaviour
     [SerializeField] private GameObject productContent;
     [SerializeField] private GameObject absentContent;
 
-    private string emailContent;
+    private string subjectText;
+    private string emailBodyText;
 
     private void OnEnable()
     {
@@ -83,29 +84,75 @@ public class MailScreen : MonoBehaviour
         }
     }
 
-    public void BuildFullEmail(string content, TMP_Text mailText)
+    public void BuildFullEmail(string content, TMP_Text mailText, string subject)
     {
+        subjectText = subject;
+
         var sb = new StringBuilder()
             .AppendLine("Dear Team,")
             .AppendLine()
             .AppendLine(content)
             .AppendLine("Thank you \nPriyanka Roy\n");
 
-        emailContent = sb.ToString();
+        emailBodyText = sb.ToString();
         if (mailText != null)
-            mailText.text = emailContent;
+            mailText.text = emailBodyText;
+
+        Debug.Log($"Email body built:\n{emailBodyText}");
+        Debug.Log($"Email subject: {subjectText}");
     }
 
     public void CopyToClipboard()
     {
-        GUIUtility.systemCopyBuffer = emailContent ?? string.Empty;
-        Debug.Log($"Copied to clipboard:\n{emailContent}");
+        GUIUtility.systemCopyBuffer = subjectText + "\n" + emailBodyText ?? string.Empty;
+        Debug.Log($"Copied to clipboard:\n{emailBodyText}");
         GUIManager.Instance.ShowAndroidToast("Copied to clipboard");
+
+        OpenOutlook(subjectText, emailBodyText);
+    }
+
+    public void OpenOutlook(string subject, string body)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        try
+        {
+            string outlookPackage = "com.microsoft.office.outlook";
+
+            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            using (AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+            using (AndroidJavaObject packageManager = activity.Call<AndroidJavaObject>("getPackageManager"))
+            using (AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", "android.intent.action.SENDTO"))
+            using (AndroidJavaObject uri = new AndroidJavaClass("android.net.Uri")
+                    .CallStatic<AndroidJavaObject>("parse", "mailto:")) // No "to" address
+            {
+                intent.Call<AndroidJavaObject>("setData", uri);
+                intent.Call<AndroidJavaObject>("putExtra", "android.intent.extra.SUBJECT", subject);
+                intent.Call<AndroidJavaObject>("putExtra", "android.intent.extra.TEXT", body);
+                intent.Call<AndroidJavaObject>("setPackage", outlookPackage);
+
+                // Confirm Outlook is installed
+                AndroidJavaObject resolveInfo = packageManager.Call<AndroidJavaObject>("resolveActivity", intent, 0);
+                if (resolveInfo == null)
+                {
+                    Debug.LogWarning("Outlook app not installed on device.");
+                    return;
+                }
+
+                activity.Call("startActivity", intent);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("Failed to launch Outlook: " + ex.Message);
+        }
+#else
+        Debug.Log("This feature only works on an Android device.");
+#endif
     }
 
     private void ResetMailScreen()
     {
-        emailContent = string.Empty;
+        emailBodyText = string.Empty;
         productContent?.SetActive(false);
         absentContent?.SetActive(false);
 

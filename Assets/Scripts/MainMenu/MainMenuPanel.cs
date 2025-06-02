@@ -9,7 +9,6 @@ public class MainMenuPanel : MonoBehaviour
     [SerializeField] private Button stockButton;
 
     [Header("Profile UI")]
-    [SerializeField] private Image profileImage;
     [SerializeField] private TMP_Text profileName;
 
     private void OnEnable()
@@ -26,13 +25,8 @@ public class MainMenuPanel : MonoBehaviour
         stockButton?.onClick.RemoveListener(OnStockButtonClicked);
     }
 
-    public void Initialize(Texture2D texture, string name)
+    public void Initialize(string name)
     {
-        if (texture && profileImage)
-        {
-            profileImage.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-        }
-
         if (!string.IsNullOrWhiteSpace(name) && profileName)
         {
             profileName.text = name;
