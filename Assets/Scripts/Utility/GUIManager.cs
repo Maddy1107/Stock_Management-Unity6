@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GUIManager : MonoBehaviour
@@ -8,8 +9,12 @@ public class GUIManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private SelectMailPopup selectMailPopup;
     [SerializeField] private GameObject startScreenPopup;
+    [SerializeField] private GameObject excelUploadPopup;
+    [SerializeField] private GameObject stockUpdatePopup;
+
     [SerializeField] private GameObject mailScreenGO;
     [SerializeField] private GameObject mainMenuPanelGO;
+    [SerializeField] private GameObject stockScreenGO;
 
     private MailScreen mailScreen;
     private bool hasCheckedProfileData = false;
@@ -55,6 +60,19 @@ public class GUIManager : MonoBehaviour
             selectMailPopup.GetComponent<PopupAnimator>().Show();
     }
 
+    public void ShowStockUpdatePopup(string productName = "", string productQuan = "")
+    {
+        if (stockUpdatePopup != null)
+        {
+            stockUpdatePopup.GetComponent<PopupAnimator>().Show();
+            var stockUpdate = stockUpdatePopup.GetComponent<StockUpdatePopup>();
+            if (stockUpdate != null)
+            {
+                stockUpdate.Initialize(productName, productQuan);
+            }
+        }
+    }
+
     public void ShowMainMenuPanel(string name = "")
     {
         if (!mainMenuPanelGO) return;
@@ -64,13 +82,29 @@ public class GUIManager : MonoBehaviour
         mainMenuPanel?.Initialize(name);
     }
 
+    public void ShowStockScreen(string filePath = "")
+    {
+        if (!stockScreenGO) return;
+
+        ShowOnly(stockScreenGO);
+
+        var stockScreen = stockScreenGO.GetComponent<StockScreen>();
+        if (stockScreen != null)
+        {
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                stockScreen.Initialize(filePath);
+            }
+        }
+    }
+
     private void ShowOnly(GameObject targetGO)
     {
-        if (mainMenuPanelGO != null)
-            mainMenuPanelGO.SetActive(mainMenuPanelGO == targetGO);
-
-        if (mailScreenGO != null)
-            mailScreenGO.SetActive(mailScreenGO == targetGO);
+        foreach (var go in new[] { mainMenuPanelGO, mailScreenGO, stockScreenGO })
+        {
+            if (go != null)
+                go.SetActive(go == targetGO);
+        }
     }
 
     public void CheckProfileData()
@@ -96,6 +130,11 @@ public class GUIManager : MonoBehaviour
         {
             startScreenPopup.GetComponent<PopupAnimator>().Show();
         }
+    }
+
+    public void ShowExcelUploadPopup()
+    {
+        excelUploadPopup?.GetComponent<PopupAnimator>()?.Show();
     }
 
     public void ShowAndroidToast(string message)

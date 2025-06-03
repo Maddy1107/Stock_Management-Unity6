@@ -40,6 +40,6 @@ public class MainMenuPanel : MonoBehaviour
 
     private void OnStockButtonClicked()
     {
-        Debug.Log("Stock button clicked - feature not yet implemented.");
+        GUIManager.Instance.ShowExcelUploadPopup();
     }
 }

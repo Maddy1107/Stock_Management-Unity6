@@ -31,7 +31,6 @@ public class SelectMailPopup : MonoBehaviour
     private void SelectType(MailType type)
     {
         ClosePopup();
-        gameObject.SetActive(false);
         OnTypeSelected?.Invoke(type);
     }
 

@@ -15,7 +15,7 @@ public class ProductItem : MonoBehaviour
 
     public event Action<ProductItem> OnToggleClicked;
 
-    public void Initialize(string displayName, string productName, bool isInMail)
+    public void Initialize(string displayName, string productName, bool isInMail = false)
     {
         ProductName = productName;
         IsInMail = isInMail;
