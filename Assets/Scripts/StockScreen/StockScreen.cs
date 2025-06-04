@@ -1,27 +1,42 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using MiniExcelLibs;
-using Mono.Cecil.Cil;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class StockScreen : ProductListbase
 {
+    public static StockScreen Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
     private static Dictionary<string, string> productDictionary = new Dictionary<string, string>();
 
     [SerializeField] private Button submitButton;
     [SerializeField] private Button backButton;
     List<IDictionary<string, object>> rows = new List<IDictionary<string, object>>();
-    string filePath;
+    string jsonFilepath;
+    public static string uploadedFilePath;
+    [SerializeField] private GameObject finalList;
+    [SerializeField] private GameObject productScreen;
 
     protected override void OnEnable()
     {
         base.OnEnable();
 
-        filePath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
+        ResetProductScreen();
 
-        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(filePath));
+        jsonFilepath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
+
+        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(jsonFilepath));
 
         if (submitButton != null)
         {
@@ -38,25 +53,22 @@ public class StockScreen : ProductListbase
         if (productDictionary == null || productDictionary.Count == 0)
         {
             Debug.LogWarning("⚠️ Product dictionary is empty. Nothing to write.");
+            GUIManager.Instance.ShowAndroidToast("No products to submit.");
             return;
         }
 
-        JsonUtilityEditor.WriteJson(filePath, productDictionary);
+        JsonUtilityEditor.WriteJson(jsonFilepath, productDictionary);
 
-        // Debug log to confirm
-        if (File.Exists(filePath))
-        {
-            Debug.Log($"✅ JSON file exists after write: {filePath}");
+        finalList.SetActive(true);
+        productScreen.SetActive(false);
 
-            string jsonContent = File.ReadAllText(filePath);
-            Debug.Log($"📄 JSON content:\n{jsonContent}");
-        }
-        else
-        {
-            Debug.LogError($"❌ Failed to create or locate the file at: {filePath}");
-        }
     }
 
+    public void OpenScreen()
+    {
+        productScreen.SetActive(true);
+        finalList.SetActive(false);
+    }
 
     public static void StockUpdate(string key, string value)
     {
@@ -69,16 +81,17 @@ public class StockScreen : ProductListbase
         if (productDictionary.ContainsKey(key))
         {
             Debug.LogWarning($"Key '{key}' already exists in the dictionary. Updating value.");
-            productDictionary[key] = value;
+            productDictionary[key] = $"{value}ml";
         }
         else
         {
-            productDictionary.Add(key, value);
+            productDictionary.Add(key, $"{value}ml");
         }
     }
 
     public void Initialize(string filePath)
     {
+        uploadedFilePath = filePath;
         ReadExcel(filePath);
     }
 
@@ -94,12 +107,12 @@ public class StockScreen : ProductListbase
     private void HandleToggleClicked(ProductItem item)
     {
         string result = ExcelReader.FindProductValue(rows, item.ProductName);
-        GUIManager.Instance.ShowStockUpdatePopup(item.ProductName,result);
+        GUIManager.Instance.ShowStockUpdatePopup(item.ProductName, result);
     }
-    
+
     private void HandleBackButton()
     {
-        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(filePath));
+        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(jsonFilepath));
         gameObject.SetActive(false);
         GUIManager.Instance.ShowMainMenuPanel();
     }
@@ -109,4 +122,10 @@ public class StockScreen : ProductListbase
         rows = ExcelReader.ReadExcelRows(filePath);
     }
 
+    public void ResetProductScreen()
+    {
+        productDictionary.Clear();
+        finalList.SetActive(false);
+        productScreen.SetActive(true);
+    }
 }

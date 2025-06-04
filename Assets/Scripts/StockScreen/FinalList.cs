@@ -1,0 +1,100 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class FinalList : MonoBehaviour
+{
+    Dictionary<string, string> finalList;
+
+    [SerializeField] private GameObject finalListPrefab;
+    [SerializeField] private Transform finalListContainer;
+    [SerializeField] private Button updateButton;
+    [SerializeField] private Button exportButton;
+
+    private void Awake()
+    {
+        finalList = new Dictionary<string, string>();
+    }
+
+    void OnEnable()
+    {
+        ClearChildren(finalListContainer);
+
+        if (updateButton != null)
+        {
+            updateButton.onClick.AddListener(OnUpdateButtonClicked);
+        }
+
+        if (exportButton != null)
+        {
+            exportButton.onClick.AddListener(OnExportButtonClicked);
+        }
+
+        string filePath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
+        finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(filePath);
+
+        GenerateList();
+    }
+
+    private void OnExportButtonClicked()
+    {
+        if (finalList == null || finalList.Count == 0)
+        {
+            Debug.LogWarning("Final list is empty. Nothing to export.");
+            GUIManager.Instance.ShowAndroidToast("No data to export.");
+            return;
+        }
+
+        ExcelReader.ExportExcel(StockScreen.uploadedFilePath, finalList);
+
+        GUIManager.Instance.ShowAndroidToast("Final list exported successfully.");
+
+        StockScreen.Instance.HandleBackButton();
+    }
+
+    private void OnUpdateButtonClicked()
+    {
+        StockScreen.Instance.OpenScreen();
+    }
+
+    private void GenerateList()
+    {
+        if (finalList == null || finalList.Count == 0)
+        {
+            Debug.LogWarning("Final list is empty.");
+            return;
+        }
+
+        foreach (var item in finalList)
+        {
+            GameObject listItem = Instantiate(finalListPrefab, finalListContainer);
+            FinalListItem finalListItem = listItem.GetComponent<FinalListItem>();
+            if (finalListItem != null)
+            {
+                finalListItem.SetData(item.Key, item.Value);
+            }
+        }
+    }
+    
+    private void OnDisable()
+    {
+        if (updateButton != null)
+        {
+            updateButton.onClick.RemoveListener(OnUpdateButtonClicked);
+        }
+
+        ClearChildren(finalListContainer);
+    }
+
+    private void ClearChildren(Transform finalListContainer)
+    {
+        if (finalListContainer == null) return;
+
+        for (int i = finalListContainer.childCount - 1; i >= 0; i--)
+        {
+            Destroy(finalListContainer.GetChild(i).gameObject);
+        }
+    }
+}

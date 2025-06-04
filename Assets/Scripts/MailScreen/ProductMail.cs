@@ -29,6 +29,7 @@ public class ProductMail : ProductListbase
         base.OnDisable();
         buildEmailButton.onClick.RemoveAllListeners();
         copyButton.onClick.RemoveAllListeners();
+        finalMailContent.SetActive(false);
     }
 
     public void OpenScreen()
@@ -51,6 +52,12 @@ public class ProductMail : ProductListbase
         if (!string.IsNullOrWhiteSpace(headerText))
         {
             sb.AppendLine(headerText).AppendLine();
+        }
+
+        if (selectedProducts.Count == 0)
+        {
+            GUIManager.Instance.ShowAndroidToast("No products selected for the email.");
+            return;
         }
 
         int index = 1;
