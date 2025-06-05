@@ -14,6 +14,7 @@ public class StockUpdatePopup : MonoBehaviour
     [SerializeField] private TMP_Text productNameText;
     private string _productName;
 
+
     void OnEnable()
     {
         ResetUI();
@@ -63,6 +64,7 @@ public class StockUpdatePopup : MonoBehaviour
 
     private void OnSubmitButtonClicked()
     {
+
         if (string.IsNullOrWhiteSpace(newInputField.text))
         {
             GUIManager.Instance.ShowAndroidToast("Please enter a valid value.");
@@ -71,6 +73,9 @@ public class StockUpdatePopup : MonoBehaviour
         StockScreen.StockUpdate(_productName, newInputField.text);
         GUIManager.Instance.ShowAndroidToast("Updated successfully!");
         Close();
+
+        StockScreen.CallUpdateSubmitted();
+
     }
 
     private void ResetUI()

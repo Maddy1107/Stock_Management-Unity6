@@ -19,6 +19,8 @@ public class StockScreen : ProductListbase
         DontDestroyOnLoad(gameObject);
     }
     public static Dictionary<string, string> productDictionary = new Dictionary<string, string>();
+    public delegate void OnUpdateSubmitted();
+    public static event OnUpdateSubmitted UpdateSubmitted;
 
     [SerializeField] private Button submitButton;
     [SerializeField] private Button backButton;
@@ -28,6 +30,10 @@ public class StockScreen : ProductListbase
     [SerializeField] private GameObject finalList;
     [SerializeField] private GameObject productScreen;
 
+    public static void CallUpdateSubmitted()
+    {
+        UpdateSubmitted?.Invoke();
+    }
     protected override void OnEnable()
     {
         base.OnEnable();

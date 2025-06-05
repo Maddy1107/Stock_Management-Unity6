@@ -41,7 +41,22 @@ public class FinalList : MonoBehaviour
         string filePath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
         finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(filePath);
 
+        StockScreen.UpdateSubmitted += Refresh;
+
         GenerateList();
+
+    }
+
+    private void OnDisable()
+    {
+        if (updateButton != null)
+        {
+            updateButton.onClick.RemoveListener(OnUpdateButtonClicked);
+        }
+
+        StockScreen.UpdateSubmitted -= Refresh;
+
+        ClearChildren(finalListContainer);
     }
 
     public void Refresh()
@@ -100,16 +115,6 @@ public class FinalList : MonoBehaviour
     public void HandleToggleClicked(FinalListItem item)
     {
         GUIManager.Instance.ShowStockUpdatePopup(item.ProductName, item.ProductValue);
-    }
-
-    private void OnDisable()
-    {
-        if (updateButton != null)
-        {
-            updateButton.onClick.RemoveListener(OnUpdateButtonClicked);
-        }
-
-        ClearChildren(finalListContainer);
     }
 
     private void ClearChildren(Transform finalListContainer)

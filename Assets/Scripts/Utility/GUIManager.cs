@@ -11,6 +11,7 @@ public class GUIManager : MonoBehaviour
     [SerializeField] private GameObject startScreenPopup;
     [SerializeField] private GameObject excelUploadPopup;
     [SerializeField] private GameObject stockUpdatePopup;
+    [SerializeField] private GameObject imageUploadPopup;
 
     [SerializeField] private GameObject mailScreenGO;
     [SerializeField] private GameObject mainMenuPanelGO;
@@ -135,6 +136,11 @@ public class GUIManager : MonoBehaviour
     public void ShowExcelUploadPopup()
     {
         excelUploadPopup?.GetComponent<PopupAnimator>()?.Show();
+    }
+
+    public void ShowImageUploadPopup()
+    {
+        imageUploadPopup?.GetComponent<PopupAnimator>()?.Show();
     }
 
     public void ShowAndroidToast(string message)
