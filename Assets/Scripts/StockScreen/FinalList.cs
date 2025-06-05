@@ -12,6 +12,7 @@ public class FinalList : MonoBehaviour
     [SerializeField] private Transform finalListContainer;
     [SerializeField] private Button updateButton;
     [SerializeField] private Button exportButton;
+    [SerializeField] private Button refreshButton;
 
     private void Awake()
     {
@@ -32,6 +33,21 @@ public class FinalList : MonoBehaviour
             exportButton.onClick.AddListener(OnExportButtonClicked);
         }
 
+        if (refreshButton != null)
+        {
+            refreshButton.onClick.AddListener(Refresh);
+        }
+
+        string filePath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
+        finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(filePath);
+
+        GenerateList();
+    }
+
+    public void Refresh()
+    {
+        JsonUtilityEditor.WriteJson(StockScreen.jsonFilepath, StockScreen.productDictionary);
+
         string filePath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
         finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(filePath);
 
@@ -47,11 +63,11 @@ public class FinalList : MonoBehaviour
             return;
         }
 
-        ExcelReader.ExportExcel(StockScreen.uploadedFilePath, finalList);
+        ExcelReader.Instance.ExportFile(StockScreen.uploadedFilePath, finalList);
 
         GUIManager.Instance.ShowAndroidToast("Final list exported successfully.");
 
-        StockScreen.Instance.HandleBackButton();
+        //StockScreen.Instance.HandleBackButton();
     }
 
     private void OnUpdateButtonClicked()
@@ -61,6 +77,8 @@ public class FinalList : MonoBehaviour
 
     private void GenerateList()
     {
+        ClearChildren(finalListContainer);
+
         if (finalList == null || finalList.Count == 0)
         {
             Debug.LogWarning("Final list is empty.");
@@ -71,6 +89,7 @@ public class FinalList : MonoBehaviour
         {
             GameObject listItem = Instantiate(finalListPrefab, finalListContainer);
             FinalListItem finalListItem = listItem.GetComponent<FinalListItem>();
+            finalListItem.OnEditToggleClicked += HandleToggleClicked;
             if (finalListItem != null)
             {
                 finalListItem.SetData(item.Key, item.Value);
@@ -78,6 +97,11 @@ public class FinalList : MonoBehaviour
         }
     }
     
+    public void HandleToggleClicked(FinalListItem item)
+    {
+        GUIManager.Instance.ShowStockUpdatePopup(item.ProductName, item.ProductValue);
+    }
+
     private void OnDisable()
     {
         if (updateButton != null)

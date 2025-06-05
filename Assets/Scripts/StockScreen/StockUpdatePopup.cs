@@ -53,7 +53,7 @@ public class StockUpdatePopup : MonoBehaviour
             newInputField.text = string.Empty;
         }
 
-        prevText.transform.parent.gameObject.SetActive(prevTextValue != null);
+        prevText.transform.parent.gameObject.SetActive(prevTextValue != "");
         
         if (prevText != null)
         {

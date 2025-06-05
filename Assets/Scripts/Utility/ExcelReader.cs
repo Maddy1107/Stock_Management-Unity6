@@ -1,243 +1,266 @@
-using MiniExcelLibs;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.Networking;
+using System.Collections;
+using System.IO;
+using System.Collections.Generic;
+using System;
+using Newtonsoft.Json;
 
-public static class ExcelReader
+[Serializable]
+public class ExcelResponse
 {
-    // 1. Reads and returns all rows from Excel
-    public static List<IDictionary<string, object>> ReadExcelRows(string filePath)
+    public Dictionary<string, string> productData;
+}
+
+public class ExcelReader : MonoBehaviour
+{
+    public static ExcelReader Instance { get; private set; }
+
+    public string uploadApiUrl = "http://127.0.0.1:5000/upload";
+    public string exportApiUrl = "http://127.0.0.1:5000/export";
+
+    private void Awake()
     {
-        if (!File.Exists(filePath))
+        if (Instance != null && Instance != this)
         {
-            Debug.LogError("❌ Excel file not found at: " + filePath);
-            return null;
+            Destroy(gameObject);
+            return;
         }
-
-        try
-        {
-            var rows = MiniExcel.Query(filePath);
-            var rowList = new List<IDictionary<string, object>>();
-
-            foreach (var row in rows)
-            {
-                if (row is IDictionary<string, object> dict)
-                    rowList.Add(dict);
-            }
-
-            return rowList;
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError("❌ Failed to read Excel: " + ex.Message);
-            return null;
-        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
-    // 2. Finds the value from column D for a matching product name in column C
-    public static string FindProductValue(List<IDictionary<string, object>> rows, string targetProductName)
+    public void UploadFile(string filePath, Action<ExcelResponse> onCompleted, Action<string> onError = null)
     {
-        if (rows == null || rows.Count == 0)
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
         {
-            Debug.LogError("❌ No rows to search.");
-            return null;
-        }
-
-        int startRow = 5;
-        int rowIndex = 1;
-
-        foreach (var dict in rows)
-        {
-            if (rowIndex >= startRow)
-            {
-                object[] values = new object[dict.Count];
-                dict.Values.CopyTo(values, 0);
-
-                if (values.Length >= 4)
-                {
-                    string product = values[2]?.ToString()?.Trim();
-                    string value = values[3]?.ToString()?.Trim();
-
-                    if (product == targetProductName)
-                    {
-                        Debug.Log($"✅ Match found for {product}: {value}");
-                        return value;
-                    }
-                }
-            }
-            rowIndex++;
-        }
-
-        Debug.LogWarning($"❌ Product '{targetProductName}' not found.");
-        return null;
-    }
-
-    public static void CopyExcelFile(string sourcePath, string destinationPath, bool overwrite = true)
-    {
-        if (!File.Exists(sourcePath))
-        {
-            Debug.LogError("❌ Source Excel file not found at: " + sourcePath);
+            onError?.Invoke("Invalid file path: " + filePath);
             return;
         }
 
-        try
-        {
-            File.Copy(sourcePath, destinationPath, overwrite);
-            Debug.Log($"✅ Excel file copied to: {destinationPath}");
-        }
-        catch (IOException ex)
-        {
-            Debug.LogError($"❌ Failed to copy Excel file: {ex.Message}");
-        }
+        StartCoroutine(UploadFileCoroutine(filePath, onCompleted, onError));
     }
-    
-    public static void UpdateExcelProductValues(string excelPath, Dictionary<string, string> productData)
+
+    public void ExportFile(string filePath, Dictionary<string, string> jsondata, Action<string> onSuccess = null, Action<string> onError = null)
     {
-        if (!File.Exists(excelPath))
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
         {
-            Debug.LogError("❌ Excel file not found at: " + excelPath);
+            onError?.Invoke("Invalid file path: " + filePath);
             return;
         }
 
-        try
+        // Convert jsondata dictionary to JSON string before passing to Export
+        string jsonString = JsonConvert.SerializeObject(jsondata);
+        StartCoroutine(Export(filePath, GetFileNameWithNewMonth(filePath), jsonString, onSuccess, onError));
+    }
+
+    private IEnumerator Export(string filepath, string saveFileName, string jsondata, Action<string> onSuccess, Action<string> onError)
+    {
+        if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath))
         {
-            var rows = ReadExcelRows(excelPath);
-            var finalData = new List<List<object>>();
+            onError?.Invoke("File not found: " + filepath);
+            yield break;
+        }
 
-            int rowIndex = 1;
+        byte[] fileData = File.ReadAllBytes(filepath);
+        string fileNameOnly = Path.GetFileName(saveFileName); // What you want the downloaded file to be called
 
-            foreach (var row in rows)
+        WWWForm form = new WWWForm();
+        form.AddBinaryData("file", fileData, Path.GetFileName(filepath), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        form.AddField("filename", fileNameOnly);
+        form.AddField("data", jsondata);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(exportApiUrl, form))
+        {
+            www.downloadHandler = new DownloadHandlerBuffer();
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.Success)
             {
-                var values = row.Values.ToList();
-                // Pad to 4 columns if short
-                while (values.Count < 4)
-                    values.Add(null);
-
-                // Start updates from row 5 (MiniExcel is 1-based)
-                if (rowIndex >= 5)
+                string nextMonth = null;
+                string foundMonth;
+                int foundMonthIndex = FindMonthIndex(fileNameOnly, out foundMonth);
+                if (foundMonthIndex != -1)
                 {
-                    string product = values[2]?.ToString()?.Trim();
-
-                    if (!string.IsNullOrEmpty(product) && productData.ContainsKey(product))
-                    {
-                        values[3] = productData[product];
-                        Debug.Log($"✅ Updated '{product}' to '{productData[product]}'");
-                    }
+                    nextMonth = GetNextMonth(foundMonth);
                 }
-
-                finalData.Add(values);
-                rowIndex++;
-            }
-
-            if(File.Exists(excelPath))
-            {
-                File.Delete(excelPath);
-                Debug.Log($"🗑️ Original Excel file deleted: {excelPath}");
-            }
-
-            // Overwrite the same Excel file with updated values
-            MiniExcel.SaveAs(excelPath, finalData);
-            Debug.Log("✅ Excel file successfully updated.");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("❌ Error while updating Excel: " + ex.Message);
-        }
-    }
-
-    public static string UpdateMonthInFileName(string originalFilePath)
-    {
-        if (string.IsNullOrWhiteSpace(originalFilePath))
-            return originalFilePath;
-
-        string currentMonth = DateTime.Now.ToString("MMMM", CultureInfo.InvariantCulture); // e.g., "June"
-
-        // Match any month name from the list and replace it
-        string[] monthNames = CultureInfo.InvariantCulture.DateTimeFormat.MonthNames;
-        foreach (var month in monthNames)
-        {
-            if (!string.IsNullOrEmpty(month) && originalFilePath.Contains(month, StringComparison.OrdinalIgnoreCase))
-            {
-                return originalFilePath.Replace(month, currentMonth, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        // If no month was found, just return as-is
-        return originalFilePath;
-    }
-
-    public static void ExportExcel(string originalFilePath, Dictionary<string, string> productData)
-    {
-        // Create a temp file with updated month in filename
-        string tempFileName = UpdateMonthInFileName(Path.GetFileNameWithoutExtension(originalFilePath));
-        string tempFilePath = Path.Combine(Application.persistentDataPath, tempFileName + ".xlsx");
-
-        // Copy and edit
-        CopyExcelFile(originalFilePath, tempFilePath, true);
-
-        UpdateExcelProductValues(tempFilePath, productData);
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-            // Android: save to Downloads
-            string downloadsPath = "/storage/emulated/0/Download"; // common location
-            string destFile = Path.Combine(downloadsPath, tempFileName);
-
-            try
-            {
-                File.Copy(tempFilePath, destFile, overwrite: true);
-                Debug.Log("✅ Exported to Android Downloads: " + destFile);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("❌ Failed to export on Android: " + e.Message);
-            }
-
+                    // Android: save to Downloads
+                    string downloadsPath = "/storage/emulated/0/Download/ClosingStock/nextMonth"; // common location
+                    string destFile = Path.Combine(downloadsPath, saveFileName);
+                    if (!Directory.Exists(downloadsPath))
+                    {
+                        Directory.CreateDirectory(downloadsPath);
+                    }
+                    try
+                    {
+                        File.WriteAllBytes(destFile, www.downloadHandler.data);
+                        Debug.Log($"Export successful! File saved to: {destFile}");
+                        onSuccess?.Invoke(destFile);
+                    }
+                    catch (Exception e)
+                    {
+                        string errorMsg = $"Failed to save file to {destFile}: {e.Message}";
+                        Debug.LogError(errorMsg);
+                        onError?.Invoke(errorMsg);
+                    }
 #elif UNITY_EDITOR || UNITY_STANDALONE
 #if UNITY_EDITOR
-        // Unity Editor: show Save File Panel
-        string savePath = UnityEditor.EditorUtility.SaveFilePanel(
-            "Save Exported Excel File",
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-            tempFileName,
-            "xlsx"
-        );
+                // Unity Editor: show Save File Panel
+                string savePath = UnityEditor.EditorUtility.SaveFilePanel(
+                    "Save Exported Excel File",
+                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    saveFileName,
+                    "xlsx"
+                );
 
-        if (!string.IsNullOrEmpty(savePath))
-        {
-            try
-            {
-                File.Copy(tempFilePath, savePath, overwrite: true);
-                Debug.Log("✅ Exported to Editor/Desktop: " + savePath);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("❌ Failed to export on Editor: " + e.Message);
-            }
-        }
-        else
-        {
-            Debug.Log("⚠️ Export cancelled by user.");
-        }
+                if (!string.IsNullOrEmpty(savePath))
+                {
+                    try
+                    {
+                        File.WriteAllBytes(savePath, www.downloadHandler.data);
+                        Debug.Log($"Export successful! File saved to: {savePath}");
+                        onSuccess?.Invoke(savePath);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("❌ Failed to export on Editor: " + e.Message);
+
+                        onError?.Invoke("Failed to export: " + e.Message);
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("Export cancelled by user.");
+                    onError?.Invoke("Export cancelled by user.");
+                }
 #endif
 #else
-            Debug.LogWarning("❌ Export not supported on this platform.");
+                        Debug.LogWarning("❌ Export not supported on this platform.");
 #endif
-        
-        try
-        {
-            if (File.Exists(tempFilePath))
+            }
+            else
             {
-            File.Delete(tempFilePath);
-            Debug.Log($"🗑️ Temporary file deleted: {tempFilePath}");
+                string errorMsg = $"Export failed: {www.error}\n{www.downloadHandler.text}";
+                Debug.LogError(errorMsg);
+                onError?.Invoke(errorMsg);
             }
         }
-        catch (Exception ex)
+    }  
+
+
+    private IEnumerator UploadFileCoroutine(string path, Action<ExcelResponse> onCompleted, Action<string> onError)
+    {
+        WWWForm form = CreateUploadForm(path);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(uploadApiUrl, form))
         {
-            Debug.LogWarning($"⚠️ Could not delete temporary file: {ex.Message}");
+            www.SetRequestHeader("Accept", "application/json");
+
+            Debug.Log("Uploading file: " + Path.GetFileName(path));
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                string error = "Upload failed: " + www.error + "\nResponse: " + www.downloadHandler.text;
+                Debug.LogError(error);
+                onError?.Invoke(error);
+            }
+            else
+            {
+                string jsonResponse = www.downloadHandler.text;
+                Debug.Log("Upload successful! Server response:\n" + jsonResponse);
+
+                try
+                {
+                    var wrapper = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(jsonResponse);
+                    ExcelResponse response = new ExcelResponse();
+                    response.productData = wrapper != null && wrapper.ContainsKey("data") ? wrapper["data"] : new Dictionary<string, string>();
+                    onCompleted?.Invoke(response);
+                }
+                catch (Exception e)
+                {
+                    string parseError = "Failed to parse JSON response: " + e.Message;
+                    Debug.LogError(parseError);
+                    onError?.Invoke(parseError);
+                }
+            }
         }
     }
 
+    private static WWWForm CreateUploadForm(string filePath)
+    {
+        byte[] fileData = File.ReadAllBytes(filePath);
+        string fileName = Path.GetFileName(filePath);
+
+        WWWForm form = new WWWForm();
+        form.AddBinaryData("file", fileData, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        return form;
+    }
+
+    private int FindMonthIndex(string fileName, out string foundMonth)
+    {
+        string[] months = new[]
+        {
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        };
+
+        for (int i = 0; i < months.Length; i++)
+        {
+            if (fileName.IndexOf(months[i], StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                foundMonth = months[i];
+                return i;
+            }
+        }
+        foundMonth = null;
+        return -1;
+    }
+
+    public string GetFileNameWithNewMonth(string filePath)
+    {
+        string fileName = Path.GetFileNameWithoutExtension(filePath);
+        string extension = Path.GetExtension(filePath);
+
+        string foundMonth;
+        int foundMonthIndex = FindMonthIndex(fileName, out foundMonth);
+
+        if (foundMonthIndex == -1)
+        {
+            // No month found, return original file name
+            return fileName + extension;
+        }
+
+        string nextMonth = GetNextMonth(foundMonth);
+
+        string newFileName = System.Text.RegularExpressions.Regex.Replace(
+            fileName,
+            foundMonth,
+            nextMonth,
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase
+        );
+
+        return newFileName + extension;
+    }
+
+    public string GetNextMonth(string currentMonth)
+    {
+        string[] months = new[]
+        {
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        };
+
+        int index = Array.FindIndex(months, m => m.Equals(currentMonth, StringComparison.InvariantCultureIgnoreCase));
+        if (index == -1)
+            return currentMonth;
+
+        int nextIndex = (index + 1) % 12;
+        return months[nextIndex];
+    }
+
+    
 }

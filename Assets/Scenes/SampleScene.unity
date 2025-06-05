@@ -320,8 +320,10 @@ MonoBehaviour:
   prevMonthButton: {fileID: 1894158289}
   nextMonthButton: {fileID: 547906328}
   monthYearText: {fileID: 465330306}
+  selectDateButton: {fileID: 0}
   defaultSprite: {fileID: 7919194353434859991, guid: b35fcaa46fa9f3e49b71c103f69df698, type: 3}
   todaySprite: {fileID: -3327971419932107721, guid: 7c8ff58917aad254bbee16daeba7b32b, type: 3}
+  dayButtons: []
 --- !u!114 &37051806
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,6 +386,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50dbaf95a9ac35245b5e9496f5b4d98a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  popupContent: {fileID: 0}
+  canvasGroup: {fileID: 0}
   animationDuration: 0.25
 --- !u!1 &60468501
 GameObject:
@@ -2581,7 +2585,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &310438363
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2617,6 +2621,7 @@ MonoBehaviour:
   finalListPrefab: {fileID: 2958670635708331847, guid: 11ed64e1e8cdf0846b7f4bed6e4bb38f, type: 3}
   finalListContainer: {fileID: 902985699}
   updateButton: {fileID: 1678839108}
+  exportButton: {fileID: 859637213}
 --- !u!1 &327170737
 GameObject:
   m_ObjectHideFlags: 0
@@ -8033,6 +8038,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50dbaf95a9ac35245b5e9496f5b4d98a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  popupContent: {fileID: 0}
+  canvasGroup: {fileID: 0}
   animationDuration: 0.25
 --- !u!225 &836163032
 CanvasGroup:
@@ -8102,6 +8109,7 @@ MonoBehaviour:
   submitButton: {fileID: 381382749}
   closeButton: {fileID: 1585158717}
   productNameText: {fileID: 1023769821}
+  _productName: 
 --- !u!1 &846285176
 GameObject:
   m_ObjectHideFlags: 0
@@ -8475,7 +8483,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 40}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &902985700
 MonoBehaviour:
@@ -9337,12 +9345,16 @@ MonoBehaviour:
   productPrefab: {fileID: 8008964145469152058, guid: 47408c79b0a1e57439e92ee9a3073a21, type: 3}
   productContent: {fileID: 716234315}
   clearSearchButton: {fileID: 1611350765}
+  productList: []
   mailContent: {fileID: 1422197395}
   finalMailContent: {fileID: 1055222345}
   productSelectContent: {fileID: 182227700}
   buildEmailButton: {fileID: 632936225}
   copyButton: {fileID: 2142028754}
   mailText: {fileID: 1435458478}
+  mailParent: {fileID: 0}
+  currentMailType: 0
+  headerText: 
 --- !u!1 &1113518388
 GameObject:
   m_ObjectHideFlags: 0
@@ -10339,7 +10351,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1337518433
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10378,9 +10390,12 @@ MonoBehaviour:
   productPrefab: {fileID: 8008964145469152058, guid: 47408c79b0a1e57439e92ee9a3073a21, type: 3}
   productContent: {fileID: 508136390}
   clearSearchButton: {fileID: 449506738}
+  productList: []
   submitButton: {fileID: 5371761}
   backButton: {fileID: 300260286}
+  jsonFilepath: 
   finalList: {fileID: 310438362}
+  productScreen: {fileID: 2097088746}
 --- !u!114 &1337518435
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13646,6 +13661,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50dbaf95a9ac35245b5e9496f5b4d98a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  popupContent: {fileID: 0}
+  canvasGroup: {fileID: 0}
   animationDuration: 0.25
 --- !u!225 &1680258332
 CanvasGroup:
@@ -14508,6 +14525,8 @@ MonoBehaviour:
   dateContainer: {fileID: 1436722393}
   absentText: {fileID: 527504566}
   copyButton: {fileID: 591141673}
+  selectedDates: []
+  _previousDates: []
 --- !u!1 &1796624683
 GameObject:
   m_ObjectHideFlags: 0
@@ -15571,6 +15590,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50dbaf95a9ac35245b5e9496f5b4d98a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  popupContent: {fileID: 0}
+  canvasGroup: {fileID: 0}
   animationDuration: 0.25
 --- !u!225 &1922657110
 CanvasGroup:
@@ -16177,6 +16198,8 @@ MonoBehaviour:
   updateButton: {fileID: 1504704403}
   productContent: {fileID: 182227700}
   absentContent: {fileID: 1794807820}
+  subjectText: 
+  emailBodyText: 
 --- !u!1 &2014737372
 GameObject:
   m_ObjectHideFlags: 0
@@ -16831,6 +16854,8 @@ MonoBehaviour:
   mailScreenGO: {fileID: 2010987293}
   mainMenuPanelGO: {fileID: 297554543}
   stockScreenGO: {fileID: 1337518432}
+  mailScreen: {fileID: 0}
+  hasCheckedProfileData: 0
 --- !u!1 &2079040183
 GameObject:
   m_ObjectHideFlags: 0
@@ -17072,7 +17097,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2097088747
 RectTransform:
   m_ObjectHideFlags: 0
@@ -18345,6 +18370,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50dbaf95a9ac35245b5e9496f5b4d98a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  popupContent: {fileID: 0}
+  canvasGroup: {fileID: 0}
   animationDuration: 0.25
 --- !u!225 &8821058142678344815
 CanvasGroup:

@@ -44,7 +44,6 @@ public class UploadExcel : MonoBehaviour
 
     private void HandleUploadButtonClicked()
     {
-#if UNITY_ANDROID
         NativeFilePicker.PickFile((path) =>
         {
             if (path == null)
@@ -58,9 +57,6 @@ public class UploadExcel : MonoBehaviour
             HandlePickedExcelFile(path);
         },
         new string[] { ".xlsx", ".xls" });
-#else
-        Debug.LogWarning("This only works on Android with NativeFilePicker");
-#endif
     }
 
     private void HandlePickedExcelFile(string filePath)

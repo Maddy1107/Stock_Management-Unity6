@@ -866,3 +866,4 @@ public class StockManager : MonoBehaviour
 [WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
 [WARNING] Failed to extract property m_fontStyle from TMPro.TextMeshProUGUI: Index was outside the bounds of the array.
 [INFO] CoplayLogger - Autocomplete: Rename Caret to Cursor | press CTRL + Shift + X to accept.
+[INFO] Loading state from file, and setting to: Initialized

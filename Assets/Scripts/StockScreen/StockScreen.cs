@@ -18,12 +18,12 @@ public class StockScreen : ProductListbase
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-    private static Dictionary<string, string> productDictionary = new Dictionary<string, string>();
+    public static Dictionary<string, string> productDictionary = new Dictionary<string, string>();
 
     [SerializeField] private Button submitButton;
     [SerializeField] private Button backButton;
-    List<IDictionary<string, object>> rows = new List<IDictionary<string, object>>();
-    string jsonFilepath;
+    ExcelResponse rows;
+    public static string jsonFilepath;
     public static string uploadedFilePath;
     [SerializeField] private GameObject finalList;
     [SerializeField] private GameObject productScreen;
@@ -106,11 +106,11 @@ public class StockScreen : ProductListbase
 
     private void HandleToggleClicked(ProductItem item)
     {
-        string result = ExcelReader.FindProductValue(rows, item.ProductName);
+        string result = rows.productData.TryGetValue(item.ProductName, out string quantity) ? quantity : "0";
         GUIManager.Instance.ShowStockUpdatePopup(item.ProductName, result);
     }
 
-    private void HandleBackButton()
+    public void HandleBackButton()
     {
         JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(jsonFilepath));
         gameObject.SetActive(false);
@@ -119,7 +119,16 @@ public class StockScreen : ProductListbase
 
     public void ReadExcel(string filePath)
     {
-        rows = ExcelReader.ReadExcelRows(filePath);
+        ExcelReader.Instance.UploadFile(filePath, 
+            onCompleted: (response) =>
+            {
+                rows = response;
+            },
+            onError: (errorMsg) =>
+            {
+                Debug.LogError("Upload error: " + errorMsg);
+            }
+        );
     }
 
     public void ResetProductScreen()
