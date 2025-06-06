@@ -19,8 +19,6 @@ public class StockScreen : ProductListbase
         DontDestroyOnLoad(gameObject);
     }
     public static Dictionary<string, string> productDictionary = new Dictionary<string, string>();
-    public delegate void OnUpdateSubmitted();
-    public static event OnUpdateSubmitted UpdateSubmitted;
 
     [SerializeField] private Button submitButton;
     [SerializeField] private Button backButton;
@@ -30,10 +28,6 @@ public class StockScreen : ProductListbase
     [SerializeField] private GameObject finalList;
     [SerializeField] private GameObject productScreen;
 
-    public static void CallUpdateSubmitted()
-    {
-        UpdateSubmitted?.Invoke();
-    }
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -98,7 +92,6 @@ public class StockScreen : ProductListbase
     public void Initialize(string filePath)
     {
         uploadedFilePath = filePath;
-        ReadExcel(filePath);
     }
 
     protected override void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false)
@@ -107,13 +100,13 @@ public class StockScreen : ProductListbase
         var item = itemGO.GetComponent<ProductItem>();
         string displayName = displayIndex > 0 ? $"{displayIndex}. {name}" : name;
         item.Initialize(displayName, name, isInMail);
-        item.OnToggleClicked += HandleToggleClicked;
+        GameEvents.OnToggleClicked += HandleToggleClicked;
     }
 
     private void HandleToggleClicked(ProductItem item)
     {
-        string result = rows.productData.TryGetValue(item.ProductName, out string quantity) ? quantity : "0";
-        GUIManager.Instance.ShowStockUpdatePopup(item.ProductName, result);
+        //string result = rows.productData.TryGetValue(item.ProductName, out string quantity) ? quantity : "0";
+        GUIManager.Instance.ShowStockUpdatePopup(item.ProductName);
     }
 
     public void HandleBackButton()
@@ -123,19 +116,19 @@ public class StockScreen : ProductListbase
         GUIManager.Instance.ShowMainMenuPanel();
     }
 
-    public void ReadExcel(string filePath)
-    {
-        ExcelReader.Instance.UploadFile(filePath, 
-            onCompleted: (response) =>
-            {
-                rows = response;
-            },
-            onError: (errorMsg) =>
-            {
-                Debug.LogError("Upload error: " + errorMsg);
-            }
-        );
-    }
+    // public void ReadExcel(string filePath)
+    // {
+    //     ExcelReader.Instance.UploadFile(filePath, 
+    //         onCompleted: (response) =>
+    //         {
+    //             rows = response;
+    //         },
+    //         onError: (errorMsg) =>
+    //         {
+    //             Debug.LogError("Upload error: " + errorMsg);
+    //         }
+    //     );
+    // }
 
     public void ResetProductScreen()
     {

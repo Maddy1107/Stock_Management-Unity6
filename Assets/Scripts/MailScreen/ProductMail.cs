@@ -87,13 +87,13 @@ public class ProductMail : ProductListbase
         var item = itemGO.GetComponent<ProductItem>();
         string displayName = displayIndex > 0 ? $"{displayIndex}. {name}" : name;
         item.Initialize(displayName, name, isInMail);
-        item.OnToggleClicked += HandleToggleClicked;
+        GameEvents.OnToggleClicked += HandleToggleClicked;
     }
 
     private void HandleToggleClicked(ProductItem item)
     {
         string name = item.ProductName;
-        item.OnToggleClicked -= HandleToggleClicked;
+        GameEvents.OnToggleClicked -= HandleToggleClicked;
 
         if (item.IsInMail)
         {

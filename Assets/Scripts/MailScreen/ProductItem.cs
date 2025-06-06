@@ -13,8 +13,7 @@ public class ProductItem : MonoBehaviour
     public string ProductName { get; private set; }
     public bool IsInMail { get; private set; }
 
-    public event Action<ProductItem> OnToggleClicked;
-
+    
     public void Initialize(string displayName, string productName, bool isInMail = false)
     {
         ProductName = productName;
@@ -33,7 +32,7 @@ public class ProductItem : MonoBehaviour
 
     private void HandleToggleClicked()
     {
-        OnToggleClicked?.Invoke(this);
+        GameEvents.InvokeOnToggleClicked(this);
     }
 
     public void SetButtonSprite(bool isInMail)

@@ -7,7 +7,6 @@ public class FinalListItem : MonoBehaviour
 {
     [SerializeField] private Button productNameText;
     [SerializeField] private TMP_Text productValueText;
-    public event Action<FinalListItem> OnEditToggleClicked;
 
     public string ProductName { get; private set; }
     public string ProductValue { get; private set; }
@@ -33,6 +32,6 @@ public class FinalListItem : MonoBehaviour
 
     private void HandleToggleClicked()
     {
-        OnEditToggleClicked?.Invoke(this);
+        GameEvents.InvokeOnEditToggleClicked(this);
     }
 }

@@ -12,10 +12,12 @@ public class GUIManager : MonoBehaviour
     [SerializeField] private GameObject excelUploadPopup;
     [SerializeField] private GameObject stockUpdatePopup;
     [SerializeField] private GameObject imageUploadPopup;
+    [SerializeField] private GameObject imagePreviewPopup;
 
     [SerializeField] private GameObject mailScreenGO;
     [SerializeField] private GameObject mainMenuPanelGO;
     [SerializeField] private GameObject stockScreenGO;
+    [SerializeField] private GameObject imageScreenGO;
 
     private MailScreen mailScreen;
     private bool hasCheckedProfileData = false;
@@ -32,7 +34,7 @@ public class GUIManager : MonoBehaviour
         mailScreen = mailScreenGO?.GetComponent<MailScreen>();
 
         if (selectMailPopup != null)
-            selectMailPopup.OnTypeSelected += HandleMailTypeSelected;
+            GameEvents.OnTypeSelected += HandleMailTypeSelected;
     }
 
     private void OnEnable()
@@ -99,9 +101,25 @@ public class GUIManager : MonoBehaviour
         }
     }
 
+    public void ShowImageScreen(string[] imagePaths)
+    {
+        if (!imageScreenGO) return;
+
+        ShowOnly(imageScreenGO);
+
+        var imageScreen = imageScreenGO.GetComponent<ImageScreen>();
+        if (imageScreen != null)
+        {
+            if (imagePaths != null && imagePaths.Length > 0)
+            {
+                imageScreen.Initialize(imagePaths);
+            }
+        }
+    }
+
     private void ShowOnly(GameObject targetGO)
     {
-        foreach (var go in new[] { mainMenuPanelGO, mailScreenGO, stockScreenGO })
+        foreach (var go in new[] { mainMenuPanelGO, mailScreenGO, stockScreenGO, imageScreenGO })
         {
             if (go != null)
                 go.SetActive(go == targetGO);
@@ -133,14 +151,41 @@ public class GUIManager : MonoBehaviour
         }
     }
 
-    public void ShowExcelUploadPopup()
-    {
-        excelUploadPopup?.GetComponent<PopupAnimator>()?.Show();
-    }
+    // public void ShowExcelUploadPopup()
+    // {
+    //     excelUploadPopup?.GetComponent<PopupAnimator>()?.Show();
+    // }
 
     public void ShowImageUploadPopup()
     {
         imageUploadPopup?.GetComponent<PopupAnimator>()?.Show();
+    }
+
+    public void ShowImagePreviewPopup(Sprite previewImage)
+    {
+        if (imagePreviewPopup != null)
+        {
+            imagePreviewPopup.GetComponent<PopupAnimator>()?.Show();
+
+            var target = GameObject.Find("Preview");
+            
+            if (target != null)
+            {
+                var imageComponent = target.GetComponent<UnityEngine.UI.Image>();
+                if (imageComponent != null)
+                {
+                    imageComponent.sprite = previewImage;
+                }
+                else
+                {
+                    Debug.LogWarning("Image component not found on Preview GameObject.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Preview GameObject not found in the scene.");
+            }
+        }
     }
 
     public void ShowAndroidToast(string message)

@@ -12,7 +12,6 @@ public class FinalList : MonoBehaviour
     [SerializeField] private Transform finalListContainer;
     [SerializeField] private Button updateButton;
     [SerializeField] private Button exportButton;
-    [SerializeField] private Button refreshButton;
 
     private void Awake()
     {
@@ -33,15 +32,10 @@ public class FinalList : MonoBehaviour
             exportButton.onClick.AddListener(OnExportButtonClicked);
         }
 
-        if (refreshButton != null)
-        {
-            refreshButton.onClick.AddListener(Refresh);
-        }
-
         string filePath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
         finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(filePath);
 
-        StockScreen.UpdateSubmitted += Refresh;
+        GameEvents.OnUpdateSubmitted += Refresh;
 
         GenerateList();
 
@@ -54,7 +48,7 @@ public class FinalList : MonoBehaviour
             updateButton.onClick.RemoveListener(OnUpdateButtonClicked);
         }
 
-        StockScreen.UpdateSubmitted -= Refresh;
+        GameEvents.OnUpdateSubmitted -= Refresh;
 
         ClearChildren(finalListContainer);
     }
@@ -82,7 +76,7 @@ public class FinalList : MonoBehaviour
 
         GUIManager.Instance.ShowAndroidToast("Final list exported successfully.");
 
-        //StockScreen.Instance.HandleBackButton();
+        StockScreen.Instance.HandleBackButton();
     }
 
     private void OnUpdateButtonClicked()
@@ -104,7 +98,7 @@ public class FinalList : MonoBehaviour
         {
             GameObject listItem = Instantiate(finalListPrefab, finalListContainer);
             FinalListItem finalListItem = listItem.GetComponent<FinalListItem>();
-            finalListItem.OnEditToggleClicked += HandleToggleClicked;
+            GameEvents.OnEditToggleClicked += HandleToggleClicked;
             if (finalListItem != null)
             {
                 finalListItem.SetData(item.Key, item.Value);

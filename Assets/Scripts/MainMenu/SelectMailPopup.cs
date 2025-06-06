@@ -10,8 +10,6 @@ public class SelectMailPopup : MonoBehaviour
     [SerializeField] private Button receiveButton;
     [SerializeField] private Button absentButton;
 
-    public event Action<MailType> OnTypeSelected;
-
     private void OnEnable()
     {
         closeButton?.onClick.AddListener(ClosePopup);
@@ -31,7 +29,7 @@ public class SelectMailPopup : MonoBehaviour
     private void SelectType(MailType type)
     {
         ClosePopup();
-        OnTypeSelected?.Invoke(type);
+        GameEvents.InvokeOnTypeSelected(type);
     }
 
     private void ClosePopup()

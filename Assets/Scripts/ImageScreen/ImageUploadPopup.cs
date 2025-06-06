@@ -1,6 +1,13 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
+using System.Linq;
+
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class ImageUploadPopup : MonoBehaviour
 {
@@ -8,7 +15,8 @@ public class ImageUploadPopup : MonoBehaviour
     [SerializeField] private Button uploadButton;
     [SerializeField] private Button submitButton;
     [SerializeField] private Button closeButton;
-    [SerializeField] private string[] imageFilePaths;
+    private string[] imageFilePaths;
+    
     private void OnEnable()
     {
         ResetUI();
@@ -44,23 +52,52 @@ public class ImageUploadPopup : MonoBehaviour
 
     private void HandleUploadButtonClicked()
     {
-        NativeFilePicker.PickMultipleFiles((paths) =>
+        #if UNITY_EDITOR
+        string folderPath = EditorUtility.OpenFolderPanel("Select Folder with Images", "", "");
+        if (string.IsNullOrEmpty(folderPath))
+        {
+            Debug.Log("Folder selection cancelled in Editor");
+            return;
+        }
+
+        string[] paths = Directory.GetFiles(folderPath, "*.*")
+                                .Where(file => file.EndsWith(".png") || file.EndsWith(".jpg") || file.EndsWith(".jpeg"))
+                                .ToArray();
+
+        if (paths.Length == 0)
+        {
+            Debug.Log("No image files found in folder.");
+            return;
+        }
+
+        Debug.Log("Image files picked (Editor): " + string.Join(", ", paths));
+
+        imageFilePaths = paths;
+        HandlePickedImage();
+        
+
+    #elif UNITY_ANDROID
+        NativeFilePicker.PickMultipleFiles((string[] paths) =>
         {
             if (paths == null || paths.Length == 0)
             {
-                Debug.Log("File selection cancelled");
+                Debug.Log("File selection cancelled on Android");
                 return;
             }
 
-           imageFilePaths = paths;
-            Debug.Log("Image files picked: " + string.Join(", ", imageFilePaths));
+            Debug.Log("Image files picked (Android): " + string.Join(", ", paths));
 
-            HandlePickedExcelFile(imageFilePaths[0]);
-        },
-        new string[] { ".png", ".jpg", ".jpeg" });
+            imageFilePaths = paths;
+            HandlePickedImage();
+
+        }, new string[] { ".png", ".jpg", ".jpeg" });
+
+    #else
+        Debug.LogWarning("File picking not supported on this platform.");
+    #endif
     }
 
-    private void HandlePickedExcelFile(string filePath)
+    private void HandlePickedImage()
     {
         if (fileDetailsText != null)
         {
@@ -70,16 +107,14 @@ public class ImageUploadPopup : MonoBehaviour
 
     public void OnSubmitButtonClicked()
     {
-        if (fileDetailsText != null && 
-            !string.IsNullOrEmpty(fileDetailsText.text) && 
-            fileDetailsText.text != "No file selected")
+        if (imageFilePaths != null && imageFilePaths.Length > 0)
         {
-            GUIManager.Instance.ShowStockScreen(fileDetailsText.text);
+            GUIManager.Instance.ShowImageScreen(imageFilePaths);
             ClosePopup();
         }
         else
         {
-            GUIManager.Instance.ShowAndroidToast("Please select an Excel file first.");
+            GUIManager.Instance.ShowAndroidToast("Please select an image first.");
         }
     }
 

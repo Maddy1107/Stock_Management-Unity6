@@ -74,7 +74,7 @@ public class StockUpdatePopup : MonoBehaviour
         GUIManager.Instance.ShowAndroidToast("Updated successfully!");
         Close();
 
-        StockScreen.CallUpdateSubmitted();
+        GameEvents.InvokeOnUpdateSubmitted();
 
     }
 

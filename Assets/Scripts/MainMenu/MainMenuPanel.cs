@@ -44,7 +44,8 @@ public class MainMenuPanel : MonoBehaviour
 
     private void OnStockButtonClicked()
     {
-        GUIManager.Instance.ShowExcelUploadPopup();
+        var excelPath = "Assets/Resources/Priyanka_Closing_Stock_May_2025.xlsx";
+        GUIManager.Instance.ShowStockScreen(excelPath);
     }
     
     private void OnImagesButtonClicked()
