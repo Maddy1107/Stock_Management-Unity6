@@ -889,8 +889,8 @@ RectTransform:
   m_Father: {fileID: 1435458477}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 85.958466}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 171.9167}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &125620950
@@ -9126,8 +9126,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 33.490692, y: 0.000045776367}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 16.745, y: 0.000045776367}
+  m_SizeDelta: {x: -33.491, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1000933640
 MonoBehaviour:
@@ -9422,11 +9422,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   closeButton: {fileID: 1254522077}
-  emailheadText: {fileID: 2127464020}
-  emailfootText: {fileID: 125620950}
+  emailHeadText: {fileID: 2127464020}
+  emailFootText: {fileID: 125620950}
   copyButton: {fileID: 2142028754}
-  productsTextPrefab: {fileID: 5474822961491517874, guid: d4aa5c45dbefbeb4fb33e785593cb301, type: 3}
-  productsTextContainer: {fileID: 1000933638}
+  productTextPrefab: {fileID: 5474822961491517874, guid: d4aa5c45dbefbeb4fb33e785593cb301, type: 3}
+  productTextContainer: {fileID: 1000933639}
 --- !u!1 &1061029815
 GameObject:
   m_ObjectHideFlags: 0
@@ -9625,10 +9625,10 @@ RectTransform:
   - {fileID: 1196958092}
   m_Father: {fileID: 1435458477}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.00027466, y: -5.6898}
-  m_SizeDelta: {x: 868.04, y: 450.3474}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 391.7121}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1098774531
 MonoBehaviour:
@@ -12184,6 +12184,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1435458477}
   - component: {fileID: 1435458479}
+  - component: {fileID: 1435458481}
+  - component: {fileID: 1435458480}
   m_Layer: 0
   m_Name: Email
   m_TagString: Untagged
@@ -12211,7 +12213,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -2.8449097, y: -92.87091}
-  m_SizeDelta: {x: -56.897, y: -185.74}
+  m_SizeDelta: {x: -56.897, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1435458479
 CanvasRenderer:
@@ -12221,6 +12223,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1435458476}
   m_CullTransparentMesh: 1
+--- !u!114 &1435458480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435458476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
+--- !u!114 &1435458481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435458476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 40.8
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &1436722389
 GameObject:
   m_ObjectHideFlags: 0
@@ -19790,10 +19832,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1435458477}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -112.2337}
-  m_SizeDelta: {x: 0, y: 224.4672}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 193.4194}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2127464020
 MonoBehaviour:
@@ -19817,7 +19859,6 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Dear Team,
 
-    
 
     Below are the required products:'
   m_isRightToLeft: 0
