@@ -73,7 +73,7 @@ public class UploadExcel : MonoBehaviour
             !string.IsNullOrEmpty(excelFilePath.text) && 
             excelFilePath.text != "No file selected")
         {
-            GUIManager.Instance.ShowStockScreen(excelFilePath.text);
+            //GUIManager.Instance.ShowStockScreen(excelFilePath.text);
             ClosePopup();
         }
         else

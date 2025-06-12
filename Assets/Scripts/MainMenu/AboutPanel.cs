@@ -1,28 +1,26 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using System.IO;
 using TMPro;
 
-public class AboutPanel : MonoBehaviour
+public class AboutPanel : Popup<AboutPanel>
 {
     [Header("UI References")]
     public TMP_InputField nameInputField;
     public Button submitButton;
     public Button closeButton;
+
     private const string NameKey = "SavedUserName";
 
-    void Start()
+    private void Start()
     {
         submitButton.onClick.AddListener(Submit);
-        closeButton.onClick.AddListener(ClosePopup);
+        closeButton.onClick.AddListener(Hide); // Use base Hide from Popup<T>
 
         string savedName = LoadSavedData();
 
         if (!string.IsNullOrEmpty(savedName))
         {
-            GUIManager.Instance.ShowMainMenuPanel(savedName);
-            ClosePopup();
+            Hide();
         }
     }
 
@@ -36,23 +34,14 @@ public class AboutPanel : MonoBehaviour
             return;
         }
 
-
         PlayerPrefs.SetString(NameKey, userName);
         PlayerPrefs.Save();
 
-        GUIManager.Instance.ShowMainMenuPanel(userName);
-        ClosePopup();
+        Hide();
     }
 
     public string LoadSavedData()
     {
-        string savedName = PlayerPrefs.GetString(NameKey, null);
-
-        return savedName;
-    }
-
-    public void ClosePopup()
-    {
-        GetComponent<PopupAnimator>()?.Hide();
+        return PlayerPrefs.GetString(NameKey, null);
     }
 }

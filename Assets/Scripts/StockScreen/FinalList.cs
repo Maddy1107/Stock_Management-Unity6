@@ -108,7 +108,7 @@ public class FinalList : MonoBehaviour
     
     public void HandleToggleClicked(FinalListItem item)
     {
-        GUIManager.Instance.ShowStockUpdatePopup(item.ProductName, item.ProductValue);
+        //GUIManager.Instance.ShowStockUpdatePopup(item.ProductName, item.ProductValue);
     }
 
     private void ClearChildren(Transform finalListContainer)

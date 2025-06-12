@@ -1,39 +1,30 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SelectMailPopup : MonoBehaviour
+public class SelectMailPopup : Popup<SelectMailPopup>
 {
-    [Header("Buttons")]
-    [SerializeField] private Button closeButton;
     [SerializeField] private Button requireButton;
     [SerializeField] private Button receiveButton;
     [SerializeField] private Button absentButton;
 
     private void OnEnable()
     {
-        closeButton?.onClick.AddListener(ClosePopup);
-        requireButton?.onClick.AddListener(() => SelectType(MailType.Required));
-        receiveButton?.onClick.AddListener(() => SelectType(MailType.Received));
-        absentButton?.onClick.AddListener(() => SelectType(MailType.Absent));
+        requireButton?.onClick.AddListener(() => HandleClick(MailType.Required));
+        receiveButton?.onClick.AddListener(() => HandleClick(MailType.Received));
+        absentButton?.onClick.AddListener(() => HandleClick(MailType.Absent));
     }
 
     private void OnDisable()
     {
-        closeButton?.onClick.RemoveListener(ClosePopup);
         requireButton?.onClick.RemoveAllListeners();
         receiveButton?.onClick.RemoveAllListeners();
         absentButton?.onClick.RemoveAllListeners();
     }
 
-    private void SelectType(MailType type)
+    private void HandleClick(MailType type)
     {
-        ClosePopup();
+        MailScreen.Instance?.Show();
         GameEvents.InvokeOnTypeSelected(type);
-    }
-
-    private void ClosePopup()
-    {
-        GetComponent<PopupAnimator>()?.Hide();
+        Hide();
     }
 }

@@ -1,55 +1,55 @@
-using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainMenuPanel : MonoBehaviour
+public class MainMenuPanel : UIPage<MainMenuPanel>
 {
     [Header("Buttons")]
-    [SerializeField] private Button mailButton;
-    [SerializeField] private Button stockButton;
-    [SerializeField] private Button imagesButton;
+    [SerializeField] private Button mailButton, stockButton, imagesButton;
 
     [Header("Profile UI")]
     [SerializeField] private TMP_Text profileName;
 
+    private bool hasCheckedProfileData = false;
+
+    private const string StockFilePath = "Assets/Resources/Priyanka_Closing_Stock_May_2025.xlsx";
+
+    public void Initialize()
+    {
+        CheckProfileData();
+    }
+
+    public void CheckProfileData()
+    {
+        if (hasCheckedProfileData) return;
+        hasCheckedProfileData = true;
+
+        string name = AboutPanel.Instance?.LoadSavedData();
+
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            profileName.text = name;
+        }
+        else
+        {
+            AboutPanel.Instance?.Show();
+        }
+        
+    }
+
     private void OnEnable()
     {
-        GUIManager.Instance.CheckProfileData();
-
-        mailButton?.onClick.AddListener(OnMailButtonClicked);
-        stockButton?.onClick.AddListener(OnStockButtonClicked);
-        imagesButton?.onClick.AddListener(OnImagesButtonClicked);
+        Initialize();
+        mailButton?.onClick.AddListener(() => SelectMailPopup.Instance?.Show());
+        //stockButton?.onClick.AddListener(() => GUIManager.Instance?.ShowStockScreen(StockFilePath));
+        imagesButton?.onClick.AddListener(() => ImageUploadPopup.Instance?.Show());
     }
 
     private void OnDisable()
     {
-        mailButton?.onClick.RemoveListener(OnMailButtonClicked);
-        stockButton?.onClick.RemoveListener(OnStockButtonClicked);
-        imagesButton?.onClick.RemoveListener(OnImagesButtonClicked);
-    }
-
-    public void Initialize(string name)
-    {
-        if (!string.IsNullOrWhiteSpace(name) && profileName)
-        {
-            profileName.text = name;
-        }
-    }
-
-    private void OnMailButtonClicked()
-    {
-        GUIManager.Instance.ShowSelectMailPopup();
-    }
-
-    private void OnStockButtonClicked()
-    {
-        var excelPath = "Assets/Resources/Priyanka_Closing_Stock_May_2025.xlsx";
-        GUIManager.Instance.ShowStockScreen(excelPath);
-    }
-    
-    private void OnImagesButtonClicked()
-    {
-        GUIManager.Instance.ShowImageUploadPopup();
+        mailButton?.onClick.RemoveAllListeners();
+        stockButton?.onClick.RemoveAllListeners();
+        imagesButton?.onClick.RemoveAllListeners();
     }
 }

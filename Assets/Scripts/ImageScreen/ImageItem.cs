@@ -20,7 +20,7 @@ public class ImageItem : MonoBehaviour
 
     private void HandlePreviewButtonClicked()
     {
-        GUIManager.Instance.ShowImagePreviewPopup(imageSprite);
+        //GUIManager.Instance.ShowImagePreviewPopup(imageSprite);
     }
 
     public void OnDisable()

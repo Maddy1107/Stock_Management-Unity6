@@ -12,7 +12,7 @@ public abstract class ProductListbase : MonoBehaviour
     [SerializeField] protected Button clearSearchButton;
 
     protected List<string> productList;
-    protected readonly HashSet<string> selectedProducts = new();
+    protected readonly List<string> selectedProducts = new();
 
     protected virtual void OnEnable()
     {

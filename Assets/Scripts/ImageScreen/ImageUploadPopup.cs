@@ -9,7 +9,7 @@ using System.Linq;
 using UnityEditor;
 #endif
 
-public class ImageUploadPopup : MonoBehaviour
+public class ImageUploadPopup : Popup<ImageUploadPopup>
 {
     [SerializeField] private TMP_Text fileDetailsText;
     [SerializeField] private Button uploadButton;
@@ -109,7 +109,7 @@ public class ImageUploadPopup : MonoBehaviour
     {
         if (imageFilePaths != null && imageFilePaths.Length > 0)
         {
-            GUIManager.Instance.ShowImageScreen(imageFilePaths);
+            //GUIManager.Instance.ShowImageScreen(imageFilePaths);
             ClosePopup();
         }
         else

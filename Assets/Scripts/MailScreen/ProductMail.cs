@@ -1,12 +1,12 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Text;
 
 public class ProductMail : ProductListbase
 {
+    [Header("UI References")]
     [SerializeField] private GameObject mailContent;
-    [SerializeField] private GameObject finalMailContent;
-    [SerializeField] private GameObject productSelectContent;
     [SerializeField] private Button buildEmailButton;
     [SerializeField] private Button copyButton;
     [SerializeField] private TMP_Text mailText;
@@ -18,82 +18,74 @@ public class ProductMail : ProductListbase
     protected override void OnEnable()
     {
         base.OnEnable();
-        mailParent = mailContent.transform;
+
+        if (mailParent == null)
+            mailParent = mailContent.transform;
+
         buildEmailButton.onClick.AddListener(BuildEmailBody);
-        copyButton.onClick.AddListener(() => MailScreen.Instance.CopyToClipboard());
-        RefreshMailList();
+        GameEvents.OnToggleClicked += HandleToggleClicked;
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-        buildEmailButton.onClick.RemoveAllListeners();
-        copyButton.onClick.RemoveAllListeners();
-        finalMailContent.SetActive(false);
+
+        buildEmailButton.onClick.RemoveListener(BuildEmailBody);
+        GameEvents.OnToggleClicked -= HandleToggleClicked;
     }
 
-    public void OpenScreen()
+    public void Show(MailType type)
     {
-        productSelectContent.SetActive(true);
-        finalMailContent.SetActive(false);
+        gameObject.SetActive(true);
+        OpenWithType(type);
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
     }
 
     public void OpenWithType(MailType type)
     {
         currentMailType = type;
-        productSelectContent.SetActive(true);
         headerText = $"Below are the {(type == MailType.Required ? "required" : "received")} products:";
         ResetProductScreen();
     }
 
     public void BuildEmailBody()
     {
-        var sb = new System.Text.StringBuilder();
-        if (!string.IsNullOrWhiteSpace(headerText))
-        {
-            sb.AppendLine(headerText).AppendLine();
-        }
-
         if (selectedProducts.Count == 0)
         {
             GUIManager.Instance.ShowAndroidToast("No products selected for the email.");
             return;
         }
 
-        int index = 1;
-        foreach (var name in selectedProducts)
-        {
-            sb.AppendLine($"{index++}. {name}");
-        }
-
-        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), mailText, $"Product {currentMailType}");
-        productSelectContent.SetActive(false);
-        finalMailContent.SetActive(true);
+        FinalProductEmailPopup.Instance.Show();
+        FinalProductEmailPopup.Instance.SetEmailContent(selectedProducts,headerText, $"Product {currentMailType}");
     }
 
     private void RefreshMailList()
     {
         ClearChildren(mailParent);
+
         int index = 1;
-        foreach (var name in selectedProducts)
+        foreach (var product in selectedProducts)
         {
-            CreateProductItem(name, mailParent, index++, true);
+            CreateProductItem(product, mailParent, index++, true);
         }
     }
 
+
     protected override void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false)
     {
-        var itemGO = Instantiate(productPrefab, parent);
-        var item = itemGO.GetComponent<ProductItem>();
-        string displayName = displayIndex > 0 ? $"{displayIndex}. {name}" : name;
-        item.Initialize(displayName, name, isInMail);
-        GameEvents.OnToggleClicked += HandleToggleClicked;
+        base.CreateProductItem(name, parent, displayIndex, isInMail);
     }
 
     private void HandleToggleClicked(ProductItem item)
     {
+        if (item == null) return;
+
         string name = item.ProductName;
-        GameEvents.OnToggleClicked -= HandleToggleClicked;
 
         if (item.IsInMail)
         {
@@ -113,9 +105,11 @@ public class ProductMail : ProductListbase
 
     private void RemoveProductFromList(string name)
     {
-        for (int i = 0; i < productContent.transform.childCount; i++)
+        Transform content = productContent.transform;
+
+        for (int i = 0; i < content.childCount; i++)
         {
-            var item = productContent.transform.GetChild(i).GetComponent<ProductItem>();
+            var item = content.GetChild(i).GetComponent<ProductItem>();
             if (item != null && item.ProductName == name)
             {
                 Destroy(item.gameObject);
@@ -129,6 +123,5 @@ public class ProductMail : ProductListbase
         selectedProducts.Clear();
         ClearSearch();
         RefreshMailList();
-        finalMailContent.SetActive(false);
     }
 }

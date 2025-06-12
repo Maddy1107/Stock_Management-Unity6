@@ -30,6 +30,16 @@ public class AbsentEmail : MonoBehaviour
         copyButton.onClick.RemoveListener(OnCopyClicked);
     }
 
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+    
     private void HandleDateCountChanged(string input)
     {
         ClearChildren(dateContainer);
@@ -162,12 +172,12 @@ public class AbsentEmail : MonoBehaviour
             sb.AppendLine(".0No Dates Selected.");
         }
         sb.AppendLine("\nIt will be very nice if you can fix the issue.");
-        GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), absentText, "Absent Dates fixed in GreytHR");
+        //GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), absentText, "Absent Dates fixed in GreytHR");
     }
 
     private void OnCopyClicked()
     {
-        MailScreen.Instance.CopyToClipboard();
+        //MailScreen.Instance.CopyToClipboard();
     }
 
     public void ResetUI()

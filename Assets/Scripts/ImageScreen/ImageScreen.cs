@@ -120,7 +120,7 @@ public class ImageScreen : MonoBehaviour
     public void HandleBackButton()
     {
         gameObject.SetActive(false);
-        GUIManager.Instance.ShowMainMenuPanel();
+        //GUIManager.Instance.ShowMainMenuPanel();
     }
 
     private void ClearChildren(Transform container)

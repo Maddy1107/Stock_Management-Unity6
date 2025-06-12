@@ -106,14 +106,14 @@ public class StockScreen : ProductListbase
     private void HandleToggleClicked(ProductItem item)
     {
         //string result = rows.productData.TryGetValue(item.ProductName, out string quantity) ? quantity : "0";
-        GUIManager.Instance.ShowStockUpdatePopup(item.ProductName);
+        //GUIManager.Instance.ShowStockUpdatePopup(item.ProductName);
     }
 
     public void HandleBackButton()
     {
         JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(jsonFilepath));
         gameObject.SetActive(false);
-        GUIManager.Instance.ShowMainMenuPanel();
+        //GUIManager.Instance.ShowMainMenuPanel();
     }
 
     // public void ReadExcel(string filePath)

@@ -1,26 +1,11 @@
+using System.Text;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class GUIManager : MonoBehaviour
 {
-    public static GUIManager Instance { get; private set; }
-
-    [Header("UI References")]
-    [SerializeField] private SelectMailPopup selectMailPopup;
-    [SerializeField] private GameObject startScreenPopup;
-    [SerializeField] private GameObject excelUploadPopup;
-    [SerializeField] private GameObject stockUpdatePopup;
-    [SerializeField] private GameObject imageUploadPopup;
-    [SerializeField] private GameObject imagePreviewPopup;
-
-    [SerializeField] private GameObject mailScreenGO;
-    [SerializeField] private GameObject mainMenuPanelGO;
-    [SerializeField] private GameObject stockScreenGO;
-    [SerializeField] private GameObject imageScreenGO;
-
-    private MailScreen mailScreen;
-    private bool hasCheckedProfileData = false;
+    public static GUIManager Instance { get; private set; }    
 
     private void Awake()
     {
@@ -31,163 +16,19 @@ public class GUIManager : MonoBehaviour
         }
 
         Instance = this;
-        mailScreen = mailScreenGO?.GetComponent<MailScreen>();
-
-        if (selectMailPopup != null)
-            GameEvents.OnTypeSelected += HandleMailTypeSelected;
     }
 
     private void OnEnable()
     {
-        ShowOnly(mainMenuPanelGO);
+        MainMenuPanel.Instance?.Show();
     }
 
-    private void HandleMailTypeSelected(MailType type)
+    public void CopyToClipboard(string stringToCopy)
     {
-        Debug.Log($"Mail type selected: {type}");
-        if (mailScreen != null)
-        {
-            ShowOnly(mailScreenGO);
-            mailScreen.Open(type);
-        }
+        GUIUtility.systemCopyBuffer = stringToCopy.Trim();
+        ShowAndroidToast("Copied to clipboard");
     }
-
-    public void ShowFinalEmailScreen(string emailContent, TMP_Text mailText = null, string subject = "")
-    {
-        mailScreen?.BuildFullEmail(emailContent, mailText, subject);
-    }
-
-    public void ShowSelectMailPopup()
-    {
-        if (selectMailPopup != null)
-            selectMailPopup.GetComponent<PopupAnimator>().Show();
-    }
-
-    public void ShowStockUpdatePopup(string productName = "", string productQuan = "")
-    {
-        if (stockUpdatePopup != null)
-        {
-            stockUpdatePopup.GetComponent<PopupAnimator>().Show();
-            var stockUpdate = stockUpdatePopup.GetComponent<StockUpdatePopup>();
-            if (stockUpdate != null)
-            {
-                stockUpdate.Initialize(productName, productQuan);
-            }
-        }
-    }
-
-    public void ShowMainMenuPanel(string name = "")
-    {
-        if (!mainMenuPanelGO) return;
-
-        ShowOnly(mainMenuPanelGO);
-        var mainMenuPanel = mainMenuPanelGO.GetComponent<MainMenuPanel>();
-        mainMenuPanel?.Initialize(name);
-    }
-
-    public void ShowStockScreen(string filePath = "")
-    {
-        if (!stockScreenGO) return;
-
-        ShowOnly(stockScreenGO);
-
-        var stockScreen = stockScreenGO.GetComponent<StockScreen>();
-        if (stockScreen != null)
-        {
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                stockScreen.Initialize(filePath);
-            }
-        }
-    }
-
-    public void ShowImageScreen(string[] imagePaths)
-    {
-        if (!imageScreenGO) return;
-
-        ShowOnly(imageScreenGO);
-
-        var imageScreen = imageScreenGO.GetComponent<ImageScreen>();
-        if (imageScreen != null)
-        {
-            if (imagePaths != null && imagePaths.Length > 0)
-            {
-                imageScreen.Initialize(imagePaths);
-            }
-        }
-    }
-
-    private void ShowOnly(GameObject targetGO)
-    {
-        foreach (var go in new[] { mainMenuPanelGO, mailScreenGO, stockScreenGO, imageScreenGO })
-        {
-            if (go != null)
-                go.SetActive(go == targetGO);
-        }
-    }
-
-    public void CheckProfileData()
-    {
-        if (hasCheckedProfileData) return;
-        hasCheckedProfileData = true;
-
-        if (startScreenPopup == null) return;
-
-        var aboutPanel = startScreenPopup.GetComponent<AboutPanel>();
-        if (aboutPanel == null)
-        {
-            Debug.LogWarning("AboutPanel not found on startScreenPopup.");
-            return;
-        }
-
-        string name = aboutPanel.LoadSavedData();
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            ShowMainMenuPanel(name);
-        }
-        else
-        {
-            startScreenPopup.GetComponent<PopupAnimator>().Show();
-        }
-    }
-
-    // public void ShowExcelUploadPopup()
-    // {
-    //     excelUploadPopup?.GetComponent<PopupAnimator>()?.Show();
-    // }
-
-    public void ShowImageUploadPopup()
-    {
-        imageUploadPopup?.GetComponent<PopupAnimator>()?.Show();
-    }
-
-    public void ShowImagePreviewPopup(Sprite previewImage)
-    {
-        if (imagePreviewPopup != null)
-        {
-            imagePreviewPopup.GetComponent<PopupAnimator>()?.Show();
-
-            var target = GameObject.Find("Preview");
-            
-            if (target != null)
-            {
-                var imageComponent = target.GetComponent<UnityEngine.UI.Image>();
-                if (imageComponent != null)
-                {
-                    imageComponent.sprite = previewImage;
-                }
-                else
-                {
-                    Debug.LogWarning("Image component not found on Preview GameObject.");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("Preview GameObject not found in the scene.");
-            }
-        }
-    }
-
+    
     public void ShowAndroidToast(string message)
     {
 #if UNITY_ANDROID && !UNITY_EDITOR

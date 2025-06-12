@@ -1,13 +1,11 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class PopupAnimator : MonoBehaviour
 {
-    [Tooltip("The RectTransform of the popup content that scales in/out")]
     private RectTransform popupContent;
-
-    [Tooltip("CanvasGroup controlling the background fade and interactivity")]
     private CanvasGroup canvasGroup;
 
     public float animationDuration = 0.25f;
@@ -16,7 +14,6 @@ public class PopupAnimator : MonoBehaviour
 
     void Awake()
     {
-        // Initially hidden: scale content to zero and fade out canvas group
         if (popupContent == null)
             popupContent = transform.GetChild(0).GetComponent<RectTransform>();
 
@@ -29,48 +26,60 @@ public class PopupAnimator : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
     }
 
-    public void Show()
+    public void Show(bool isPopup = true)
     {
         gameObject.SetActive(true);
 
         if (animCoroutine != null)
             StopCoroutine(animCoroutine);
 
-        animCoroutine = StartCoroutine(AnimatePopup(Vector3.one, 1f, true));
+        animCoroutine = StartCoroutine(AnimatePopup(Vector3.one, 1f, true, null, isPopup));
     }
 
-    public void Hide()
+    public void Hide(bool isPopup = true,Action onComplete = null)
     {
         if (animCoroutine != null)
             StopCoroutine(animCoroutine);
 
-        animCoroutine = StartCoroutine(AnimatePopup(Vector3.zero, 0f, false));
+        animCoroutine = StartCoroutine(AnimatePopup(Vector3.zero, 0f, false, onComplete, isPopup));
     }
 
-    private IEnumerator AnimatePopup(Vector3 targetScale, float targetAlpha, bool enableOnFinish)
+    private IEnumerator AnimatePopup(Vector3 targetScale, float targetAlpha, bool enableOnFinish, Action onComplete, bool animateScale)
     {
         float t = 0f;
         Vector3 startScale = popupContent.localScale;
         float startAlpha = canvasGroup.alpha;
 
-        // Enable raycast blocking so clicks are caught during animation
         canvasGroup.blocksRaycasts = true;
+
+        if (!animateScale)
+            popupContent.localScale = Vector3.one;
 
         while (t < animationDuration)
         {
             t += Time.unscaledDeltaTime;
             float progress = Mathf.Clamp01(t / animationDuration);
 
-            popupContent.localScale = Vector3.Lerp(startScale, targetScale, progress);
+            if (animateScale)
+                popupContent.localScale = Vector3.Lerp(startScale, targetScale, progress);
+
             canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, progress);
 
             yield return null;
         }
 
-        popupContent.localScale = targetScale;
+        if (animateScale)
+            popupContent.localScale = targetScale;
+        else
+            popupContent.localScale = Vector3.one;
+
+
         canvasGroup.alpha = targetAlpha;
 
         canvasGroup.interactable = enableOnFinish;
         canvasGroup.blocksRaycasts = enableOnFinish;
+
+        onComplete?.Invoke();
     }
+
 }

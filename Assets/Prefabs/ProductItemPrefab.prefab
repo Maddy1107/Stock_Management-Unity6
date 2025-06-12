@@ -570,7 +570,7 @@ GameObject:
   - component: {fileID: 7309858820976964871}
   - component: {fileID: 3241458468435964925}
   m_Layer: 0
-  m_Name: MailPrefab
+  m_Name: ProductItemPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
