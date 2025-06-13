@@ -61,6 +61,9 @@ public class ImageScreen : UIPage<ImageScreen>
             }
 
             Debug.Log($"Images zipped successfully: {zipFilePath}");
+
+            GUIManager.Instance.OpenFolder(zipFilePath);
+            
             GUIManager.Instance.ShowAndroidToast($"Images zipped successfully: {zipFilePath}");
         });
     }

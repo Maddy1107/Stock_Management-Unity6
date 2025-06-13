@@ -44,52 +44,63 @@ public class ExcelReader : MonoBehaviour
 
     private IEnumerator Export(string filepath, string saveFileName, string jsondata, Action<string> onSuccess, Action<string> onError)
     {
+        Debug.Log($"[Export] Starting export for file: {filepath}, save as: {saveFileName}");
+
         if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath))
         {
+            Debug.LogError($"[Export] File not found: {filepath}");
             onError?.Invoke("File not found: " + filepath);
             yield break;
         }
 
         byte[] fileData = File.ReadAllBytes(filepath);
-        string fileNameOnly = Path.GetFileName(saveFileName); // What you want the downloaded file to be called
+        Debug.Log($"[Export] Read {fileData.Length} bytes from {filepath}");
+
+        string fileNameOnly = Path.GetFileName(saveFileName);
 
         WWWForm form = new WWWForm();
         form.AddBinaryData("file", fileData, Path.GetFileName(filepath), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         form.AddField("filename", fileNameOnly);
         form.AddField("data", jsondata);
 
+        Debug.Log($"[Export] Sending POST request to {exportApiUrl} with file: {fileNameOnly}");
+
         using (UnityWebRequest www = UnityWebRequest.Post(exportApiUrl, form))
         {
             www.downloadHandler = new DownloadHandlerBuffer();
             yield return www.SendWebRequest();
 
+            Debug.Log($"[Export] POST request completed. Result: {www.result}");
+
             if (www.result == UnityWebRequest.Result.Success)
             {
                 string currMonth = GetCurrentMonth();
+                Debug.Log($"[Export] Server responded successfully. Preparing to save file for month: {currMonth}");
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-                    // Android: save to Downloads
-                    string downloadsPath = $"/storage/emulated/0/Download/ClosingStock/{currMonth}"; // common location
-                    string destFile = Path.Combine(downloadsPath, saveFileName);
-                    if (!Directory.Exists(downloadsPath))
-                    {
-                        Directory.CreateDirectory(downloadsPath);
-                    }
-                    try
-                    {
-                        File.WriteAllBytes(destFile, www.downloadHandler.data);
-                        Debug.Log($"Export successful! File saved to: {destFile}");
-                        onSuccess?.Invoke(destFile);
-                    }
-                    catch (Exception e)
-                    {
-                        string errorMsg = $"Failed to save file to {destFile}: {e.Message}";
-                        Debug.LogError(errorMsg);
-                        onError?.Invoke(errorMsg);
-                    }
+                string downloadsPath = $"/storage/emulated/0/Download/ClosingStock/{currMonth}";
+                string destFile = Path.Combine(downloadsPath, saveFileName);
+                Debug.Log($"[Export] Android save path: {destFile}");
+                if (!Directory.Exists(downloadsPath))
+                {
+                    Directory.CreateDirectory(downloadsPath);
+                    Debug.Log($"[Export] Created directory: {downloadsPath}");
+                }
+                try
+                {
+                    File.WriteAllBytes(destFile, www.downloadHandler.data);
+                    Debug.Log($"[Export] Export successful! File saved to: {destFile}");
+                    onSuccess?.Invoke(destFile);
+                }
+                catch (Exception e)
+                {
+                    string errorMsg = $"[Export] Failed to save file to {destFile}: {e.Message}";
+                    Debug.LogError(errorMsg);
+                    onError?.Invoke(errorMsg);
+                }
 #elif UNITY_EDITOR || UNITY_STANDALONE
 #if UNITY_EDITOR
-                // Unity Editor: show Save File Panel
+                Debug.Log("[Export] Running in Unity Editor. Showing Save File Panel.");
                 string savePath = UnityEditor.EditorUtility.SaveFilePanel(
                     "Save Exported Excel File",
                     Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
@@ -102,34 +113,33 @@ public class ExcelReader : MonoBehaviour
                     try
                     {
                         File.WriteAllBytes(savePath, www.downloadHandler.data);
-                        Debug.Log($"Export successful! File saved to: {savePath}");
+                        Debug.Log($"[Export] Export successful! File saved to: {savePath}");
                         onSuccess?.Invoke(savePath);
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError("❌ Failed to export on Editor: " + e.Message);
-
+                        Debug.LogError("[Export] ❌ Failed to export on Editor: " + e.Message);
                         onError?.Invoke("Failed to export: " + e.Message);
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("Export cancelled by user.");
+                    Debug.LogWarning("[Export] Export cancelled by user.");
                     onError?.Invoke("Export cancelled by user.");
                 }
 #endif
 #else
-                        Debug.LogWarning("❌ Export not supported on this platform.");
+                Debug.LogWarning("[Export] ❌ Export not supported on this platform.");
 #endif
             }
             else
             {
-                string errorMsg = $"Export failed: {www.error}\n{www.downloadHandler.text}";
+                string errorMsg = $"[Export] Export failed: {www.error}\n{www.downloadHandler.text}";
                 Debug.LogError(errorMsg);
                 onError?.Invoke(errorMsg);
             }
         }
-    }  
+    }
 
     private string GetCurrentMonth()
     {

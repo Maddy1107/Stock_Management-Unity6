@@ -102,7 +102,7 @@ public class GUIManager : MonoBehaviour
 
     private string GetZipFilePath(out bool allowOverwrite, string zipFileName)
     {
-        
+
 #if UNITY_EDITOR
         allowOverwrite = true;
 
@@ -138,6 +138,40 @@ public class GUIManager : MonoBehaviour
 #else
         allowOverwrite = false;
         return null;
+#endif
+    }
+    
+    public void OpenFolder(string folderPath)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        try
+        {
+            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                AndroidJavaObject context = currentActivity.Call<AndroidJavaObject>("getApplicationContext");
+
+                AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");
+                AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", intentClass.GetStatic<string>("ACTION_VIEW"));
+
+                AndroidJavaClass uriClass = new AndroidJavaClass("android.net.Uri");
+                AndroidJavaClass fileClass = new AndroidJavaClass("java.io.File");
+
+                AndroidJavaObject fileObject = new AndroidJavaObject("java.io.File", folderPath);
+                AndroidJavaObject uri = uriClass.CallStatic<AndroidJavaObject>("fromFile", fileObject);
+
+                intent.Call<AndroidJavaObject>("setDataAndType", uri, "resource/folder");
+                intent.Call<AndroidJavaObject>("addFlags", intentClass.GetStatic<int>("FLAG_ACTIVITY_NEW_TASK"));
+
+                currentActivity.Call("startActivity", intent);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to open folder: {e.Message}");
+        }
+#else
+        EditorUtility.RevealInFinder(folderPath);
 #endif
     }
 }

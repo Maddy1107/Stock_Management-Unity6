@@ -91,9 +91,21 @@ public class FinalList : MonoBehaviour
             return;
         }
 
-        ExcelReader.Instance.ExportFile(StockScreen.templateFilePath, finalList);
+        ExcelReader.Instance.ExportFile(StockScreen.templateFilePath, finalList,
+            (filePath) =>
+            {
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    GUIManager.Instance.ShowAndroidToast("Failed to export final list.");
+                    return;
+                }
 
-        GUIManager.Instance.ShowAndroidToast("Final list exported successfully.");
+                Debug.Log($"Final list exported successfully: {filePath}");
+                
+                GUIManager.Instance.OpenFolder(filePath);
+
+                GUIManager.Instance.ShowAndroidToast($"Final list exported successfully: {filePath}");
+            });
     }
 
     private void HandleEditClicked(FinalListItem item)
