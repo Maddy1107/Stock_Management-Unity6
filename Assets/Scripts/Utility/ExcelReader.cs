@@ -16,8 +16,7 @@ public class ExcelReader : MonoBehaviour
 {
     public static ExcelReader Instance { get; private set; }
 
-    public string uploadApiUrl = "http://127.0.0.1:5000/upload";
-    public string exportApiUrl = "http://127.0.0.1:5000/export";
+    private string exportApiUrl = "http://127.0.0.1:5000/export";
 
     private void Awake()
     {
@@ -29,17 +28,6 @@ public class ExcelReader : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
-    // public void UploadFile(string filePath, Action<ExcelResponse> onCompleted, Action<string> onError = null)
-    // {
-    //     if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
-    //     {
-    //         onError?.Invoke("Invalid file path: " + filePath);
-    //         return;
-    //     }
-
-    //     StartCoroutine(UploadFileCoroutine(filePath, onCompleted, onError));
-    // }
 
     public void ExportFile(string filePath, Dictionary<string, string> jsondata, Action<string> onSuccess = null, Action<string> onError = null)
     {

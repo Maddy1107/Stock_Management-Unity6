@@ -5953,7 +5953,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 611175217}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -9234,7 +9234,6 @@ MonoBehaviour:
   fileDetailsText: {fileID: 2112442284}
   uploadButton: {fileID: 1352964910}
   submitButton: {fileID: 2036097951}
-  closeButton: {fileID: 1546534973}
 --- !u!1 &1000933638
 GameObject:
   m_ObjectHideFlags: 0
@@ -14889,7 +14888,6 @@ MonoBehaviour:
   backButton: {fileID: 1504612413}
   imagePrefab: {fileID: 2216102489413782793, guid: c00b97cffc446d745aaf6ddb03acb6e6, type: 3}
   imageContainer: {fileID: 1245254164}
-  backButton: {fileID: 1504612413}
   submitButton: {fileID: 1741656457}
 --- !u!1 &1601349892
 GameObject:
@@ -21263,7 +21261,6 @@ MonoBehaviour:
   closeButton: {fileID: 6036163256445804155}
   nameInputField: {fileID: 4677088776897177125}
   submitButton: {fileID: 569628156}
-  closeButton: {fileID: 6036163256445804155}
 --- !u!114 &8821058142678344812
 MonoBehaviour:
   m_ObjectHideFlags: 0
