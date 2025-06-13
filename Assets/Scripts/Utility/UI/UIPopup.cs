@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(PopupAnimator))]
-public abstract class Popup<T> : PopupBase where T : Popup<T>
+public abstract class UIPopup<T> : UIPopupBase where T : UIPopup<T>
 {
     public static T Instance { get; private set; }
 
@@ -29,7 +29,6 @@ public abstract class Popup<T> : PopupBase where T : Popup<T>
     {
         gameObject.SetActive(true);
         animator?.Show();
-        PopupStackManager.Instance?.Register(this);
         OnShow();
     }
 
@@ -37,7 +36,6 @@ public abstract class Popup<T> : PopupBase where T : Popup<T>
     {
         animator?.Hide();
         gameObject.SetActive(false);
-        PopupStackManager.Instance?.Deregister(this);
         OnHide();
     }
 

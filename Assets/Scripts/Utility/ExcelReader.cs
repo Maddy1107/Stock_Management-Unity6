@@ -143,57 +143,6 @@ public class ExcelReader : MonoBehaviour
         }
     }  
 
-
-    // private IEnumerator UploadFileCoroutine(string path, Action<ExcelResponse> onCompleted, Action<string> onError)
-    // {
-    //     WWWForm form = CreateUploadForm(path);
-
-    //     using (UnityWebRequest www = UnityWebRequest.Post(uploadApiUrl, form))
-    //     {
-    //         www.SetRequestHeader("Accept", "application/json");
-
-    //         Debug.Log("Uploading file: " + Path.GetFileName(path));
-    //         yield return www.SendWebRequest();
-
-    //         if (www.result != UnityWebRequest.Result.Success)
-    //         {
-    //             string error = "Upload failed: " + www.error + "\nResponse: " + www.downloadHandler.text;
-    //             Debug.LogError(error);
-    //             onError?.Invoke(error);
-    //         }
-    //         else
-    //         {
-    //             string jsonResponse = www.downloadHandler.text;
-    //             Debug.Log("Upload successful! Server response:\n" + jsonResponse);
-
-    //             try
-    //             {
-    //                 var wrapper = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(jsonResponse);
-    //                 ExcelResponse response = new ExcelResponse();
-    //                 response.productData = wrapper != null && wrapper.ContainsKey("data") ? wrapper["data"] : new Dictionary<string, string>();
-    //                 onCompleted?.Invoke(response);
-    //             }
-    //             catch (Exception e)
-    //             {
-    //                 string parseError = "Failed to parse JSON response: " + e.Message;
-    //                 Debug.LogError(parseError);
-    //                 onError?.Invoke(parseError);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // private static WWWForm CreateUploadForm(string filePath)
-    // {
-    //     byte[] fileData = File.ReadAllBytes(filePath);
-    //     string fileName = Path.GetFileName(filePath);
-
-    //     WWWForm form = new WWWForm();
-    //     form.AddBinaryData("file", fileData, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-    //     return form;
-    // }
-
     private string GetCurrentMonth()
     {
         return DateTime.Now.ToString("MMMM");

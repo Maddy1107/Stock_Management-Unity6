@@ -1,94 +1,79 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class StockUpdatePopup : MonoBehaviour
+public class StockUpdatePopup : UIPopup<StockUpdatePopup>
 {
+    [Header("UI Elements")]
     [SerializeField] private TMP_Text prevText;
     [SerializeField] private TMP_Text prevTextHeader;
     [SerializeField] private TMP_InputField newInputField;
-    [SerializeField] private Button submitButton;
-    [SerializeField] private Button closeButton;
     [SerializeField] private TMP_Text productNameText;
+
+    [Header("Buttons")]
+    [SerializeField] private Button submitButton;
+
     private string _productName;
 
-
-    void OnEnable()
+    private void OnEnable()
     {
         ResetUI();
-        if (submitButton != null)
-        {
-            submitButton.onClick.AddListener(OnSubmitButtonClicked);
-        }
-        if (closeButton != null)
-        {
-            closeButton.onClick.AddListener(Close);
-        }
+        BindListeners();
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        if (submitButton != null)
-        {
-            submitButton.onClick.RemoveListener(OnSubmitButtonClicked);
-        }
-        if (closeButton != null)
-        {
-            closeButton.onClick.RemoveListener(Close);
-        }
+        UnbindListeners();
     }
 
-    public void Initialize(string productName, string prevTextValue)
+    public void Initialize(string productName, string previousQuantity = "")
     {
         _productName = productName;
+        productNameText.text = productName;
+        newInputField.text = string.Empty;
 
-        if (productNameText != null)
-        {
-            productNameText.text = productName;
-        }
-
-        if (newInputField != null)
-        {
-            newInputField.text = string.Empty;
-        }
-
-        prevText.transform.parent.gameObject.SetActive(prevTextValue != "");
-        
-        if (prevText != null)
-        {
-            prevText.text = prevTextValue;
-        }
+        bool hasPrevious = !string.IsNullOrWhiteSpace(previousQuantity);
+        prevText.transform.parent.gameObject.SetActive(hasPrevious);
+        prevText.text = hasPrevious ? previousQuantity : string.Empty;
     }
 
-    private void OnSubmitButtonClicked()
+    public void Show(string productName, string previousQuantity = "")
     {
+        Initialize(productName, previousQuantity);
+        Show();
+    }
 
-        if (string.IsNullOrWhiteSpace(newInputField.text))
+    private void BindListeners()
+    {
+        submitButton.onClick.AddListener(HandleSubmitClicked);
+    }
+
+    private void UnbindListeners()
+    {
+        submitButton.onClick.RemoveListener(HandleSubmitClicked);
+    }
+
+    private void HandleSubmitClicked()
+    {
+        string input = newInputField.text.Trim();
+
+        if (string.IsNullOrEmpty(input))
         {
             GUIManager.Instance.ShowAndroidToast("Please enter a valid value.");
             return;
         }
-        StockScreen.StockUpdate(_productName, newInputField.text);
-        GUIManager.Instance.ShowAndroidToast("Updated successfully!");
-        Close();
 
+        StockScreen.Instance.UpdateStock(_productName, input);
+        GUIManager.Instance.ShowAndroidToast("Updated successfully!");
         GameEvents.InvokeOnUpdateSubmitted();
 
+        Hide();
     }
 
     private void ResetUI()
     {
-        if (prevText != null)
-        {
-            prevText.text = string.Empty;
-        }
-    }
-    
-    public void Close()
-    {
-        ResetUI();
-        GetComponent<PopupAnimator>()?.Hide();
+        newInputField.text = string.Empty;
+        productNameText.text = string.Empty;
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -6,118 +5,99 @@ using UnityEngine.UI;
 
 public class FinalList : MonoBehaviour
 {
-    Dictionary<string, string> finalList;
-
+    [Header("UI References")]
     [SerializeField] private GameObject finalListPrefab;
     [SerializeField] private Transform finalListContainer;
     [SerializeField] private Button updateButton;
     [SerializeField] private Button exportButton;
 
+    private Dictionary<string, string> finalList = new();
+
+    private string JsonFilePath => Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
+
     private void Awake()
     {
-        finalList = new Dictionary<string, string>();
+        updateButton.onClick.AddListener(HandleUpdateButtonClicked);
+        exportButton.onClick.AddListener(HandleExportButtonClicked);
+        GameEvents.OnEditToggleClicked += HandleEditClicked;
+        GameEvents.OnUpdateSubmitted += RefreshList;
     }
 
-    void OnEnable()
+    private void OnDestroy()
     {
-        ClearChildren(finalListContainer);
+        updateButton.onClick.RemoveListener(HandleUpdateButtonClicked);
+        exportButton.onClick.RemoveListener(HandleExportButtonClicked);
+        GameEvents.OnEditToggleClicked -= HandleEditClicked;
+        GameEvents.OnUpdateSubmitted -= RefreshList;
+    }
 
-        if (updateButton != null)
-        {
-            updateButton.onClick.AddListener(OnUpdateButtonClicked);
-        }
-
-        if (exportButton != null)
-        {
-            exportButton.onClick.AddListener(OnExportButtonClicked);
-        }
-
-        string filePath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
-        finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(filePath);
-
-        GameEvents.OnUpdateSubmitted += Refresh;
-
-        GenerateList();
-
+    private void OnEnable()
+    {
+        RefreshList();
     }
 
     private void OnDisable()
     {
-        if (updateButton != null)
-        {
-            updateButton.onClick.RemoveListener(OnUpdateButtonClicked);
-        }
-
-        GameEvents.OnUpdateSubmitted -= Refresh;
-
-        ClearChildren(finalListContainer);
+        ClearFinalList();
     }
 
-    public void Refresh()
+    public void Show() => gameObject.SetActive(true);
+    public void Hide() => gameObject.SetActive(false);
+
+    private void RefreshList()
     {
-        JsonUtilityEditor.WriteJson(StockScreen.jsonFilepath, StockScreen.productDictionary);
-
-        string filePath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
-        finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(filePath);
-
-        GenerateList();
+        finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(JsonFilePath);
+        GenerateFinalListUI();
     }
 
-    private void OnExportButtonClicked()
+    private void GenerateFinalListUI()
     {
-        if (finalList == null || finalList.Count == 0)
-        {
-            Debug.LogWarning("Final list is empty. Nothing to export.");
-            GUIManager.Instance.ShowAndroidToast("No data to export.");
-            return;
-        }
-
-        ExcelReader.Instance.ExportFile(StockScreen.uploadedFilePath, finalList);
-
-        GUIManager.Instance.ShowAndroidToast("Final list exported successfully.");
-
-        StockScreen.Instance.HandleBackButton();
-    }
-
-    private void OnUpdateButtonClicked()
-    {
-        StockScreen.Instance.OpenScreen();
-    }
-
-    private void GenerateList()
-    {
-        ClearChildren(finalListContainer);
+        ClearFinalList();
 
         if (finalList == null || finalList.Count == 0)
         {
-            Debug.LogWarning("Final list is empty.");
+            Debug.Log("Final list is empty.");
             return;
         }
 
-        foreach (var item in finalList)
+        foreach (var pair in finalList)
         {
-            GameObject listItem = Instantiate(finalListPrefab, finalListContainer);
-            FinalListItem finalListItem = listItem.GetComponent<FinalListItem>();
-            GameEvents.OnEditToggleClicked += HandleToggleClicked;
-            if (finalListItem != null)
+            var listItemGO = Instantiate(finalListPrefab, finalListContainer);
+            if (listItemGO.TryGetComponent(out FinalListItem item))
             {
-                finalListItem.SetData(item.Key, item.Value);
+                item.SetData(pair.Key, pair.Value);
             }
         }
     }
-    
-    public void HandleToggleClicked(FinalListItem item)
-    {
-        //GUIManager.Instance.ShowStockUpdatePopup(item.ProductName, item.ProductValue);
-    }
 
-    private void ClearChildren(Transform finalListContainer)
+    private void ClearFinalList()
     {
-        if (finalListContainer == null) return;
-
         for (int i = finalListContainer.childCount - 1; i >= 0; i--)
         {
             Destroy(finalListContainer.GetChild(i).gameObject);
         }
+    }
+
+    private void HandleUpdateButtonClicked()
+    {
+        StockScreen.Instance.OpenScreen(); // Decouple if needed
+    }
+
+    private void HandleExportButtonClicked()
+    {
+        if (finalList == null || finalList.Count == 0)
+        {
+            GUIManager.Instance.ShowAndroidToast("No data to export.");
+            return;
+        }
+
+        ExcelReader.Instance.ExportFile(StockScreen.templateFilePath, finalList);
+
+        GUIManager.Instance.ShowAndroidToast("Final list exported successfully.");
+    }
+
+    private void HandleEditClicked(FinalListItem item)
+    {
+        StockUpdatePopup.Instance.Show(item.ProductName, item.ProductValue);
     }
 }

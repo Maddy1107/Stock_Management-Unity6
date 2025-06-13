@@ -42,7 +42,7 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
     {
         Initialize();
         mailButton?.onClick.AddListener(() => SelectMailPopup.Instance?.Show());
-        //stockButton?.onClick.AddListener(() => GUIManager.Instance?.ShowStockScreen(StockFilePath));
+        stockButton?.onClick.AddListener(() => StockScreen.Instance?.Show(StockFilePath));
         imagesButton?.onClick.AddListener(() => ImageUploadPopup.Instance?.Show());
     }
 

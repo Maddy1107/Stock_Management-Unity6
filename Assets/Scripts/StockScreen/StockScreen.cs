@@ -2,75 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class StockScreen : ProductListbase
+public class StockScreen : UIPage<StockScreen>
 {
-    public static StockScreen Instance { get; private set; }
+    public static Dictionary<string, string> ProductDictionary { get; private set; } = new Dictionary<string, string>();
 
-    private void Awake()
+    [SerializeField] private FinalList finalList;
+    [SerializeField] private StockProductScreen productScreen;
+
+    public static string tempStockUpdatepath { get; private set; }
+    public static string templateFilePath { get; private set; }
+
+    public void Show(string stockFilePath)
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-    public static Dictionary<string, string> productDictionary = new Dictionary<string, string>();
-
-    [SerializeField] private Button submitButton;
-    [SerializeField] private Button backButton;
-    ExcelResponse rows;
-    public static string jsonFilepath;
-    public static string uploadedFilePath;
-    [SerializeField] private GameObject finalList;
-    [SerializeField] private GameObject productScreen;
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-
-        ResetProductScreen();
-
-        jsonFilepath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
-
-        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(jsonFilepath));
-
-        if (submitButton != null)
-        {
-            submitButton.onClick.AddListener(OnSubmitButtonClicked);
-        }
-        if (backButton != null)
-        {
-            backButton.onClick.AddListener(HandleBackButton);
-        }
+        Show();
+        ResetStockPages();
+        Initialize(stockFilePath);
     }
 
-    private void OnSubmitButtonClicked()
+    public void Initialize(string filePath)
     {
-        if (productDictionary == null || productDictionary.Count == 0)
-        {
-            Debug.LogWarning("⚠️ Product dictionary is empty. Nothing to write.");
-            GUIManager.Instance.ShowAndroidToast("No products to submit.");
-            return;
-        }
-
-        JsonUtilityEditor.WriteJson(jsonFilepath, productDictionary);
-
-        finalList.SetActive(true);
-        productScreen.SetActive(false);
-
+        templateFilePath = filePath;
+        tempStockUpdatepath = Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
+        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(tempStockUpdatepath));
+        ProductDictionary.Clear();
     }
 
-    public void OpenScreen()
-    {
-        productScreen.SetActive(true);
-        finalList.SetActive(false);
-    }
-
-    public static void StockUpdate(string key, string value)
+    public void UpdateStock(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
         {
@@ -78,62 +36,40 @@ public class StockScreen : ProductListbase
             return;
         }
 
-        if (productDictionary.ContainsKey(key))
+        ProductDictionary[key] = $"{value}ml";
+        JsonUtilityEditor.WriteJson(tempStockUpdatepath, ProductDictionary);
+
+    }
+
+    public void SubmitStockData()
+    {
+        if (ProductDictionary == null || ProductDictionary.Count == 0)
         {
-            Debug.LogWarning($"Key '{key}' already exists in the dictionary. Updating value.");
-            productDictionary[key] = $"{value}ml";
+            Debug.LogWarning("⚠️ Product dictionary is empty. Nothing to write.");
+            GUIManager.Instance.ShowAndroidToast("No products to submit.");
+            return;
         }
-        else
-        {
-            productDictionary.Add(key, $"{value}ml");
-        }
+
+        JsonUtilityEditor.WriteJson(tempStockUpdatepath, ProductDictionary);
+        finalList?.Show();
+        productScreen?.Hide();
     }
 
-    public void Initialize(string filePath)
+    public void Reset()
     {
-        uploadedFilePath = filePath;
+        ProductDictionary.Clear();
+        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(tempStockUpdatepath));
     }
 
-    protected override void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false)
+    private void ResetStockPages()
     {
-        var itemGO = Instantiate(productPrefab, parent);
-        var item = itemGO.GetComponent<ProductItem>();
-        string displayName = displayIndex > 0 ? $"{displayIndex}. {name}" : name;
-        item.Initialize(displayName, name, isInMail);
-        GameEvents.OnToggleClicked += HandleToggleClicked;
+        productScreen?.Show();
+        finalList?.Hide();
     }
 
-    private void HandleToggleClicked(ProductItem item)
+    public void OpenScreen()
     {
-        //string result = rows.productData.TryGetValue(item.ProductName, out string quantity) ? quantity : "0";
-        //GUIManager.Instance.ShowStockUpdatePopup(item.ProductName);
-    }
-
-    public void HandleBackButton()
-    {
-        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(jsonFilepath));
-        gameObject.SetActive(false);
-        //GUIManager.Instance.ShowMainMenuPanel();
-    }
-
-    // public void ReadExcel(string filePath)
-    // {
-    //     ExcelReader.Instance.UploadFile(filePath, 
-    //         onCompleted: (response) =>
-    //         {
-    //             rows = response;
-    //         },
-    //         onError: (errorMsg) =>
-    //         {
-    //             Debug.LogError("Upload error: " + errorMsg);
-    //         }
-    //     );
-    // }
-
-    public void ResetProductScreen()
-    {
-        productDictionary.Clear();
-        finalList.SetActive(false);
-        productScreen.SetActive(true);
+        productScreen?.Show();
+        finalList?.Hide();
     }
 }

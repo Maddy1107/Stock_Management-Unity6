@@ -39,11 +39,7 @@ public class ProductMail : ProductListbase
         gameObject.SetActive(true);
         OpenWithType(type);
     }
-
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+    public void Hide() => gameObject.SetActive(false);
 
     public void OpenWithType(MailType type)
     {

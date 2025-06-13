@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SelectMailPopup : Popup<SelectMailPopup>
+public class SelectMailPopup : UIPopup<SelectMailPopup>
 {
     [SerializeField] private Button requireButton;
     [SerializeField] private Button receiveButton;

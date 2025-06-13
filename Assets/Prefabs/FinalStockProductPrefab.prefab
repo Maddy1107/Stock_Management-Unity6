@@ -90,7 +90,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d666e9f0ecb13445a70146134cb2368, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  productNameText: {fileID: 8108946870119605198}
+  productNameButton: {fileID: 8108946870119605198}
+  productNameLabel: {fileID: 3220067323769671646}
   productValueText: {fileID: 3090225139742941874}
 --- !u!1 &6010996269477790497
 GameObject:

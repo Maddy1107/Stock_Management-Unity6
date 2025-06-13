@@ -2,19 +2,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class AboutPanel : Popup<AboutPanel>
+public class AboutPanel : UIPopup<AboutPanel>
 {
     [Header("UI References")]
     public TMP_InputField nameInputField;
     public Button submitButton;
-    public Button closeButton;
 
     private const string NameKey = "SavedUserName";
 
     private void Start()
     {
         submitButton.onClick.AddListener(Submit);
-        closeButton.onClick.AddListener(Hide); // Use base Hide from Popup<T>
 
         string savedName = LoadSavedData();
 

@@ -1,31 +1,30 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
+[RequireComponent(typeof(PopupAnimator))]
 public class DatePicker : MonoBehaviour
 {
     [Header("UI References")]
-    public Transform dayGrid; // GridLayoutGroup parent
-    public Button dayButtonPrefab;
-    public Button prevMonthButton;
-    public Button nextMonthButton;
-    public TMP_Text monthYearText;
-
-    private Button selectDateButton;
+    [SerializeField] private Transform dayGrid;
+    [SerializeField] private Button dayButtonPrefab;
+    [SerializeField] private Button prevMonthButton;
+    [SerializeField] private Button nextMonthButton;
+    [SerializeField] private TMP_Text monthYearText;
 
     [Header("Button Sprites")]
-    public Sprite defaultSprite;
-    public Sprite todaySprite;
+    [SerializeField] private Sprite defaultSprite;
+    [SerializeField] private Sprite todaySprite;
 
-    private DateTime currentMonth;
-    private List<DateTime> selectedDates = new List<DateTime>();
-    private List<Button> dayButtons = new List<Button>();
+    private Button _targetButton;
+    private DateTime _currentMonth;
+    private readonly List<Button> _dayButtons = new();
 
     public static DatePicker Instance { get; private set; }
 
-    void Awake()
+    private void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -33,141 +32,106 @@ public class DatePicker : MonoBehaviour
             return;
         }
         Instance = this;
-        // Optional: Uncomment if you want this to persist across scenes
-        // DontDestroyOnLoad(gameObject);
     }
 
-    void Start()
+    private void Start()
     {
-        currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        _currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 
         prevMonthButton.onClick.AddListener(() =>
         {
-            currentMonth = currentMonth.AddMonths(-1);
+            _currentMonth = _currentMonth.AddMonths(-1);
             BuildCalendar();
         });
 
         nextMonthButton.onClick.AddListener(() =>
         {
-            currentMonth = currentMonth.AddMonths(1);
+            _currentMonth = _currentMonth.AddMonths(1);
             BuildCalendar();
         });
     }
 
-    public void Show(Button datebutton)
+    public void Show(Button targetButton)
     {
-        var animator = GetComponent<PopupAnimator>();
-        animator.Show();
-        selectDateButton = datebutton;
+        _targetButton = targetButton;
+        GetComponent<PopupAnimator>()?.Show();
         BuildCalendar();
     }
 
-    void BuildCalendar()
+    private void BuildCalendar()
     {
-        monthYearText.text = currentMonth.ToString("MMMM yyyy");
+        ClearDayButtons();
+        monthYearText.text = _currentMonth.ToString("MMMM yyyy");
 
-        foreach (var btn in dayButtons)
-        {
-            Destroy(btn.gameObject);
-        }
-        dayButtons.Clear();
+        DateTime prevMonth = _currentMonth.AddMonths(-1);
+        DateTime nextMonth = _currentMonth.AddMonths(1);
+        DateTime thisMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
 
-        int daysInMonth = DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
-        int startDayOfWeek = (int)currentMonth.DayOfWeek; // Sunday = 0
+        int daysInMonth = DateTime.DaysInMonth(_currentMonth.Year, _currentMonth.Month);
+        int startDay = (int)_currentMonth.DayOfWeek;
 
-        // Get previous and next month references
-        DateTime prevMonth = currentMonth.AddMonths(-1);
+        nextMonthButton.interactable = _currentMonth < thisMonth;
+        prevMonthButton.interactable = _currentMonth > new DateTime(2020, 1, 1);
+
+        // Leading days
         int daysInPrevMonth = DateTime.DaysInMonth(prevMonth.Year, prevMonth.Month);
-        DateTime nextMonth = currentMonth.AddMonths(1);
+        for (int i = startDay - 1; i >= 0; i--)
+            CreateDayButton(new DateTime(prevMonth.Year, prevMonth.Month, daysInPrevMonth - i), true);
 
-        DateTime now = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-        nextMonthButton.interactable = currentMonth < now;
-
-        // 1. Leading days from previous month
-        for (int i = startDayOfWeek - 1; i >= 0; i--)
-        {
-            DateTime prevMonthDate = new DateTime(prevMonth.Year, prevMonth.Month, daysInPrevMonth - i);
-            CreateDayButton(prevMonthDate, true);
-        }
-
-        // 2. Days of current month
+        // Current month days
         for (int day = 1; day <= daysInMonth; day++)
-        {
-            DateTime currentDate = new DateTime(currentMonth.Year, currentMonth.Month, day);
-            CreateDayButton(currentDate, false);
-        }
+            CreateDayButton(new DateTime(_currentMonth.Year, _currentMonth.Month, day), false);
 
-        // 3. Trailing days from next month to fill the week
-        int totalCells = startDayOfWeek + daysInMonth;
-        int trailingDays = (7 - (totalCells % 7)) % 7; // Ensures a complete last week
-
-        for (int i = 1; i <= trailingDays; i++)
-        {
-            DateTime nextMonthDate = new DateTime(nextMonth.Year, nextMonth.Month, i);
-            CreateDayButton(nextMonthDate, true);
-        }
+        // Trailing days
+        int totalCells = startDay + daysInMonth;
+        int trailing = (7 - (totalCells % 7)) % 7;
+        for (int i = 1; i <= trailing; i++)
+            CreateDayButton(new DateTime(nextMonth.Year, nextMonth.Month, i), true);
     }
 
-
-
-    void CreateDayButton(DateTime date, bool isFromOtherMonth)
+    private void CreateDayButton(DateTime date, bool isFromOtherMonth)
     {
-        Button dayButton = Instantiate(dayButtonPrefab, dayGrid);
-        TextMeshProUGUI buttonText = dayButton.GetComponentInChildren<TextMeshProUGUI>();
-        Image buttonImage = dayButton.GetComponent<Image>();
+        Button button = Instantiate(dayButtonPrefab, dayGrid);
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>();
+        Image bgImage = button.GetComponent<Image>();
 
-        buttonText.text = date.Day.ToString();
+        label.text = date.Day.ToString();
 
-        // Set sprite
-        if (date.Date == DateTime.Today)
-            buttonImage.sprite = todaySprite;
+        bool isFutureDate = date.Date > DateTime.Today;
+        bool isSelectable = !isFromOtherMonth && !isFutureDate;
+
+        // Set text color
+        if (isFromOtherMonth)
+            label.color = new Color(0.5f, 0.5f, 0.5f); // dimmed for other months
+        else if (isFutureDate)
+            label.color = new Color(0.7f, 0.7f, 0.7f); // light gray for future dates
         else
-            buttonImage.sprite = defaultSprite;
+            label.color = Color.black;
 
-        // Dim color for other month
-        buttonText.color = isFromOtherMonth ? new Color(0.5f, 0.5f, 0.5f) : Color.black;
+        // Sprite for today
+        bgImage.sprite = date.Date == DateTime.Today ? todaySprite : defaultSprite;
 
-        // Disable interaction for other month dates (optional)
-        dayButton.interactable = !isFromOtherMonth;
+        button.interactable = isSelectable;
 
-        if (!isFromOtherMonth)
+        if (isSelectable)
         {
-            UpdateButtonSelection(dayButton, date);
-            dayButton.onClick.AddListener(() => ToggleDateSelection(date));
+            button.onClick.AddListener(() =>
+            {
+                _targetButton.GetComponentInChildren<TMP_Text>().text = date.ToString("dd MMM");
+                GetComponent<PopupAnimator>()?.Hide();
+            });
         }
 
-        dayButtons.Add(dayButton);
+        _dayButtons.Add(button);
     }
 
 
-
-    void ToggleDateSelection(DateTime date)
+    private void ClearDayButtons()
     {
-        selectDateButton.GetComponentInChildren<TMP_Text>().text = date.ToString("dd MMM");
-        var animator = GetComponent<PopupAnimator>();
-        animator.Hide();
-    }
-
-    void UpdateButtonSelection(Button btn, DateTime date)
-    {
-        ColorBlock colors = btn.colors;
-        if (selectedDates.Contains(date))
+        foreach (var button in _dayButtons)
         {
-            // Highlight selected color
-            colors.normalColor = Color.green;
-            colors.selectedColor = Color.green;
+            Destroy(button.gameObject);
         }
-        else
-        {
-            // Default button color
-            colors.normalColor = Color.white;
-            colors.selectedColor = Color.white;
-        }
-        btn.colors = colors;
-    }
-
-    public List<DateTime> GetSelectedDates()
-    {
-        return new List<DateTime>(selectedDates);
+        _dayButtons.Clear();
     }
 }

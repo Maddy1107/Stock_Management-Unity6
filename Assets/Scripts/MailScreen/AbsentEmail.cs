@@ -14,7 +14,7 @@ public class AbsentEmail : MonoBehaviour
     [SerializeField] private Button copyButton;
 
     private TMP_Text[] selectedDates;
-    private string[] _previousDates;
+    private string[] previousDates;
 
     private void OnEnable()
     {
@@ -22,24 +22,28 @@ public class AbsentEmail : MonoBehaviour
         numberOfDatesInput.onValueChanged.AddListener(HandleDateCountChanged);
         copyButton.onClick.AddListener(OnCopyClicked);
         numberOfDatesInput.ActivateInputField();
+
+        BuildEmail();
     }
 
     private void OnDisable()
     {
         numberOfDatesInput.onValueChanged.RemoveListener(HandleDateCountChanged);
-        copyButton.onClick.RemoveListener(OnCopyClicked);
+        copyButton.onClick.RemoveAllListeners();
     }
 
-    public void Hide()
+    public void Show() => gameObject.SetActive(true);
+    public void Hide() => gameObject.SetActive(false);
+
+    public void ResetUI()
     {
-        gameObject.SetActive(false);
+        numberOfDatesInput.text = "";
+        selectedDates = null;
+        previousDates = null;
+        ClearChildren(dateContainer);
+        absentText.text = "";
     }
 
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
-    
     private void HandleDateCountChanged(string input)
     {
         ClearChildren(dateContainer);
@@ -55,22 +59,15 @@ public class AbsentEmail : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            CreateDateButton(i);
-        }
-    }
-
-    private void CreateDateButton(int index)
-    {
-        GameObject dateGO = Instantiate(selectDatePrefab, dateContainer);
-        TMP_Text buttonText = dateGO.GetComponentInChildren<TMP_Text>();
-
-        if (buttonText != null)
+            GameObject dateGO = Instantiate(selectDatePrefab, dateContainer);
+            TMP_Text buttonText = dateGO.GetComponentInChildren<TMP_Text>();
             buttonText.text = "Select Date";
 
-        Button btn = dateGO.GetComponent<Button>();
-        btn.onClick.AddListener(() => DatePicker.Instance.Show(btn));
+            Button btn = dateGO.GetComponent<Button>();
+            btn.onClick.AddListener(() => DatePicker.Instance.Show(btn));
 
-        selectedDates[index] = buttonText;
+            selectedDates[i] = buttonText;
+        }
     }
 
     private void Update()
@@ -81,7 +78,7 @@ public class AbsentEmail : MonoBehaviour
             return;
         }
 
-        bool changed = ValidateSelectedDates(out bool hasDuplicates);
+        bool changed = ValidateDates(out bool hasDuplicates);
 
         if (changed && !hasDuplicates)
             BuildEmail();
@@ -89,14 +86,14 @@ public class AbsentEmail : MonoBehaviour
         copyButton.interactable = HasAllUniqueValidDates();
     }
 
-    private bool ValidateSelectedDates(out bool duplicateFound)
+    private bool ValidateDates(out bool duplicateFound)
     {
-        bool changed = false;
         duplicateFound = false;
+        bool changed = false;
 
-        if (_previousDates == null || _previousDates.Length != selectedDates.Length)
+        if (previousDates == null || previousDates.Length != selectedDates.Length)
         {
-            _previousDates = new string[selectedDates.Length];
+            previousDates = new string[selectedDates.Length];
             changed = true;
         }
 
@@ -106,9 +103,9 @@ public class AbsentEmail : MonoBehaviour
         {
             string text = selectedDates[i]?.text ?? "";
 
-            if (_previousDates[i] != text)
+            if (previousDates[i] != text)
             {
-                _previousDates[i] = text;
+                previousDates[i] = text;
                 changed = true;
             }
 
@@ -142,51 +139,49 @@ public class AbsentEmail : MonoBehaviour
 
     private void BuildEmail()
     {
-        StringBuilder sb = new StringBuilder("This is to inform that the following dates are marked as absent in GreytHR:\n\n");
+        StringBuilder sb = new StringBuilder();
 
-        bool hasValidDate = selectedDates != null && selectedDates.Length > 0;
+        sb.AppendLine("Dear Team,\n");
+        sb.AppendLine("This is to inform that the following dates are marked as absent in GreytHR:\n");
+
         int count = 0;
-
-        if (hasValidDate)
+        if (selectedDates != null && selectedDates.Length > 0)
         {
             foreach (var date in selectedDates)
             {
-                string text = date?.text ?? "";
-                if (!string.IsNullOrEmpty(text) && text != "Select Date")
-                {
-                    sb.Append(text).Append(", ");
-                    hasValidDate = true;
-                }
-                else
-                {
-                    count++;
-                }
+            string text = date?.text ?? "";
+            if (!string.IsNullOrEmpty(text) && text != "Select Date")
+            {
+                sb.Append(text).Append(", ");
+                count++;
             }
+            }
+        }
 
-            sb.Length -= 2; // remove trailing comma
+        if (count > 0)
+        {
+            sb.Length -= 2; // Trim trailing comma
             sb.AppendLine();
         }
-
-        if (!hasValidDate || count == selectedDates.Length)
+        else
         {
-            sb.AppendLine(".0No Dates Selected.");
+            sb.AppendLine("No Dates Selected.");
         }
-        sb.AppendLine("\nIt will be very nice if you can fix the issue.");
-        //GUIManager.Instance.ShowFinalEmailScreen(sb.ToString(), absentText, "Absent Dates fixed in GreytHR");
+
+        sb.AppendLine("\nIt will be very nice if you can fix the issue.\n");
+
+        sb.AppendLine("Thank you \nPriyanka Roy");
+
+        absentText.text = sb.ToString();
     }
 
     private void OnCopyClicked()
     {
-        //MailScreen.Instance.CopyToClipboard();
-    }
-
-    public void ResetUI()
-    {
-        numberOfDatesInput.text = "";
-        selectedDates = null;
-        _previousDates = null;
-        ClearChildren(dateContainer);
-        BuildEmail();
+        string finalText = absentText.text;
+        if (!string.IsNullOrWhiteSpace(finalText))
+        {
+            GUIManager.Instance.CopyToClipboard(finalText);
+        }
     }
 
     private void ClearChildren(Transform container)

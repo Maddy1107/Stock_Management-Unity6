@@ -7,7 +7,10 @@ public class ImageItem : MonoBehaviour
 
     [SerializeField] private Button previewButton;
     private Sprite imageSprite;
-
+    private float pressStartTime;
+    private bool longPressTriggered = false;
+    public float longPressThreshold = 0.6f;
+    
     public void OnEnable()
     {
         previewButton = GetComponentInChildren<Button>();
@@ -20,8 +23,12 @@ public class ImageItem : MonoBehaviour
 
     private void HandlePreviewButtonClicked()
     {
-        //GUIManager.Instance.ShowImagePreviewPopup(imageSprite);
+        if (imageSprite != null)
+        {
+            ImagePreviewPopup.Instance.ShowImage(imageSprite);
+        }
     }
+
 
     public void OnDisable()
     {
@@ -30,6 +37,31 @@ public class ImageItem : MonoBehaviour
             previewButton.onClick.RemoveListener(HandlePreviewButtonClicked);
         }
     }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            pressStartTime = Time.time;
+            longPressTriggered = false;
+        }
+
+        if (Input.GetMouseButton(0) && !longPressTriggered)
+        {
+            if (Time.time - pressStartTime > longPressThreshold)
+            {
+                longPressTriggered = true;
+                HandlePreviewButtonClicked();
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            pressStartTime = 0;
+            longPressTriggered = false;
+        }
+    }
+
     public void SetData(string imagePath)
     {
         // Assuming you have an Image component to display the image

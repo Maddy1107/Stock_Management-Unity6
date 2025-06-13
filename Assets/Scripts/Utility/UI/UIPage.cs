@@ -51,11 +51,7 @@ public abstract class UIPage<T> : UIPageBase where T : UIPage<T>
             gameObject.SetActive(true);
 
         SetCurrentPage(this);
-        OnShow();
     }
-
-    protected virtual void OnShow() { }
-    protected virtual void OnHide() { }
 
     protected virtual void OnBackPressed()
     {
@@ -66,7 +62,6 @@ public abstract class UIPage<T> : UIPageBase where T : UIPage<T>
     // Optional override to maintain consistent behavior
     public override void Hide()
     {
-        OnHide();
         base.Hide();
     }
 }

@@ -1,134 +1,110 @@
+using System.IO;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.IO;
-using System.Linq;
-
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-public class ImageUploadPopup : Popup<ImageUploadPopup>
+public class ImageUploadPopup : UIPopup<ImageUploadPopup>
 {
+    [Header("UI References")]
     [SerializeField] private TMP_Text fileDetailsText;
     [SerializeField] private Button uploadButton;
     [SerializeField] private Button submitButton;
-    [SerializeField] private Button closeButton;
+
     private string[] imageFilePaths;
-    
+
     private void OnEnable()
     {
         ResetUI();
-        if (uploadButton != null)
-        {
-            uploadButton.onClick.AddListener(HandleUploadButtonClicked);
-        }
-        if (submitButton != null)
-        {
-            submitButton.onClick.AddListener(OnSubmitButtonClicked);
-        }
-        if (closeButton != null)
-        {
-            closeButton.onClick.AddListener(ClosePopup);
-        }
+        uploadButton?.onClick.AddListener(OnUploadClicked);
+        submitButton?.onClick.AddListener(OnSubmitClicked);
     }
 
     private void OnDisable()
     {
-        if (uploadButton != null)
-        {
-            uploadButton.onClick.RemoveListener(HandleUploadButtonClicked);
-        }
-        if (submitButton != null)
-        {
-            submitButton.onClick.RemoveAllListeners();
-        }
-        if (closeButton != null)
-        {
-            closeButton.onClick.RemoveListener(ClosePopup);
-        }
+        uploadButton?.onClick.RemoveListener(OnUploadClicked);
+        submitButton?.onClick.RemoveAllListeners();
     }
 
-    private void HandleUploadButtonClicked()
+    private void OnUploadClicked()
     {
-        #if UNITY_EDITOR
-        string folderPath = EditorUtility.OpenFolderPanel("Select Folder with Images", "", "");
+#if UNITY_EDITOR
+        string folderPath = EditorUtility.OpenFolderPanel("Select Image Folder", "", "");
         if (string.IsNullOrEmpty(folderPath))
         {
-            Debug.Log("Folder selection cancelled in Editor");
+            Debug.Log("Image folder selection canceled.");
             return;
         }
 
-        string[] paths = Directory.GetFiles(folderPath, "*.*")
-                                .Where(file => file.EndsWith(".png") || file.EndsWith(".jpg") || file.EndsWith(".jpeg"))
-                                .ToArray();
+        imageFilePaths = Directory.GetFiles(folderPath)
+            .Where(file => file.EndsWith(".png") || file.EndsWith(".jpg") || file.EndsWith(".jpeg"))
+            .ToArray();
 
-        if (paths.Length == 0)
+        if (imageFilePaths.Length == 0)
         {
-            Debug.Log("No image files found in folder.");
+            Debug.Log("No valid image files in folder.");
+            GUIManager.Instance.ShowAndroidToast("No image files found.");
             return;
         }
 
-        Debug.Log("Image files picked (Editor): " + string.Join(", ", paths));
+        Debug.Log("Images selected (Editor): " + string.Join(", ", imageFilePaths));
+        OnImagesPicked();
 
-        imageFilePaths = paths;
-        HandlePickedImage();
-        
-
-    #elif UNITY_ANDROID
-        NativeFilePicker.PickMultipleFiles((string[] paths) =>
+#elif UNITY_ANDROID
+        NativeFilePicker.PickMultipleFiles((paths) =>
         {
             if (paths == null || paths.Length == 0)
             {
-                Debug.Log("File selection cancelled on Android");
+                Debug.Log("Image selection canceled (Android).");
                 return;
             }
 
-            Debug.Log("Image files picked (Android): " + string.Join(", ", paths));
-
             imageFilePaths = paths;
-            HandlePickedImage();
+            Debug.Log("Images selected (Android): " + string.Join(", ", paths));
+            OnImagesPicked();
 
         }, new string[] { ".png", ".jpg", ".jpeg" });
-
-    #else
-        Debug.LogWarning("File picking not supported on this platform.");
-    #endif
+#else
+        Debug.LogWarning("Image picking is not supported on this platform.");
+#endif
     }
 
-    private void HandlePickedImage()
+    private void OnImagesPicked()
     {
         if (fileDetailsText != null)
         {
-            fileDetailsText.text = $"{imageFilePaths.Length} files selected";
+            fileDetailsText.text = $"{imageFilePaths.Length} file(s) selected";
         }
     }
 
-    public void OnSubmitButtonClicked()
+    private void OnSubmitClicked()
     {
         if (imageFilePaths != null && imageFilePaths.Length > 0)
         {
-            //GUIManager.Instance.ShowImageScreen(imageFilePaths);
+            ImageScreen.Instance.Show();
+            ImageScreen.Instance.Initialize(imageFilePaths);
+
             ClosePopup();
         }
         else
         {
-            GUIManager.Instance.ShowAndroidToast("Please select an image first.");
+            GUIManager.Instance.ShowAndroidToast("Please select images first.");
         }
     }
 
-    public void ResetUI()
-    {
-        if (fileDetailsText != null)
-        {
-            fileDetailsText.text = "No file selected";
-        }
-    }
-    
     private void ClosePopup()
     {
         ResetUI();
         GetComponent<PopupAnimator>()?.Hide();
+    }
+
+    public void ResetUI()
+    {
+        fileDetailsText.text = "No file selected";
+        imageFilePaths = null;
     }
 }

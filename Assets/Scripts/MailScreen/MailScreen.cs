@@ -29,7 +29,7 @@ public class MailScreen : UIPage<MailScreen>
         GameEvents.OnTypeSelected -= HandleMailTypeSelected;
     }
 
-    protected override void OnShow()
+    public void OnEnable()
     {
         ResetMailPages();
     }

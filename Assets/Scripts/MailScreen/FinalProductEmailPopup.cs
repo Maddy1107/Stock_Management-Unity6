@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FinalProductEmailPopup : Popup<FinalProductEmailPopup>
+public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
 {
     [Header("UI References")]
     [SerializeField] private TMP_Text emailHeadText;
