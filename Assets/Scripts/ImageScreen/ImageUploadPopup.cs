@@ -55,19 +55,20 @@ public class ImageUploadPopup : UIPopup<ImageUploadPopup>
         OnImagesPicked();
 
 #elif UNITY_ANDROID
-        NativeFilePicker.PickMultipleFiles((paths) =>
+        NativeGallery.GetImagesFromGallery((paths) =>
         {
             if (paths == null || paths.Length == 0)
             {
-                Debug.Log("Image selection canceled (Android).");
+                Debug.Log("Image selection canceled.");
                 return;
             }
 
             imageFilePaths = paths;
-            Debug.Log("Images selected (Android): " + string.Join(", ", paths));
+            Debug.Log("Images selected: " + string.Join(", ", paths));
             OnImagesPicked();
 
-        }, new string[] { ".png", ".jpg", ".jpeg" });
+        }, "Select images", "image/*");
+
 #else
         Debug.LogWarning("Image picking is not supported on this platform.");
 #endif

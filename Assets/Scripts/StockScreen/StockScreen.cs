@@ -7,16 +7,12 @@ public class StockScreen : UIPage<StockScreen>
 {
     public static Dictionary<string, string> ProductDictionary { get; private set; } = new Dictionary<string, string>();
 
-    [SerializeField] private FinalList finalList;
-    [SerializeField] private StockProductScreen productScreen;
-
     public static string tempStockUpdatepath { get; private set; }
     public static string templateFilePath { get; private set; }
 
     public void Show(string stockFilePath)
     {
         Show();
-        ResetStockPages();
         Initialize(stockFilePath);
     }
 
@@ -51,25 +47,12 @@ public class StockScreen : UIPage<StockScreen>
         }
 
         JsonUtilityEditor.WriteJson(tempStockUpdatepath, ProductDictionary);
-        finalList?.Show();
-        productScreen?.Hide();
+        FinalList.Instance?.Show();
     }
 
     public void Reset()
     {
         ProductDictionary.Clear();
         JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(tempStockUpdatepath));
-    }
-
-    private void ResetStockPages()
-    {
-        productScreen?.Show();
-        finalList?.Hide();
-    }
-
-    public void OpenScreen()
-    {
-        productScreen?.Show();
-        finalList?.Hide();
     }
 }

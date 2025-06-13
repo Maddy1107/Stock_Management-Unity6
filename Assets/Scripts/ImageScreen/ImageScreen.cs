@@ -42,11 +42,6 @@ public class ImageScreen : UIPage<ImageScreen>
         }
     }
 
-    void Update()
-    {
-        submitButton.interactable = currentImagePaths == null && currentImagePaths.Length <= 0;
-    }
-
     private void HandleSubmit()
     {
         string month = DateTime.Now.ToString("MMMM");

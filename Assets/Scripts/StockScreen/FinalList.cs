@@ -3,46 +3,32 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FinalList : MonoBehaviour
+public class FinalList : UIPopup<FinalList>
 {
     [Header("UI References")]
     [SerializeField] private GameObject finalListPrefab;
     [SerializeField] private Transform finalListContainer;
-    [SerializeField] private Button updateButton;
     [SerializeField] private Button exportButton;
 
     private Dictionary<string, string> finalList = new();
 
     private string JsonFilePath => Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
 
-    private void Awake()
+    public void OnEnable()
     {
-        updateButton.onClick.AddListener(HandleUpdateButtonClicked);
         exportButton.onClick.AddListener(HandleExportButtonClicked);
         GameEvents.OnEditToggleClicked += HandleEditClicked;
         GameEvents.OnUpdateSubmitted += RefreshList;
-    }
-
-    private void OnDestroy()
-    {
-        updateButton.onClick.RemoveListener(HandleUpdateButtonClicked);
-        exportButton.onClick.RemoveListener(HandleExportButtonClicked);
-        GameEvents.OnEditToggleClicked -= HandleEditClicked;
-        GameEvents.OnUpdateSubmitted -= RefreshList;
-    }
-
-    private void OnEnable()
-    {
         RefreshList();
     }
 
     private void OnDisable()
     {
+        exportButton.onClick.RemoveListener(HandleExportButtonClicked);
+        GameEvents.OnEditToggleClicked -= HandleEditClicked;
+        GameEvents.OnUpdateSubmitted -= RefreshList;
         ClearFinalList();
     }
-
-    public void Show() => gameObject.SetActive(true);
-    public void Hide() => gameObject.SetActive(false);
 
     private void RefreshList()
     {
@@ -78,11 +64,6 @@ public class FinalList : MonoBehaviour
         }
     }
 
-    private void HandleUpdateButtonClicked()
-    {
-        StockScreen.Instance.OpenScreen(); // Decouple if needed
-    }
-
     private void HandleExportButtonClicked()
     {
         if (finalList == null || finalList.Count == 0)
@@ -101,10 +82,12 @@ public class FinalList : MonoBehaviour
                 }
 
                 Debug.Log($"Final list exported successfully: {filePath}");
-                
+
                 GUIManager.Instance.OpenFolder(filePath);
 
                 GUIManager.Instance.ShowAndroidToast($"Final list exported successfully: {filePath}");
+
+                MainMenuPanel.Instance.Show();
             });
     }
 
