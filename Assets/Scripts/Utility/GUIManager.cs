@@ -125,8 +125,12 @@ public class GUIManager : MonoBehaviour
         return zipPath;
 
 #elif UNITY_ANDROID
+        string month = System.DateTime.Now.ToString("MMMM");
         string folderPath = Path.Combine("/storage/emulated/0/Download/ClosingStock", month);
-        Directory.CreateDirectory(folderPath);
+         if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
         string zipPath = Path.Combine(folderPath, zipFileName);
 
         allowOverwrite = true; // No popup — just overwrite
