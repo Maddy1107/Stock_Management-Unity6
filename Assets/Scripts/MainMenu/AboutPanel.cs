@@ -10,18 +10,16 @@ public class AboutPanel : UIPopup<AboutPanel>
 
     private const string NameKey = "SavedUserName";
 
-    private void Start()
+    private void OnEnable()
     {
         submitButton.onClick.AddListener(Submit);
-
-        string savedName = LoadSavedData();
-
-        if (!string.IsNullOrEmpty(savedName))
-        {
-            Hide();
-        }
     }
 
+    private void OnDisable()
+    {
+        submitButton.onClick.RemoveListener(Submit);
+    }
+    
     public void Submit()
     {
         string userName = nameInputField.text?.Trim();

@@ -3,6 +3,8 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -33,11 +35,51 @@ public class ImageUploadPopup : UIPopup<ImageUploadPopup>
     private void OnUploadClicked()
     {
 #if UNITY_EDITOR
-        string folderPath = EditorUtility.OpenFolderPanel("Select Image Folder", "", "");
+        StartCoroutine(HandleEditorImagePicker());
+
+#elif UNITY_ANDROID
+    LoadingManager.ShowWhile(async () =>
+    {
+        bool callbackReceived = false;
+
+        NativeGallery.GetImagesFromGallery((paths) =>
+        {
+            if (paths == null || paths.Length == 0)
+            {
+                Debug.Log("Image selection canceled.");
+                callbackReceived = true;
+                return;
+            }
+
+            imageFilePaths = paths;
+            Debug.Log("Images selected: " + string.Join(", ", paths));
+            OnImagesPicked();
+
+            callbackReceived = true;
+        }, "Select images", "image/*");
+
+        // Wait until callback is hit (you may add timeout here)
+        while (!callbackReceived)
+            await Task.Yield();
+    });
+
+#else
+    Debug.LogWarning("Image picking is not supported on this platform.");
+#endif
+    }
+
+    private IEnumerator HandleEditorImagePicker()
+    {
+        LoadingScreen.Instance?.Show();
+        yield return null; // Let frame render the loading screen
+
+        string folderPath = UnityEditor.EditorUtility.OpenFolderPanel("Select Image Folder", "", "");
+
         if (string.IsNullOrEmpty(folderPath))
         {
             Debug.Log("Image folder selection canceled.");
-            return;
+            LoadingScreen.Instance?.Hide();
+            yield break;
         }
 
         imageFilePaths = Directory.GetFiles(folderPath)
@@ -48,31 +90,15 @@ public class ImageUploadPopup : UIPopup<ImageUploadPopup>
         {
             Debug.Log("No valid image files in folder.");
             GUIManager.Instance.ShowAndroidToast("No image files found.");
-            return;
+            LoadingScreen.Instance?.Hide();
+            yield break;
         }
 
         Debug.Log("Images selected (Editor): " + string.Join(", ", imageFilePaths));
         OnImagesPicked();
-
-#elif UNITY_ANDROID
-        NativeGallery.GetImagesFromGallery((paths) =>
-        {
-            if (paths == null || paths.Length == 0)
-            {
-                Debug.Log("Image selection canceled.");
-                return;
-            }
-
-            imageFilePaths = paths;
-            Debug.Log("Images selected: " + string.Join(", ", paths));
-            OnImagesPicked();
-
-        }, "Select images", "image/*");
-
-#else
-        Debug.LogWarning("Image picking is not supported on this platform.");
-#endif
+        LoadingScreen.Instance?.Hide();
     }
+
 
     private void OnImagesPicked()
     {

@@ -1,5 +1,4 @@
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,6 +22,7 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
     public void CheckProfileData()
     {
         if (hasCheckedProfileData) return;
+
         hasCheckedProfileData = true;
 
         string name = AboutPanel.Instance?.LoadSavedData();
