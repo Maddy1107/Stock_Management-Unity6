@@ -16,7 +16,11 @@ public class ExcelReader : MonoBehaviour
 {
     public static ExcelReader Instance { get; private set; }
 
-    private string exportApiUrl = "http://127.0.0.1:5000/export";
+#if UNITY_EDITOR
+    private string exportApiUrl = "https://backendapi-flask.onrender.com/export";
+#else
+    private string exportApiUrl = "https://backendapi-flask.onrender.com/export";
+#endif
 
     private void Awake()
     {
@@ -29,37 +33,32 @@ public class ExcelReader : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void ExportFile(string filePath, Dictionary<string, string> jsondata, Action<string> onSuccess = null, Action<string> onError = null)
+    public void ExportFile(TextAsset file, string filename, Dictionary<string, string> jsondata, Action<string> onSuccess = null, Action<string> onError = null)
     {
-        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+        if (file == null)
         {
-            onError?.Invoke("Invalid file path: " + filePath);
+            Debug.LogError("[ExportFile] File is null. Cannot proceed with export.");
+            onError?.Invoke("File is null. Cannot proceed with export.");
             return;
         }
 
         // Convert jsondata dictionary to JSON string before passing to Export
         string jsonString = JsonConvert.SerializeObject(jsondata);
-        StartCoroutine(Export(filePath, GetFileNameWithNewMonth(filePath), jsonString, onSuccess, onError));
+        StartCoroutine(Export(file, GetFileNameWithNewMonth(filename), jsonString, onSuccess, onError));
     }
 
-    private IEnumerator Export(string filepath, string saveFileName, string jsondata, Action<string> onSuccess, Action<string> onError)
+    private IEnumerator Export(TextAsset file, string saveFileName, string jsondata, Action<string> onSuccess, Action<string> onError)
     {
-        Debug.Log($"[Export] Starting export for file: {filepath}, save as: {saveFileName}");
+        Debug.Log($"[Export] Starting export for file: {file}, save as: {saveFileName}");
 
-        if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath))
-        {
-            Debug.LogError($"[Export] File not found: {filepath}");
-            onError?.Invoke("File not found: " + filepath);
-            yield break;
-        }
-
-        byte[] fileData = File.ReadAllBytes(filepath);
-        Debug.Log($"[Export] Read {fileData.Length} bytes from {filepath}");
+        byte[] fileData = file.bytes;
+        Debug.Log($"[Export] Read {fileData.Length} bytes from {file}");
 
         string fileNameOnly = Path.GetFileName(saveFileName);
+        string filenameWithExtension = saveFileName + ".xlsx";
 
         WWWForm form = new WWWForm();
-        form.AddBinaryData("file", fileData, Path.GetFileName(filepath), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        form.AddBinaryData("file", fileData, saveFileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         form.AddField("filename", fileNameOnly);
         form.AddField("data", jsondata);
 
@@ -86,8 +85,15 @@ public class ExcelReader : MonoBehaviour
                     Directory.CreateDirectory(downloadsPath);
                     Debug.Log($"[Export] Created directory: {downloadsPath}");
                 }
+                if (File.Exists(destFile))
+                {
+                    File.Delete(destFile);
+                    Debug.Log("[Export] Existing file deleted before writing new one.");
+                }
                 try
                 {
+                    
+
                     File.WriteAllBytes(destFile, www.downloadHandler.data);
                     Debug.Log($"[Export] Export successful! File saved to: {destFile}");
                     onSuccess?.Invoke(destFile);
@@ -191,5 +197,5 @@ public class ExcelReader : MonoBehaviour
 
         return newFileName + extension;
     }
-    
+
 }

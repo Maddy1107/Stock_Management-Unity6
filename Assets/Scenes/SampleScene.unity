@@ -3767,7 +3767,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73829d8718c1abe46bde6815d354c778, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasGroup: {fileID: 0}
   loadingText: {fileID: 106351372}
 --- !u!114 &359413875
 MonoBehaviour:
@@ -5277,7 +5276,7 @@ MonoBehaviour:
   m_ContentType: 2
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 4
+  m_KeyboardType: 2
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
@@ -7283,7 +7282,7 @@ MonoBehaviour:
   m_ContentType: 2
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 4
+  m_KeyboardType: 2
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0

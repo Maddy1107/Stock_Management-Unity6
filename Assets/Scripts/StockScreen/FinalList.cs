@@ -19,7 +19,6 @@ public class FinalList : UIPopup<FinalList>
         exportButton.onClick.AddListener(HandleExportButtonClicked);
         GameEvents.OnEditToggleClicked += HandleEditClicked;
         GameEvents.OnUpdateSubmitted += RefreshList;
-        RefreshList();
     }
 
     private void OnDisable()
@@ -28,6 +27,12 @@ public class FinalList : UIPopup<FinalList>
         GameEvents.OnEditToggleClicked -= HandleEditClicked;
         GameEvents.OnUpdateSubmitted -= RefreshList;
         ClearFinalList();
+    }
+
+    public override void Show()
+    {
+        base.Show();
+        RefreshList();
     }
 
     private void RefreshList()
@@ -72,23 +77,32 @@ public class FinalList : UIPopup<FinalList>
             return;
         }
 
-        ExcelReader.Instance.ExportFile(StockScreen.templateFilePath, finalList,
-            (filePath) =>
+        var excelAsset = Resources.Load<TextAsset>(StockScreen.templateFilePath);
+
+        ExcelReader.Instance.ExportFile(
+            excelAsset,
+            StockScreen.templateFilePath,
+            finalList,
+            filePath =>
             {
                 if (string.IsNullOrEmpty(filePath))
                 {
                     GUIManager.Instance.ShowAndroidToast("Failed to export final list.");
-                    return;
                 }
-
-                Debug.Log($"Final list exported successfully: {filePath}");
-
-                GUIManager.Instance.OpenFolder(filePath);
-
-                GUIManager.Instance.ShowAndroidToast($"Final list exported successfully: {filePath}");
-
-                MainMenuPanel.Instance.Show();
-            });
+                else
+                {
+                    Debug.Log($"Final list exported successfully: {filePath}");
+                    GUIManager.Instance.OpenFolder(filePath);
+                    GUIManager.Instance.ShowAndroidToast($"Final list exported successfully: {filePath}");
+                    MainMenuPanel.Instance.Show();
+                }
+            },
+            error =>
+            {
+                Debug.LogError($"Error exporting final list: {error}");
+                GUIManager.Instance.ShowAndroidToast(error);
+            }
+        );
     }
 
     private void HandleEditClicked(FinalListItem item)

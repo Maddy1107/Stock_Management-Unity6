@@ -12,7 +12,7 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
 
     private bool hasCheckedProfileData = false;
 
-    private const string StockFilePath = "Assets/Resources/Priyanka_Closing_Stock_May_2025.xlsx";
+    private const string StockFilePath = "Priyanka_Closing_Stock_May_2025";
 
     public void Initialize()
     {
@@ -35,7 +35,7 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
         {
             AboutPanel.Instance?.Show();
         }
-        
+
     }
 
     private void OnEnable()

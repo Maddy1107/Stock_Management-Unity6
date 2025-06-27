@@ -5,7 +5,7 @@ public class LoadingScreen : MonoBehaviour
 {
     public static LoadingScreen Instance;
 
-    [SerializeField] private CanvasGroup canvasGroup;
+    private CanvasGroup canvasGroup;
     [SerializeField] private TextMeshProUGUI loadingText;
 
     private void Awake()
@@ -13,13 +13,12 @@ public class LoadingScreen : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
-
+        canvasGroup = GetComponent<CanvasGroup>();
         HideInstant();
     }
 

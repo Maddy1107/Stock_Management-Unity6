@@ -4,6 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Threading.Tasks;
+
 
 
 #if UNITY_EDITOR
@@ -38,42 +40,49 @@ public class ImageUploadPopup : UIPopup<ImageUploadPopup>
         StartCoroutine(HandleEditorImagePicker());
 
 #elif UNITY_ANDROID
-    LoadingManager.ShowWhile(async () =>
-    {
-        bool callbackReceived = false;
-
-        NativeGallery.GetImagesFromGallery((paths) =>
-        {
-            if (paths == null || paths.Length == 0)
-            {
-                Debug.Log("Image selection canceled.");
-                callbackReceived = true;
-                return;
-            }
-
-            imageFilePaths = paths;
-            Debug.Log("Images selected: " + string.Join(", ", paths));
-            OnImagesPicked();
-
-            callbackReceived = true;
-        }, "Select images", "image/*");
-
-        // Wait until callback is hit (you may add timeout here)
-        while (!callbackReceived)
-            await Task.Yield();
-    });
-
+        _ = HandleAndroidImagePickerAsync();
 #else
-    Debug.LogWarning("Image picking is not supported on this platform.");
+        Debug.LogWarning("Image picking is not supported on this platform.");
 #endif
     }
 
+#if UNITY_ANDROID
+    private async Task HandleAndroidImagePickerAsync()
+    {
+        await LoadingManager.ShowWhile(async () =>
+        {
+            bool callbackReceived = false;
+
+            NativeGallery.GetImagesFromGallery((paths) =>
+            {
+                if (paths == null || paths.Length == 0)
+                {
+                    Debug.Log("Image selection canceled.");
+                    callbackReceived = true;
+                    return;
+                }
+
+                imageFilePaths = paths;
+                Debug.Log("Images selected: " + string.Join(", ", paths));
+                OnImagesPicked();
+
+                callbackReceived = true;
+            }, "Select images", "image/*");
+
+            // Wait until callback is hit (you may add timeout here)
+            while (!callbackReceived)
+                await Task.Yield();
+        });
+    }
+#endif
+
+#if UNITY_EDITOR
     private IEnumerator HandleEditorImagePicker()
     {
         LoadingScreen.Instance?.Show();
         yield return null; // Let frame render the loading screen
 
-        string folderPath = UnityEditor.EditorUtility.OpenFolderPanel("Select Image Folder", "", "");
+        string folderPath = EditorUtility.OpenFolderPanel("Select Image Folder", "", "");
 
         if (string.IsNullOrEmpty(folderPath))
         {
@@ -98,7 +107,7 @@ public class ImageUploadPopup : UIPopup<ImageUploadPopup>
         OnImagesPicked();
         LoadingScreen.Instance?.Hide();
     }
-
+#endif
 
     private void OnImagesPicked()
     {
