@@ -149,12 +149,12 @@ public class AbsentEmail : MonoBehaviour
         {
             foreach (var date in selectedDates)
             {
-            string text = date?.text ?? "";
-            if (!string.IsNullOrEmpty(text) && text != "Select Date")
-            {
-                sb.Append(text).Append(", ");
-                count++;
-            }
+                string text = date?.text ?? "";
+                if (!string.IsNullOrEmpty(text) && text != "Select Date")
+                {
+                    sb.Append(text).Append(", ");
+                    count++;
+                }
             }
         }
 
@@ -170,7 +170,7 @@ public class AbsentEmail : MonoBehaviour
 
         sb.AppendLine("\nIt will be very nice if you can fix the issue.\n");
 
-        sb.AppendLine("Thank you \nPriyanka Roy");
+        sb.AppendLine($"Thank you \n{PlayerPrefs.GetString("SavedUserName", null)}");
 
         absentText.text = sb.ToString();
     }

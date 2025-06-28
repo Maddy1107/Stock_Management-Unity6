@@ -33,7 +33,7 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
 
         // Set up header/foot
         emailHeadText.text = $"Dear Team,\n\n{header}\n";
-        emailFootText.text = "Thank you\nPriyanka Roy";
+        emailFootText.text = $"Thank you\n{PlayerPrefs.GetString("SavedUserName", null)}";
 
         // Fill in product content
         GenerateProductList(productList);

@@ -5,27 +5,45 @@ using UnityEngine.UI;
 public class MainMenuPanel : UIPage<MainMenuPanel>
 {
     [Header("Buttons")]
-    [SerializeField] private Button mailButton, stockButton, imagesButton;
+    [SerializeField] private Button mailButton, stockButton, imagesButton, editNameButton;
 
     [Header("Profile UI")]
     [SerializeField] private TMP_Text profileName;
 
-    private bool hasCheckedProfileData = false;
-
     private const string StockFilePath = "Priyanka_Closing_Stock_May_2025";
 
-    public void Initialize()
+    protected override void Awake()
     {
-        CheckProfileData();
+        base.Awake();
+        InitializeProfileName();
+    }
+    private void InitializeProfileName()
+    {
+        if (profileName == null)
+        {
+            Debug.LogWarning("Profile name text is not assigned.");
+            return;
+        }
+
+        string savedName = AboutPanel.Instance?.LoadSavedData();
+
+        if (!string.IsNullOrWhiteSpace(savedName))
+        {
+            profileName.text = savedName;
+        }
+        else
+        {
+            profileName.text = "Guest";
+        }
     }
 
-    public void CheckProfileData()
+    public void SetProfileName(string name)
     {
-        if (hasCheckedProfileData) return;
-
-        hasCheckedProfileData = true;
-
-        string name = AboutPanel.Instance?.LoadSavedData();
+        if (profileName == null)
+        {
+            Debug.LogWarning("Profile name text is not assigned.");
+            return;
+        }
 
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -33,17 +51,16 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
         }
         else
         {
-            AboutPanel.Instance?.Show();
+            profileName.text = "Guest";
         }
-
     }
 
     private void OnEnable()
     {
-        Initialize();
         mailButton?.onClick.AddListener(() => SelectMailPopup.Instance?.Show());
         stockButton?.onClick.AddListener(() => StockScreen.Instance?.Show(StockFilePath));
         imagesButton?.onClick.AddListener(() => ImageUploadPopup.Instance?.Show());
+        editNameButton?.onClick.AddListener(() => AboutPanel.Instance?.Show());
     }
 
     private void OnDisable()
@@ -51,5 +68,6 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
         mailButton?.onClick.RemoveAllListeners();
         stockButton?.onClick.RemoveAllListeners();
         imagesButton?.onClick.RemoveAllListeners();
+        editNameButton?.onClick.RemoveAllListeners();
     }
 }

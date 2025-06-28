@@ -71,13 +71,30 @@ public class FinalList : UIPopup<FinalList>
 
     private void HandleExportButtonClicked()
     {
+        LoadingScreen.Instance?.Show();
+
         if (finalList == null || finalList.Count == 0)
         {
             GUIManager.Instance.ShowAndroidToast("No data to export.");
+            LoadingScreen.Instance?.Hide();
             return;
         }
 
         var excelAsset = Resources.Load<TextAsset>(StockScreen.templateFilePath);
+
+        void HideLoadingAndToast(string message, bool isError = false)
+        {
+            if (!string.IsNullOrEmpty(message))
+            {
+                if (isError)
+                    Debug.LogError(message);
+                else
+                    Debug.Log(message);
+
+                GUIManager.Instance.ShowAndroidToast(message);
+            }
+            LoadingScreen.Instance?.Hide();
+        }
 
         ExcelReader.Instance.ExportFile(
             excelAsset,
@@ -87,20 +104,18 @@ public class FinalList : UIPopup<FinalList>
             {
                 if (string.IsNullOrEmpty(filePath))
                 {
-                    GUIManager.Instance.ShowAndroidToast("Failed to export final list.");
+                    HideLoadingAndToast("Failed to export final list.", true);
                 }
                 else
                 {
-                    Debug.Log($"Final list exported successfully: {filePath}");
-                    GUIManager.Instance.OpenFolder(filePath);
-                    GUIManager.Instance.ShowAndroidToast($"Final list exported successfully: {filePath}");
+                    HideLoadingAndToast($"Final list exported successfully: {filePath}");
+                    Hide();
                     MainMenuPanel.Instance.Show();
                 }
             },
             error =>
             {
-                Debug.LogError($"Error exporting final list: {error}");
-                GUIManager.Instance.ShowAndroidToast(error);
+                HideLoadingAndToast(error, true);
             }
         );
     }

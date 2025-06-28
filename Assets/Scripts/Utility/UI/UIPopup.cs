@@ -2,34 +2,28 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(PopupAnimator))]
-public abstract class UIPopup<T> : UIPopupBase where T : UIPopup<T>
+public abstract class UIPopup<T> : UIPopupBase, IUIStackElement where T : UIPopup<T>
 {
-    [SerializeField] private Button closeButton;
-    private PopupAnimator animator;
-
     private static T _instance;
-
     public static T Instance
     {
         get
         {
             if (_instance == null)
             {
-                _instance = FindFirstObjectByType<T>();
+                _instance = FindFirstObjectByType<T>(FindObjectsInactive.Include);
                 if (_instance == null)
-                    Debug.LogError($"Instance of {typeof(T)} not found!");
+                    Debug.LogError($"[{typeof(T).Name}] not found in the scene.");
             }
+
             return _instance;
         }
     }
 
-    protected virtual void Awake()
-    {
-        _instance = this as T;
-        Initialize();
-    }
+    [SerializeField] private Button closeButton;
+    private PopupAnimator animator;
 
-    private void Initialize()
+    protected virtual void Awake()
     {
         animator = GetComponent<PopupAnimator>();
 
@@ -37,19 +31,46 @@ public abstract class UIPopup<T> : UIPopupBase where T : UIPopup<T>
             closeButton.onClick.AddListener(Hide);
         else
             Debug.LogWarning($"{name} has no Close button assigned.");
+
+        if (_instance == null)
+        {
+            _instance = this as T;
+        }
+        else if (_instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
+    public void Initialize()
+    {
+
     }
 
     public virtual void Show()
     {
+        if (animator == null)
+        {
+            animator = GetComponent<PopupAnimator>();
+        }
+
         gameObject.SetActive(true);
         animator?.Show();
+        UIStackManager.Instance?.Push(this);
         OnShow();
     }
 
     public override void Hide()
     {
         animator?.Hide();
+        UIStackManager.Instance?.Pop(this);
         OnHide();
+    }
+
+    public virtual void OnBack()
+    {
+        Hide(); // Default back action
     }
 
     protected virtual void OnShow() { }
