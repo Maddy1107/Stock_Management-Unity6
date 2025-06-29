@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -38,6 +39,12 @@ public class FinalList : UIPopup<FinalList>
     private void RefreshList()
     {
         finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(JsonFilePath);
+
+        if (finalList != null)
+        {
+            string jsonContent = File.ReadAllText(JsonFilePath);
+            Debug.Log($"FinalList JSON Content: {jsonContent}");
+        }
         GenerateFinalListUI();
     }
 
@@ -96,7 +103,7 @@ public class FinalList : UIPopup<FinalList>
             LoadingScreen.Instance?.Hide();
         }
 
-        ExcelReader.Instance.ExportFile(
+        ExcelAPI.Instance.ExportExcel(
             excelAsset,
             StockScreen.templateFilePath,
             finalList,
@@ -111,6 +118,12 @@ public class FinalList : UIPopup<FinalList>
                     HideLoadingAndToast($"Final list exported successfully: {filePath}");
                     Hide();
                     MainMenuPanel.Instance.Show();
+                    DBAPI.Instance.UploadProductData(
+                        DateTime.Now.ToString("MMMM"),
+                        finalList,
+                        () => Debug.Log("DB Upload Success"),
+                        error => Debug.LogError("DB Upload Error: " + error)
+                    );
                 }
             },
             error =>
