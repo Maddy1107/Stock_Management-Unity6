@@ -64,7 +64,7 @@ public class AbsentEmail : MonoBehaviour
             buttonText.text = "Select Date";
 
             Button btn = dateGO.GetComponent<Button>();
-            btn.onClick.AddListener(() => DatePicker.Instance.Show(btn));
+            btn.onClick.AddListener(() => Calender.Instance.Show(CalenderType.DatePicker, btn, null));
 
             selectedDates[i] = buttonText;
         }

@@ -29,11 +29,13 @@ public class DBAPI : MonoBehaviour
             response =>
             {
                 Debug.Log("DB Upload Success: " + response);
+                GUIManager.Instance.ShowAndroidToast("Data uploaded successfully.");
                 onSuccess?.Invoke();
             },
             error =>
             {
                 Debug.LogError("DB Upload Error: " + error);
+                GUIManager.Instance.ShowAndroidToast("Data upload error.");
                 onError?.Invoke(error);
             }));
     }
