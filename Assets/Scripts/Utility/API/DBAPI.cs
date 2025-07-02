@@ -20,7 +20,7 @@ public class DBAPI : MonoBehaviour
     }
     private const string BaseUrl = "https://backendapi-flask.onrender.com";
 
-    public void UploadProductData(string month, Dictionary<string, string> data, Action onSuccess, Action<string> onError)
+    public void UploadProductData(string month, Dictionary<string, string[]> data, Action onSuccess, Action<string> onError)
     {
         string url = $"{BaseUrl}/month-data?month={month}";
         string json = JsonConvert.SerializeObject(data);

@@ -119,12 +119,15 @@ public class ImageUploadPopup : UIPopup<ImageUploadPopup>
 
     private void OnSubmitClicked()
     {
+        LoadingScreen.Instance.Show();
+
         if (imageFilePaths != null && imageFilePaths.Length > 0)
         {
             ImageScreen.Instance.Show();
             ImageScreen.Instance.Initialize(imageFilePaths);
 
             ClosePopup();
+            LoadingScreen.Instance.Hide();
         }
         else
         {

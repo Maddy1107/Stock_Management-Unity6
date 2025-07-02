@@ -11,23 +11,26 @@ public class FinalList : UIPopup<FinalList>
     [SerializeField] private Transform finalListContainer;
     [SerializeField] private Button exportButton;
 
-    private Dictionary<string, string> finalList = new();
+
+    private Dictionary<string, string[]> finalList = new();
 
     private string JsonFilePath => Path.Combine(Application.temporaryCachePath, "StockUpdate.json");
 
     public void OnEnable()
     {
-        exportButton.onClick.AddListener(HandleExportButtonClicked);
         GameEvents.OnEditToggleClicked += HandleEditClicked;
         GameEvents.OnUpdateSubmitted += RefreshList;
+
+        exportButton.onClick.AddListener(HandleExportButtonClicked);
     }
 
     private void OnDisable()
     {
-        exportButton.onClick.RemoveListener(HandleExportButtonClicked);
         GameEvents.OnEditToggleClicked -= HandleEditClicked;
         GameEvents.OnUpdateSubmitted -= RefreshList;
         ClearFinalList();
+
+        exportButton.onClick.RemoveAllListeners();
     }
 
     public override void Show()
@@ -38,7 +41,7 @@ public class FinalList : UIPopup<FinalList>
 
     private void RefreshList()
     {
-        finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string>>(JsonFilePath);
+        finalList = JsonUtilityEditor.ReadJson<Dictionary<string, string[]>>(JsonFilePath);
 
         if (finalList != null)
         {
@@ -63,7 +66,7 @@ public class FinalList : UIPopup<FinalList>
             var listItemGO = Instantiate(finalListPrefab, finalListContainer);
             if (listItemGO.TryGetComponent(out FinalListItem item))
             {
-                item.SetData(pair.Key, pair.Value);
+                item.SetData(pair.Key, pair.Value[0], pair.Value[1]);
             }
         }
     }
@@ -87,17 +90,21 @@ public class FinalList : UIPopup<FinalList>
             return;
         }
 
-        var excelAsset = Resources.Load<TextAsset>(StockScreen.templateFilePath);
+        string excelPath = StockScreen.Instance.ExcelFilePath;
+        bool hasExcel = !string.IsNullOrEmpty(excelPath) && !excelPath.Equals("No file selected", StringComparison.OrdinalIgnoreCase);
 
-        void HideLoadingAndToast(string message, bool isError = false)
+        string filename = hasExcel ? Path.GetFileName(excelPath) : StockScreen.templateFilePath;
+        string sheetname = hasExcel ? "Priyanka" : null;
+        TextAsset excelAsset = hasExcel
+            ? new TextAsset(File.ReadAllText(excelPath))
+            : Resources.Load<TextAsset>(StockScreen.templateFilePath);
+
+        void Finish(string message, bool error = false)
         {
             if (!string.IsNullOrEmpty(message))
             {
-                if (isError)
-                    Debug.LogError(message);
-                else
-                    Debug.Log(message);
-
+                if (error) Debug.LogError(message);
+                else Debug.Log(message);
                 GUIManager.Instance.ShowAndroidToast(message);
             }
             LoadingScreen.Instance?.Hide();
@@ -105,36 +112,34 @@ public class FinalList : UIPopup<FinalList>
 
         ExcelAPI.Instance.ExportExcel(
             excelAsset,
-            StockScreen.templateFilePath,
+            filename,
             finalList,
+            sheetname,
             filePath =>
             {
                 if (string.IsNullOrEmpty(filePath))
                 {
-                    HideLoadingAndToast("Failed to export final list.", true);
+                    Finish("Failed to export final list.", true);
                 }
                 else
                 {
-                    HideLoadingAndToast($"Final list exported successfully: {filePath}");
+                    Finish($"Final list exported successfully: {filePath}");
                     Hide();
                     MainMenuPanel.Instance.Show();
                     DBAPI.Instance.UploadProductData(
                         DateTime.Now.ToString("MMMM"),
                         finalList,
                         () => Debug.Log("DB Upload Success"),
-                        error => Debug.LogError("DB Upload Error: " + error)
+                        err => Debug.LogError("DB Upload Error: " + err)
                     );
                 }
             },
-            error =>
-            {
-                HideLoadingAndToast(error, true);
-            }
+            err => Finish(err, true)
         );
     }
 
     private void HandleEditClicked(FinalListItem item)
     {
-        StockUpdatePopup.Instance.Show(item.ProductName, item.ProductValue);
+        StockUpdatePopup.Instance.Show(item.ProductName);
     }
 }

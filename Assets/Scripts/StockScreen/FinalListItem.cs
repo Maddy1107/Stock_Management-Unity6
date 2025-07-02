@@ -7,9 +7,12 @@ public class FinalListItem : MonoBehaviour
     [SerializeField] private Button productNameButton;
     [SerializeField] private TMP_Text productNameLabel;
     [SerializeField] private TMP_Text productValueText;
+    [SerializeField] private TMP_Text bottleValueText;
+
 
     public string ProductName { get; private set; }
     public string ProductValue { get; private set; }
+    public string BottleValue { get; private set; }
 
     private void Awake()
     {
@@ -27,10 +30,11 @@ public class FinalListItem : MonoBehaviour
         }
     }
 
-    public void SetData(string productName, string productValue)
+    public void SetData(string productName, string productValue, string bottleValue)
     {
         ProductName = productName;
         ProductValue = productValue;
+        BottleValue = bottleValue;
 
         if (productNameLabel != null)
         {
@@ -40,6 +44,11 @@ public class FinalListItem : MonoBehaviour
         if (productValueText != null)
         {
             productValueText.text = productValue;
+        }
+
+        if (bottleValueText != null)
+        {
+            bottleValueText.text = bottleValue;
         }
     }
 

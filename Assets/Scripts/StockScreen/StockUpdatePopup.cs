@@ -6,8 +6,7 @@ using UnityEngine.UI;
 public class StockUpdatePopup : UIPopup<StockUpdatePopup>
 {
     [Header("UI Elements")]
-    [SerializeField] private TMP_Text prevText;
-    [SerializeField] private TMP_Text prevTextHeader;
+    [SerializeField] private TMP_InputField bottleInputField;
     [SerializeField] private TMP_InputField newInputField;
     [SerializeField] private TMP_Text productNameText;
 
@@ -27,20 +26,17 @@ public class StockUpdatePopup : UIPopup<StockUpdatePopup>
         UnbindListeners();
     }
 
-    public void Initialize(string productName, string previousQuantity = "")
+    public void Initialize(string productName)
     {
         _productName = productName;
         productNameText.text = productName;
         newInputField.text = string.Empty;
-
-        bool hasPrevious = !string.IsNullOrWhiteSpace(previousQuantity);
-        prevText.transform.parent.gameObject.SetActive(hasPrevious);
-        prevText.text = hasPrevious ? previousQuantity : string.Empty;
+        bottleInputField.text = string.Empty;
     }
 
-    public void Show(string productName, string previousQuantity = "")
+    public void Show(string productName)
     {
-        Initialize(productName, previousQuantity);
+        Initialize(productName);
         Show();
     }
 
@@ -56,15 +52,16 @@ public class StockUpdatePopup : UIPopup<StockUpdatePopup>
 
     private void HandleSubmitClicked()
     {
-        string input = newInputField.text.Trim();
+        string valueInput = newInputField.text.Trim();
+        string bottleInput = bottleInputField.text.Trim();
 
-        if (string.IsNullOrEmpty(input))
+        if (string.IsNullOrEmpty(valueInput) || string.IsNullOrEmpty(bottleInput))
         {
             GUIManager.Instance.ShowAndroidToast("Please enter a valid value.");
             return;
         }
 
-        StockScreen.Instance.UpdateStock(_productName, input);
+        StockScreen.Instance.UpdateStock(_productName, valueInput, bottleInput);
         GUIManager.Instance.ShowAndroidToast("Updated successfully!");
         GameEvents.InvokeOnUpdateSubmitted();
 

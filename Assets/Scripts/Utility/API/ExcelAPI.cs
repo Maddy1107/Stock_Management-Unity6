@@ -19,9 +19,14 @@ public class ExcelAPI : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-    private const string ExportUrl = "https://backendapi-flask.onrender.com/export";
 
-    public void ExportExcel(TextAsset file, string filename, Dictionary<string, string> data, Action<string> onSuccess, Action<string> onError)
+    private const string ExportUrl = "https://backendapi-flask.onrender.com/export";
+    private const string ExportSheetUrl = "https://backendapi-flask.onrender.com/export-sheet";
+
+    /// <summary>
+    /// Exports an Excel file to the server with optional sheet name.
+    /// </summary>
+    public void ExportExcel(TextAsset file, string filename, Dictionary<string, string[]> data, string sheetName = null, Action<string> onSuccess = null, Action<string> onError = null)
     {
         if (file == null)
         {
@@ -30,29 +35,43 @@ public class ExcelAPI : MonoBehaviour
         }
 
         string jsonData = JsonConvert.SerializeObject(data);
-        StartCoroutine(SendExcel(file, filename, jsonData, onSuccess, onError));
+        StartCoroutine(SendExcel(file, filename, jsonData, sheetName, onSuccess, onError));
     }
 
-    private IEnumerator SendExcel(TextAsset file, string filename, string jsonData, Action<string> onSuccess, Action<string> onError)
+    private IEnumerator SendExcel(TextAsset file, string filename, string jsonData, string sheetName, Action<string> onSuccess, Action<string> onError)
     {
+        string uri;
+
         WWWForm form = new WWWForm();
         form.AddBinaryData("file", file.bytes, filename + ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         form.AddField("filename", filename);
         form.AddField("data", jsonData);
 
-        yield return APIClient.PostForm(ExportUrl, form,
-            onSuccessBytes =>
-            {
-                // Save file logic here (Android/Desktop based)
-                string savedPath = SaveExportedExcel(filename, onSuccessBytes, out string error);
-                if (!string.IsNullOrEmpty(savedPath))
-                    onSuccess?.Invoke(savedPath);
-                else
-                    onError?.Invoke(error);
-            },
-            onError);
+        if (!string.IsNullOrEmpty(sheetName))
+        {
+            uri = ExportSheetUrl;
+            form.AddField("sheet", sheetName);
+        }
+        else
+        {
+            uri = ExportUrl;
+        }
+
+        yield return APIClient.PostForm(uri, form,
+                onSuccessBytes =>
+                {
+                    string savedPath = SaveExportedExcel(filename, onSuccessBytes, out string error);
+                    if (!string.IsNullOrEmpty(savedPath))
+                        onSuccess?.Invoke(savedPath);
+                    else
+                        onError?.Invoke(error);
+                },
+                onError);
     }
 
+    /// <summary>
+    /// Saves the returned Excel file to the device.
+    /// </summary>
     private string SaveExportedExcel(string filename, byte[] data, out string error)
     {
         error = null;
