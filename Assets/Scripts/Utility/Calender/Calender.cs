@@ -26,7 +26,7 @@ public class Calender : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void Show(CalenderType CurrentCalenderType, Button targetButton, System.Action<string> onMonthYearSelected = null)
+    public void Show(CalenderType CurrentCalenderType, Button targetButton, System.Action<string, string> onMonthYearSelected = null)
     {
         if (CurrentCalenderType == CalenderType.None)
         {
@@ -49,7 +49,7 @@ public class Calender : MonoBehaviour
         DatePicker.Instance.Show(targetButton);
     }
 
-    public void ShowMonthYearPicker(Button targetButton, System.Action<string> onMonthYearSelected)
+    public void ShowMonthYearPicker(Button targetButton, System.Action<string, string> onMonthYearSelected)
     {
         MonthYearPicker.Instance.Show(targetButton, onMonthYearSelected);
     }

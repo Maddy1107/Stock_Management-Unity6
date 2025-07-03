@@ -18,12 +18,12 @@ public class MonthYearPicker : MonoBehaviour
     private readonly List<Button> _yearButtons = new();
 
     private int _selectedYear;
-    private Action<string> _onMonthYearSelected;
+    private Action<string, string> _onMonthYearSelected;
 
     private readonly string[] _months = new[]
     {
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
     };
 
     private readonly int[] _yearOptions = new[] { 2020, 2021, 2022, 2023, 2024, 2025 };
@@ -40,7 +40,7 @@ public class MonthYearPicker : MonoBehaviour
         Instance = this;
     }
 
-    public void Show(Button targetButton, Action<string> onMonthYearSelected)
+    public void Show(Button targetButton, Action<string, string> onMonthYearSelected)
     {
         _targetButton = targetButton;
         _onMonthYearSelected = onMonthYearSelected;
@@ -88,9 +88,9 @@ public class MonthYearPicker : MonoBehaviour
 
             btn.onClick.AddListener(() =>
             {
-                string monthYear = new DateTime(_selectedYear, capturedIndex + 1, 1).ToString("MMMM yyyy");
-                _targetButton.GetComponentInChildren<TMP_Text>().text = monthYear;
-                _onMonthYearSelected?.Invoke(monthYear); // ← callback here
+                string month = _months[capturedIndex];
+                _targetButton.GetComponentInChildren<TMP_Text>().text = $"{month} {_selectedYear}";
+                _onMonthYearSelected?.Invoke(month, _selectedYear.ToString()); // ← callback here
                 GetComponent<PopupAnimator>()?.Hide();
             });
 

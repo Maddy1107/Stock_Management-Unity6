@@ -93,11 +93,23 @@ public class FinalList : UIPopup<FinalList>
         string excelPath = StockScreen.Instance.ExcelFilePath;
         bool hasExcel = !string.IsNullOrEmpty(excelPath) && !excelPath.Equals("No file selected", StringComparison.OrdinalIgnoreCase);
 
-        string filename = hasExcel ? Path.GetFileName(excelPath) : StockScreen.templateFilePath;
-        string sheetname = hasExcel ? "Priyanka" : null;
-        TextAsset excelAsset = hasExcel
-            ? new TextAsset(File.ReadAllText(excelPath))
-            : Resources.Load<TextAsset>(StockScreen.templateFilePath);
+        string filename = hasExcel ? Path.GetFileName(excelPath) : GetFileName(StockScreen.templateFilePath);
+
+        string userName = PlayerPrefs.GetString("SavedUserName");
+        string sheetname = hasExcel ? userName.Split(' ')[0].ToUpper() : null;
+
+        byte[] excelBytes;
+
+        if (hasExcel)
+        {
+            excelBytes = File.ReadAllBytes(excelPath);
+        }
+        else
+        {
+            TextAsset textAsset = Resources.Load<TextAsset>(StockScreen.templateFilePath);
+            excelBytes = textAsset.bytes;
+        }
+
 
         void Finish(string message, bool error = false)
         {
@@ -111,7 +123,7 @@ public class FinalList : UIPopup<FinalList>
         }
 
         ExcelAPI.Instance.ExportExcel(
-            excelAsset,
+            excelBytes,
             filename,
             finalList,
             sheetname,
@@ -125,9 +137,8 @@ public class FinalList : UIPopup<FinalList>
                 {
                     Finish($"Final list exported successfully: {filePath}");
                     Hide();
-                    MainMenuPanel.Instance.Show();
+                    //MainMenuPanel.Instance.Show();
                     DBAPI.Instance.UploadProductData(
-                        DateTime.Now.ToString("MMMM"),
                         finalList,
                         () => Debug.Log("DB Upload Success"),
                         err => Debug.LogError("DB Upload Error: " + err)
@@ -141,5 +152,47 @@ public class FinalList : UIPopup<FinalList>
     private void HandleEditClicked(FinalListItem item)
     {
         StockUpdatePopup.Instance.Show(item.ProductName);
+    }
+
+    public string GetFileName(string filename)
+    {
+        if (string.IsNullOrEmpty(filename) || filename.Equals("No file selected", StringComparison.OrdinalIgnoreCase))
+        {
+            Debug.LogWarning("No Excel file selected.");
+            return null;
+        }
+
+        string fileName = Path.GetFileNameWithoutExtension(filename);
+        string extension = Path.GetExtension(filename);
+
+        // Try to find a month name in the filename
+        string[] months = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthNames;
+        string currentMonth = DateTime.Now.ToString("MMMM");
+
+        bool monthFound = false;
+        foreach (var month in months)
+        {
+            if (!string.IsNullOrEmpty(month) && fileName.IndexOf(month, StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                fileName = System.Text.RegularExpressions.Regex.Replace(
+                    fileName,
+                    month,
+                    currentMonth,
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                );
+                monthFound = true;
+                break;
+            }
+        }
+
+        if (!monthFound)
+        {
+            // If no month found, append current month
+            fileName += $"_{currentMonth}";
+        }
+
+        Debug.Log($"Updated file name: {fileName + extension}");
+
+        return fileName + extension;
     }
 }

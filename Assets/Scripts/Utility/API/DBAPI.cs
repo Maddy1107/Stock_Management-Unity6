@@ -20,9 +20,12 @@ public class DBAPI : MonoBehaviour
     }
     private const string BaseUrl = "https://backendapi-flask.onrender.com";
 
-    public void UploadProductData(string month, Dictionary<string, string[]> data, Action onSuccess, Action<string> onError)
+    public void UploadProductData(Dictionary<string, string[]> data, Action onSuccess, Action<string> onError)
     {
-        string url = $"{BaseUrl}/month-data?month={month}";
+        string month = DateTime.Now.ToString("MMMM");
+        string year = DateTime.Now.ToString("yyyy");
+
+        string url = $"{BaseUrl}/month-data?month={month}&year={year}";
         string json = JsonConvert.SerializeObject(data);
 
         StartCoroutine(APIClient.PostJSON(url, json,
@@ -40,9 +43,9 @@ public class DBAPI : MonoBehaviour
             }));
     }
 
-    public void FetchProductData(string month, Action<Dictionary<string, string>> onSuccess, Action<string> onError)
+    public void FetchProductData(string month, string year, Action<Dictionary<string, List<string>>> onSuccess, Action<string> onError)
     {
-        string url = $"{BaseUrl}/month-data/{month}";
+        string url = $"{BaseUrl}/month-data/{month}?year={year}";
 
         StartCoroutine(APIClient.GetJSON(url,
             response =>
@@ -50,11 +53,13 @@ public class DBAPI : MonoBehaviour
                 try
                 {
                     var parsed = JsonConvert.DeserializeObject<MonthResponse>(response);
-                    var result = new Dictionary<string, string>();
+                    var result = new Dictionary<string, List<string>>();
                     foreach (var p in parsed.products)
-                        result[p.product] = p.quantity;
-
+                    {
+                        result[p.product] = new List<string> { p.quantity, p.bottles };
+                    }
                     onSuccess?.Invoke(result);
+
                 }
                 catch (Exception ex)
                 {
@@ -73,12 +78,12 @@ public class DBAPI : MonoBehaviour
     {
         public string product;
         public string quantity;
+        public string bottles;
     }
 
     [Serializable]
     public class MonthResponse
     {
-        public string month;
         public List<ProductEntry> products;
     }
 }

@@ -20,13 +20,18 @@ public class ExcelAPI : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    // #if UNITY_EDITOR
+    //     private const string ExportUrl = "http://127.0.0.1:5000/export";
+    //     private const string ExportSheetUrl = "http://127.0.0.1:5000/export-sheet";
+    // #else
     private const string ExportUrl = "https://backendapi-flask.onrender.com/export";
     private const string ExportSheetUrl = "https://backendapi-flask.onrender.com/export-sheet";
+    //#endif
 
     /// <summary>
     /// Exports an Excel file to the server with optional sheet name.
     /// </summary>
-    public void ExportExcel(TextAsset file, string filename, Dictionary<string, string[]> data, string sheetName = null, Action<string> onSuccess = null, Action<string> onError = null)
+    public void ExportExcel(byte[] file, string filename, Dictionary<string, string[]> data, string sheetName = null, Action<string> onSuccess = null, Action<string> onError = null)
     {
         if (file == null)
         {
@@ -38,12 +43,12 @@ public class ExcelAPI : MonoBehaviour
         StartCoroutine(SendExcel(file, filename, jsonData, sheetName, onSuccess, onError));
     }
 
-    private IEnumerator SendExcel(TextAsset file, string filename, string jsonData, string sheetName, Action<string> onSuccess, Action<string> onError)
+    private IEnumerator SendExcel(byte[] file, string filename, string jsonData, string sheetName, Action<string> onSuccess, Action<string> onError)
     {
         string uri;
 
         WWWForm form = new WWWForm();
-        form.AddBinaryData("file", file.bytes, filename + ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        form.AddBinaryData("file", file, filename + ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         form.AddField("filename", filename);
         form.AddField("data", jsonData);
 
