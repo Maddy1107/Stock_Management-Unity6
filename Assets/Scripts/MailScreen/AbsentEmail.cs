@@ -62,6 +62,7 @@ public class AbsentEmail : MonoBehaviour
             GameObject dateGO = Instantiate(selectDatePrefab, dateContainer);
             TMP_Text buttonText = dateGO.GetComponentInChildren<TMP_Text>();
             buttonText.text = "Select Date";
+            buttonText.fontSize = 45;
 
             Button btn = dateGO.GetComponent<Button>();
             btn.onClick.AddListener(() => Calender.Instance.Show(CalenderType.DatePicker, btn, null));

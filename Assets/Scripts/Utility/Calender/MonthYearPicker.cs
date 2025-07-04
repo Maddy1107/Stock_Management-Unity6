@@ -20,10 +20,11 @@ public class MonthYearPicker : MonoBehaviour
     private int _selectedYear;
     private Action<string, string> _onMonthYearSelected;
 
+    // Use 3-letter month abbreviations in all caps
     private readonly string[] _months = new[]
     {
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+        "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+        "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
     };
 
     private readonly int[] _yearOptions = new[] { 2020, 2021, 2022, 2023, 2024, 2025 };
@@ -63,7 +64,7 @@ public class MonthYearPicker : MonoBehaviour
             label.text = capturedYear.ToString();
 
             if (capturedYear == _selectedYear)
-                label.color = Color.yellow;
+                label.color = Color.red;
 
             btn.onClick.AddListener(() =>
             {
@@ -85,6 +86,7 @@ public class MonthYearPicker : MonoBehaviour
             Button btn = Instantiate(monthButtonPrefab, monthGrid);
             TMP_Text label = btn.GetComponentInChildren<TMP_Text>();
             label.text = _months[i];
+            label.fontSize = 57;
 
             btn.onClick.AddListener(() =>
             {
