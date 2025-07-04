@@ -13,6 +13,8 @@ public class PreviousStock : UIPopup<PreviousStock>
     {
         openPickerButton.onClick.AddListener(OnButtonClick);
         noDataText.gameObject.SetActive(true);
+
+        ResetPopup();
     }
     private void OnDisable()
     {

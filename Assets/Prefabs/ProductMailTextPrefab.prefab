@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "1. \"ZAP COSMETICOS - M\xC1SCARA ALL TIME ORGANIC ZAP 1 LITRO\",\r\n"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
-  m_sharedMaterial: {fileID: 4017366413193309622, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
+  m_sharedMaterial: {fileID: -9063029622434912667, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

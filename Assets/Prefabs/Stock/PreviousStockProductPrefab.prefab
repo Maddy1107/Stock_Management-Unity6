@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 307, y: 0}
-  m_SizeDelta: {x: -658.6066, y: 0}
+  m_AnchoredPosition: {x: 321.71, y: 0}
+  m_SizeDelta: {x: -643.42, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8907390606622358378
 CanvasRenderer:
@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 2 bottles
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
-  m_sharedMaterial: {fileID: 4017366413193309622, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
+  m_sharedMaterial: {fileID: -9063029622434912667, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -92,13 +92,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.48
-  m_fontSizeBase: 28.48
+  m_fontSize: 33.5
+  m_fontSizeBase: 33.5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -278,8 +278,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "ZAP COSMETICOS - M\xC1SCARA ALL TIME ORGANIC ZAP 1 LITRO\r\n"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
-  m_sharedMaterial: {fileID: 4017366413193309622, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
+  m_sharedMaterial: {fileID: -9063029622434912667, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -309,7 +309,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -511,8 +511,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 500ml
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
-  m_sharedMaterial: {fileID: 4017366413193309622, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
+  m_sharedMaterial: {fileID: -9063029622434912667, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -536,13 +536,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.48
-  m_fontSizeBase: 28.48
+  m_fontSize: 33.5
+  m_fontSizeBase: 33.5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535

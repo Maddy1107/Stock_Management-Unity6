@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: SELECT DATE
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
-  m_sharedMaterial: {fileID: 4017366413193309622, guid: dd064cd85cc45914283ba73ccc9fe0f1, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
+  m_sharedMaterial: {fileID: -9063029622434912667, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -92,8 +92,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 33.12
-  m_fontSizeBase: 33.12
+  m_fontSize: 37.6
+  m_fontSizeBase: 37.6
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

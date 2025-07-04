@@ -170,7 +170,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00011062622}
+  m_AnchoredPosition: {x: 0, y: -0.00011444092}
   m_SizeDelta: {x: 0, y: 0.00011444}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4574516328247651903
@@ -201,7 +201,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: SELECT MONTH & YEAR
+  m_text: 'SELECT
+
+    MONTH & YEAR'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
   m_sharedMaterial: {fileID: -9063029622434912667, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
@@ -857,8 +859,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -114.00772}
-  m_SizeDelta: {x: 511.17, y: 107.869995}
+  m_AnchoredPosition: {x: 0, y: -98.96277}
+  m_SizeDelta: {x: 511.17, y: 137.9599}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7579711975527262596
 CanvasRenderer:
