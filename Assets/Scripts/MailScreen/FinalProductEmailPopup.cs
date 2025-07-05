@@ -11,24 +11,29 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
     [SerializeField] private TMP_Text emailHeadText;
     [SerializeField] private TMP_Text emailFootText;
     [SerializeField] private Button copyButton;
+    [SerializeField] private Button saveButton;
     [SerializeField] private GameObject productTextPrefab;
     [SerializeField] private Transform productTextContainer;
 
     private string subjectText;
     private string emailBodyText;
+    private List<string> productList;
 
     private void OnEnable()
     {
         copyButton.onClick.AddListener(CopyToClipboard);
+        saveButton.onClick.AddListener(SaveData);
     }
 
     private void OnDisable()
     {
         copyButton.onClick.RemoveAllListeners();
+        saveButton.onClick.RemoveAllListeners();
     }
 
     public void SetEmailContent(List<string> productList, string header, string subject = "")
     {
+        this.productList = productList;
         subjectText = subject;
 
         // Set up header/foot
@@ -91,5 +96,23 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
         {
             Destroy(parent.GetChild(i).gameObject);
         }
+    }
+
+    public void SaveData()
+    {
+        LoadingScreen.Instance.Show();
+
+        DBAPI.Instance.RequestProducts(productList, () =>
+        {
+            LoadingScreen.Instance.Hide();
+            Debug.Log("Products saved successfully.");
+            GUIManager.Instance.ShowAndroidToast("Products saved successfully.");
+        },
+        (error) =>
+        {
+            LoadingScreen.Instance.Hide();
+            Debug.LogError($"Error saving products: {error}");
+            GUIManager.Instance.ShowAndroidToast($"Error saving products: {error}");
+        });
     }
 }
