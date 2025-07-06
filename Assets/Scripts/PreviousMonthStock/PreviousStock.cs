@@ -11,41 +11,36 @@ public class PreviousStock : UIPopup<PreviousStock>
 
     private void OnEnable()
     {
-        openPickerButton.onClick.AddListener(OnButtonClick);
+        openPickerButton.onClick.AddListener(OnPickerButtonClicked);
         noDataText.gameObject.SetActive(true);
-
         ResetPopup();
     }
+
     private void OnDisable()
     {
-        openPickerButton.onClick.RemoveListener(OnButtonClick);
+        openPickerButton.onClick.RemoveListener(OnPickerButtonClicked);
     }
 
-    private void OnButtonClick()
+    private void OnPickerButtonClicked()
     {
         Calender.Instance.Show(CalenderType.MonthYearPicker, openPickerButton, OnMonthYearPicked);
     }
 
     private void OnMonthYearPicked(string month, string year)
     {
-        LoadingScreen.Instance.Show();
         openPickerButton.GetComponentInChildren<TMP_Text>().text = $"{month} {year}";
-
-        FetchAndDisplayProductData(month, year);
-
+        FetchProductData(month, year);
     }
 
-    private void FetchAndDisplayProductData(string month, string year)
+    private void FetchProductData(string month, string year)
     {
+        LoadingScreen.Instance.Show();
+
         DBAPI.Instance.FetchProductData(
             month, year,
-            data =>
+            onSuccess: data =>
             {
-                // Clear previous items
-                foreach (Transform child in itemContainer)
-                {
-                    Destroy(child.gameObject);
-                }
+                ClearItems();
 
                 if (data == null || data.Count == 0)
                 {
@@ -56,29 +51,36 @@ public class PreviousStock : UIPopup<PreviousStock>
                     noDataText.gameObject.SetActive(false);
                     foreach (var pair in data)
                     {
-                        var listItemGO = Instantiate(itemPrefab, itemContainer);
-                        if (listItemGO.TryGetComponent(out FinalListItem item))
+                        var itemGO = Instantiate(itemPrefab, itemContainer);
+                        if (itemGO.TryGetComponent(out FinalListItem item))
                         {
                             item.SetData(pair.Key, pair.Value[0], pair.Value[1]);
                         }
                     }
                 }
+
                 LoadingScreen.Instance.Hide();
             },
-            error =>
+            onError: error =>
             {
-                Debug.LogError($"Failed to fetch product data: {error}");
+                Debug.LogError($"❌ Failed to fetch product data: {error}");
+                GUIManager.Instance.ShowAndroidToast("Unable to load data. Please try again.");
                 LoadingScreen.Instance.Hide();
             }
         );
     }
 
-    public void ResetPopup()
+    private void ClearItems()
     {
-        openPickerButton.GetComponentInChildren<TMP_Text>().text = "Select Month & Year";
         foreach (Transform child in itemContainer)
         {
             Destroy(child.gameObject);
         }
+    }
+
+    public void ResetPopup()
+    {
+        openPickerButton.GetComponentInChildren<TMP_Text>().text = "Select Month & Year";
+        ClearItems();
     }
 }

@@ -31,88 +31,76 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
         saveButton.onClick.RemoveAllListeners();
     }
 
-    public void SetEmailContent(List<string> productList, string header, string subject = "")
+    public void SetEmailContent(List<string> products, string header, bool showSaveButton = true, string subject = "")
     {
-        this.productList = productList;
+        saveButton.gameObject.SetActive(showSaveButton);
+        productList = products;
         subjectText = subject;
 
-        // Set up header/foot
+        // Setup header and footer
         emailHeadText.text = $"Dear Team,\n\n{header}\n";
-        emailFootText.text = $"Thank you\n{PlayerPrefs.GetString("SavedUserName", null)}";
+        emailFootText.text = $"Thank you\n{PlayerPrefs.GetString("SavedUserName", "")}";
 
-        // Fill in product content
-        GenerateProductList(productList);
+        GenerateProductList();
+        emailBodyText = BuildEmailBody();
 
-        // Compose full email body
-        emailBodyText = ComposeFullEmail(productList);
-        Debug.Log($"Email body built:\n{emailBodyText}");
         Debug.Log($"Email subject: {subjectText}");
+        Debug.Log($"Email body:\n{emailBodyText}");
     }
 
-    private void CopyToClipboard()
-    {
-        var fullText = $"{subjectText}\n\n{emailBodyText}";
-        GUIManager.Instance?.CopyToClipboard(fullText);
-    }
-
-    private void GenerateProductList(List<string> products)
+    private void GenerateProductList()
     {
         ClearChildren(productTextContainer);
 
-        if (products == null || products.Count == 0)
+        for (int i = 0; i < productList.Count; i++)
         {
-            Debug.LogWarning("No products to display.");
-            return;
-        }
+            GameObject productItem = Instantiate(productTextPrefab, productTextContainer);
+            if (productItem.TryGetComponent(out TMP_Text text))
+                text.text = $"    {i + 1}. {productList[i]}";
 
-        for (int i = 0; i < products.Count; i++)
-        {
-            var item = Instantiate(productTextPrefab, productTextContainer);
-            if (item.TryGetComponent(out TMP_Text text))
-            {
-                text.text = $"    {i + 1}. {products[i]}";
-            }
-            item.SetActive(true);
+            productItem.SetActive(true);
         }
     }
 
-    private string ComposeFullEmail(List<string> products)
+    private string BuildEmailBody()
     {
         var sb = new StringBuilder();
-        sb.AppendLine(emailHeadText.text).AppendLine();
+        sb.AppendLine(emailHeadText.text);
 
-        for (int i = 0; i < products.Count; i++)
-        {
-            sb.AppendLine($"    {i + 1}. {products[i]}");
-        }
+        for (int i = 0; i < productList.Count; i++)
+            sb.AppendLine($"    {i + 1}. {productList[i]}");
 
         sb.AppendLine().AppendLine(emailFootText.text);
         return sb.ToString();
     }
 
-    private void ClearChildren(Transform parent)
+    private void CopyToClipboard()
     {
-        for (int i = parent.childCount - 1; i >= 0; i--)
-        {
-            Destroy(parent.GetChild(i).gameObject);
-        }
+        GUIManager.Instance?.CopyToClipboard($"{subjectText}\n\n{emailBodyText}");
     }
 
-    public void SaveData()
+    private void SaveData()
     {
         LoadingScreen.Instance.Show();
 
-        DBAPI.Instance.RequestProducts(productList, () =>
-        {
-            LoadingScreen.Instance.Hide();
-            Debug.Log("Products saved successfully.");
-            GUIManager.Instance.ShowAndroidToast("Products saved successfully.");
-        },
-        (error) =>
-        {
-            LoadingScreen.Instance.Hide();
-            Debug.LogError($"Error saving products: {error}");
-            GUIManager.Instance.ShowAndroidToast($"Error saving products: {error}");
-        });
+        DBAPI.Instance.RequestProducts(productList,
+            onSuccess: () =>
+            {
+                LoadingScreen.Instance.Hide();
+                GUIManager.Instance.ShowAndroidToast("Products saved successfully.");
+                Debug.Log("Products saved successfully.");
+            },
+            onError: error =>
+            {
+                LoadingScreen.Instance.Hide();
+                GUIManager.Instance.ShowAndroidToast($"Error saving products: {error}");
+                Debug.LogError($"Error saving products: {error}");
+            });
+    }
+
+    private void ClearChildren(Transform parent)
+    {
+        for (int i = parent.childCount - 1; i >= 0; i--)
+            Destroy(parent.GetChild(i).gameObject);
     }
 }

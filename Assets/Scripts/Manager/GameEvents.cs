@@ -7,6 +7,7 @@ public static class GameEvents
     public static event Action OnUpdateSubmitted;
     public static event Action<MailType> OnTypeSelected;
     public static event Action<FinalListItem> OnEditToggleClicked;
+    public static event Action<DBAPI.ProductRequest> OnMarkedRecieved;
 
     internal static void InvokeOnToggleClicked(ProductItem productItem)
     {
@@ -23,5 +24,9 @@ public static class GameEvents
     internal static void InvokeOnEditToggleClicked(FinalListItem finalListItem)
     {
         OnEditToggleClicked?.Invoke(finalListItem);
+    }
+    internal static void InvokeOnMarkRecieved(DBAPI.ProductRequest prod)
+    {
+        OnMarkedRecieved?.Invoke(prod);
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class MainMenuPanel : UIPage<MainMenuPanel>
 {
     [Header("Buttons")]
-    [SerializeField] private Button mailButton, stockButton, imagesButton, editNameButton, previousStockButton;
+    [SerializeField] private Button mailButton, stockButton, imagesButton, editNameButton, previousStockButton, scheduleButton;
 
     [Header("Profile UI")]
     [SerializeField] private TMP_Text profileName;
@@ -62,6 +62,7 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
         imagesButton?.onClick.AddListener(() => ImageUploadPopup.Instance?.Show());
         editNameButton?.onClick.AddListener(() => AboutPanel.Instance?.Show());
         previousStockButton?.onClick.AddListener(() => PreviousStock.Instance?.Show());
+        scheduleButton?.onClick.AddListener(() => ProductRequestScreen.Instance?.Show());
     }
 
     private void OnDisable()
@@ -71,5 +72,6 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
         imagesButton?.onClick.RemoveAllListeners();
         editNameButton?.onClick.RemoveAllListeners();
         previousStockButton?.onClick.RemoveAllListeners();
+        scheduleButton?.onClick.RemoveAllListeners();
     }
 }

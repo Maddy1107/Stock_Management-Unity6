@@ -57,7 +57,7 @@ public class ProductMail : ProductListbase
         }
 
         FinalProductEmailPopup.Instance.Show();
-        FinalProductEmailPopup.Instance.SetEmailContent(selectedProducts,headerText, $"Product {currentMailType}");
+        FinalProductEmailPopup.Instance.SetEmailContent(selectedProducts, headerText, subject: $"Product {currentMailType}");
     }
 
     private void RefreshMailList()
