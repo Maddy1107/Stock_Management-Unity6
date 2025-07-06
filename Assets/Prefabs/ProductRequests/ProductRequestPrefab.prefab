@@ -1847,7 +1847,7 @@ MonoBehaviour:
   prodPrefab: {fileID: 4498290101726119782, guid: 388d79a20b020a24bb8475e3c0f8a037, type: 3}
   prodContainer: {fileID: 8184838937980386030}
   sendEmailButton: {fileID: 6361214765339372158}
-  markallButton: {fileID: 1430846632828069578}
+  markAllButton: {fileID: 1430846632828069578}
 --- !u!1 &7418167625109596242
 GameObject:
   m_ObjectHideFlags: 0

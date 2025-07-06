@@ -800,9 +800,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 001f090667189c747a273c5c58ff2506, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prod_name: {fileID: 3894915360505712910}
+  prodNameText: {fileID: 3894915360505712910}
+  statusText: {fileID: 8448992295394382918}
   receivedToggle: {fileID: 8959610055200511062}
-  status: {fileID: 8448992295394382918}
 --- !u!1 &8404737982678327945
 GameObject:
   m_ObjectHideFlags: 0

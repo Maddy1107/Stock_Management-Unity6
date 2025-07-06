@@ -8,23 +8,23 @@ public class Collapsible : MonoBehaviour
     [SerializeField] private GameObject prodPrefab;
     [SerializeField] private GameObject prodContainer;
     [SerializeField] private Button sendEmailButton;
-    [SerializeField] private Button markallButton;
+    [SerializeField] private Button markAllButton;
 
-    private List<DBAPI.ProductRequest> productRequests = new();
-    private HashSet<string> receivedProductNames = new();
-    private HashSet<int> productIds = new();
+    private readonly List<DBAPI.ProductRequest> productRequests = new();
+    private readonly HashSet<string> receivedProductNames = new();
+    private readonly HashSet<int> productIds = new();
 
     private void OnEnable()
     {
         sendEmailButton.onClick.AddListener(ShowEmailPopup);
-        markallButton.onClick.AddListener(MarkAllAsReceived);
+        markAllButton.onClick.AddListener(MarkAllAsReceived);
         GameEvents.OnMarkedRecieved += OnProductMarkedReceived;
     }
 
     private void OnDisable()
     {
         sendEmailButton.onClick.RemoveAllListeners();
-        markallButton.onClick.RemoveAllListeners();
+        markAllButton.onClick.RemoveAllListeners();
         GameEvents.OnMarkedRecieved -= OnProductMarkedReceived;
     }
 
@@ -35,11 +35,13 @@ public class Collapsible : MonoBehaviour
 
     public void SetProducts(List<DBAPI.ProductRequest> products)
     {
-        productRequests = products;
+        productRequests.Clear();
+        productRequests.AddRange(products);
+
         productIds.Clear();
         receivedProductNames.Clear();
 
-        foreach (var p in products)
+        foreach (var p in productRequests)
         {
             productIds.Add(p.id);
             if (p.received && !string.IsNullOrEmpty(p.product_name))
@@ -47,6 +49,7 @@ public class Collapsible : MonoBehaviour
         }
 
         RefreshUI();
+        UpdateMarkAllButtonState();
     }
 
     private void RefreshUI()
@@ -57,7 +60,6 @@ public class Collapsible : MonoBehaviour
         foreach (var product in productRequests)
         {
             var itemGO = Instantiate(prodPrefab, prodContainer.transform);
-            itemGO.transform.SetSiblingIndex(prodContainer.transform.childCount - 1);
             itemGO.GetComponent<ProductRequestItem>()?.Setup(product);
         }
     }
@@ -65,8 +67,28 @@ public class Collapsible : MonoBehaviour
     private void OnProductMarkedReceived(DBAPI.ProductRequest req)
     {
         if (productIds.Contains(req.id) && !string.IsNullOrEmpty(req.product_name))
+        {
             receivedProductNames.Add(req.product_name);
+            UpdateMarkAllButtonState();
+        }
     }
+
+    private void UpdateMarkAllButtonState()
+    {
+        bool allMarked = true;
+
+        foreach (var product in productRequests)
+        {
+            if (!product.received)
+            {
+                allMarked = false;
+                break;
+            }
+        }
+
+        markAllButton.interactable = !allMarked;
+    }
+
 
     private void ShowEmailPopup()
     {
@@ -87,45 +109,56 @@ public class Collapsible : MonoBehaviour
 
     public void MarkAllAsReceived()
     {
-        foreach (Transform child in prodContainer.transform)
-        {
-            if (child.TryGetComponent(out ProductRequestItem item))
-            {
-                var prod = item.GetProduct();
-                if (!prod.received)
-                    item.TriggerReceive();
-            }
-        }
-
-        GUIManager.Instance.ShowAndroidToast("All items marked as received.");
+        BatchToggle(
+            matchCondition: item => !item.GetProduct().received,
+            action: item => item.MarkReceivedSilently,
+            "All items already marked received."
+        );
     }
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
     private void OnGUI()
     {
-        const int buttonWidth = 160;
-        const int buttonHeight = 40;
-        Rect rect = new Rect(Screen.width - buttonWidth - 20, Screen.height - buttonHeight - 20, buttonWidth, buttonHeight);
+        const int width = 160, height = 40;
+        Rect rect = new(Screen.width - width - 20, Screen.height - height - 20, width, height);
 
         if (GUI.Button(rect, "Unmark All"))
-        {
-            UnmarkAllAsReceived();
-        }
+            MarkAllAsNotReceived();
     }
 
-    private void UnmarkAllAsReceived()
+    public void MarkAllAsNotReceived()
     {
+        BatchToggle(
+            matchCondition: item => item.GetProduct().received,
+            action: item => item.UnmarkReceivedSilently,
+            "No items are marked as received."
+        );
+    }
+#endif
+
+    private void BatchToggle(System.Predicate<ProductRequestItem> matchCondition,
+                            System.Func<ProductRequestItem, System.Action<System.Action>> action,
+                            string noMatchToast)
+    {
+        int total = 0, completed = 0;
+
         foreach (Transform child in prodContainer.transform)
         {
-            if (child.TryGetComponent(out ProductRequestItem item))
+            if (child.TryGetComponent(out ProductRequestItem item) && matchCondition(item))
             {
-                var prod = item.GetProduct();
-                if (prod.received)
-                    item.TriggerUnreceive();
+                total++;
+                action(item)(() =>
+                {
+                    completed++;
+                    if (completed >= total)
+                        LoadingScreen.Instance.Hide();
+                });
             }
         }
 
-        GUIManager.Instance.ShowAndroidToast("All items unmarked.");
+        if (total > 0)
+            LoadingScreen.Instance.Show();
+        else
+            GUIManager.Instance.ShowAndroidToast(noMatchToast);
     }
-#endif
 }
