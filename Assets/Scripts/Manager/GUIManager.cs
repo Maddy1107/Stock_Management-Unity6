@@ -140,4 +140,59 @@ public class GUIManager : MonoBehaviour
         return null;
 #endif
     }
+
+
+    public void OpenEmail(string subject, string body)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        try
+        {
+            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+
+                string uriString = $"mailto:?subject={Uri.EscapeDataString(subject)}&body={Uri.EscapeDataString(body)}";
+                AndroidJavaObject uri = new AndroidJavaClass("android.net.Uri").CallStatic<AndroidJavaObject>("parse", uriString);
+
+                AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", "android.intent.action.SENDTO", uri);
+                intent.Call<AndroidJavaObject>("addFlags", 0x10000000); // FLAG_ACTIVITY_NEW_TASK
+
+                activity.Call("startActivity", intent);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Failed to open email app: " + e.Message);
+            GUIManager.Instance.ShowAndroidToast("No email app found or failed to open.");
+        }
+#else
+        Debug.Log("This only works on a real Android device.");
+#endif
+    }
+
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+    private void OnGUI()
+    {
+        const int buttonWidth = 400;
+        const int buttonHeight = 100;
+
+        // Bottom-right corner
+        Rect buttonRect = new Rect(
+            Screen.width - buttonWidth - 200,
+            Screen.height - buttonHeight - 200,
+            buttonWidth,
+            buttonHeight
+        );
+
+        if (GUI.Button(buttonRect, "Open Outlook"))
+        {
+            OpenEmail(
+    "Feedback for your app",
+    "Hey there!\n\nI just wanted to say..."
+);
+
+        }
+    }
+#endif
 }

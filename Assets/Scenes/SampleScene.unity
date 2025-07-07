@@ -795,17 +795,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2045074078}
     m_Modifications:
-    - target: {fileID: 574858659316240061, guid: 4ad916936599c2244b4e640a69cb326e, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2047290663520021674, guid: 4ad916936599c2244b4e640a69cb326e, type: 3}
       propertyPath: m_Name
       value: MailScreen
-      objectReference: {fileID: 0}
-    - target: {fileID: 2047290663520021674, guid: 4ad916936599c2244b4e640a69cb326e, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3786599987792502670, guid: 4ad916936599c2244b4e640a69cb326e, type: 3}
       propertyPath: m_Pivot.x
@@ -885,10 +877,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3786599987792502670, guid: 4ad916936599c2244b4e640a69cb326e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7551562691619590901, guid: 4ad916936599c2244b4e640a69cb326e, type: 3}
-      propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1186,6 +1174,14 @@ PrefabInstance:
     - target: {fileID: 1036741050673024146, guid: 8d08475467b58144b8ec96affd70a176, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1330592925267341512, guid: 8d08475467b58144b8ec96affd70a176, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -66.87842
+      objectReference: {fileID: 0}
+    - target: {fileID: 2533529168215192105, guid: 8d08475467b58144b8ec96affd70a176, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.00048828125
       objectReference: {fileID: 0}
     - target: {fileID: 2814572262595638073, guid: 8d08475467b58144b8ec96affd70a176, type: 3}
       propertyPath: m_Name

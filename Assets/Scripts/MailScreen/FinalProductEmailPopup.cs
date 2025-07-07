@@ -77,6 +77,7 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
     private void CopyToClipboard()
     {
         GUIManager.Instance?.CopyToClipboard($"{subjectText}\n\n{emailBodyText}");
+        GUIManager.Instance?.OpenEmail(subjectText, emailBodyText);
     }
 
     private void SaveData()

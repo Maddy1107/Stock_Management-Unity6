@@ -8,8 +8,6 @@ public class ProductMail : ProductListbase
     [Header("UI References")]
     [SerializeField] private GameObject mailContent;
     [SerializeField] private Button buildEmailButton;
-    [SerializeField] private Button copyButton;
-    [SerializeField] private TMP_Text mailText;
 
     private Transform mailParent;
     private MailType currentMailType;

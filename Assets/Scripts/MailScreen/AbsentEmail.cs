@@ -179,9 +179,13 @@ public class AbsentEmail : MonoBehaviour
     private void OnCopyClicked()
     {
         string finalText = absentText.text;
+        string profileName = PlayerPrefs.GetString("SavedUsername");
+        string subjectText = $"Absence Report for {profileName}";
+
         if (!string.IsNullOrWhiteSpace(finalText))
         {
             GUIManager.Instance.CopyToClipboard(finalText);
+            GUIManager.Instance.OpenEmail(subjectText, finalText);
         }
     }
 
