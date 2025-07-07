@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System;
 
 public abstract class ProductListbase : MonoBehaviour
 {
@@ -19,11 +20,21 @@ public abstract class ProductListbase : MonoBehaviour
         productList = JsonUtilityEditor.ReadJsonFromResources<List<string>>("product_list");
         SetupListeners();
         PopulateProductList(null);
+
+        GameEvents.OnUpdateSubmitted += RemoveProduct;
     }
 
     protected virtual void OnDisable()
     {
         RemoveListeners();
+        GameEvents.OnUpdateSubmitted -= RemoveProduct;
+
+    }
+
+    private void RemoveProduct(string product)
+    {
+        productList.Remove(product);
+        PopulateProductList(null);
     }
 
     protected void SetupListeners()

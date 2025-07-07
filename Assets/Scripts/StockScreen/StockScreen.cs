@@ -17,6 +17,8 @@ public class StockScreen : UIPage<StockScreen>
         private set { if (excelFilePath != null) excelFilePath.text = value; }
     }
 
+    private List<string> addedProducts;
+
     [SerializeField] private TMP_Text excelFilePath;
     [SerializeField] private Button uploadButton;
 
@@ -68,7 +70,6 @@ public class StockScreen : UIPage<StockScreen>
         }
 
         JsonUtilityEditor.WriteJson(tempStockUpdatepath, ProductDictionary);
-
     }
 
     public void SubmitStockData()

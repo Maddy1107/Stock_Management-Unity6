@@ -63,7 +63,7 @@ public class StockUpdatePopup : UIPopup<StockUpdatePopup>
 
         StockScreen.Instance.UpdateStock(_productName, valueInput, bottleInput);
         GUIManager.Instance.ShowAndroidToast("Updated successfully!");
-        GameEvents.InvokeOnUpdateSubmitted();
+        GameEvents.InvokeOnUpdateSubmitted(_productName);
 
         Hide();
     }

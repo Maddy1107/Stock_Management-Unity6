@@ -4,7 +4,7 @@ using UnityEngine;
 public static class GameEvents
 {
     public static event Action<ProductItem> OnToggleClicked;
-    public static event Action OnUpdateSubmitted;
+    public static event Action<string> OnUpdateSubmitted;
     public static event Action<MailType> OnTypeSelected;
     public static event Action<FinalListItem> OnEditToggleClicked;
     public static event Action<DBAPI.ProductRequest> OnMarkedRecieved;
@@ -13,9 +13,9 @@ public static class GameEvents
     {
         OnToggleClicked?.Invoke(productItem);
     }
-    internal static void InvokeOnUpdateSubmitted()
+    internal static void InvokeOnUpdateSubmitted(string product)
     {
-        OnUpdateSubmitted?.Invoke();
+        OnUpdateSubmitted?.Invoke(product);
     }
     internal static void InvokeOnTypeSelected(MailType type)
     {

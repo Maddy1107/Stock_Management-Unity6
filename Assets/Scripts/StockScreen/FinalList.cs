@@ -19,7 +19,6 @@ public class FinalList : UIPopup<FinalList>
     public void OnEnable()
     {
         GameEvents.OnEditToggleClicked += HandleEditClicked;
-        GameEvents.OnUpdateSubmitted += RefreshList;
 
         exportButton.onClick.AddListener(HandleExportButtonClicked);
     }
@@ -27,7 +26,6 @@ public class FinalList : UIPopup<FinalList>
     private void OnDisable()
     {
         GameEvents.OnEditToggleClicked -= HandleEditClicked;
-        GameEvents.OnUpdateSubmitted -= RefreshList;
         ClearFinalList();
 
         exportButton.onClick.RemoveAllListeners();
@@ -135,12 +133,15 @@ public class FinalList : UIPopup<FinalList>
                 }
                 else
                 {
-                    Finish($"Final list exported successfully: {filePath}");
-                    Hide();
-                    //MainMenuPanel.Instance.Show();
                     DBAPI.Instance.UploadProductData(
                         finalList,
-                        () => Debug.Log("DB Upload Success"),
+                        () =>
+                        {
+                            Debug.Log("DB Upload Success");
+                            Finish($"Final list exported successfully: {filePath}");
+                            Hide();
+                            MainMenuPanel.Instance.Show();
+                        },
                         err => Debug.LogError("DB Upload Error: " + err)
                     );
                 }

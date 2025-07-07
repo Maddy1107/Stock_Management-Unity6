@@ -20,13 +20,10 @@ public class ExcelAPI : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // #if UNITY_EDITOR
-    //     private const string ExportUrl = "http://127.0.0.1:5000/export";
-    //     private const string ExportSheetUrl = "http://127.0.0.1:5000/export-sheet";
-    // #else
-    private const string ExportUrl = "https://backendapi-flask.onrender.com/export";
-    private const string ExportSheetUrl = "https://backendapi-flask.onrender.com/export-sheet";
-    //#endif
+    private const string BaseUrl = "http://127.0.0.1:5000";//"https://backendapi-flask.onrender.com";
+
+    private string ExportUrl = $"{BaseUrl}/export";
+    private string ExportSheetUrl = $"{BaseUrl}/export-sheet";
 
     /// <summary>
     /// Exports an Excel file to the server with optional sheet name.
@@ -62,7 +59,13 @@ public class ExcelAPI : MonoBehaviour
             uri = ExportUrl;
         }
 
-        yield return APIClient.PostForm(uri, form,
+        string profileName = PlayerPrefs.GetString("SavedUserName");
+
+        string url = $"{uri}/{profileName}";
+
+        Debug.Log(url);
+
+        yield return APIClient.PostForm(url, form,
                 onSuccessBytes =>
                 {
                     string savedPath = SaveExportedExcel(filename, onSuccessBytes, out string error);
