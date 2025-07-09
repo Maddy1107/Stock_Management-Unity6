@@ -1,19 +1,14 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ImageItem : MonoBehaviour
 {
-
-    [SerializeField] private Button previewButton;
+    private Button previewButton;
     private Sprite imageSprite;
-    private float pressStartTime;
-    private bool longPressTriggered = false;
-    public float longPressThreshold = 0.6f;
-    
+
     public void OnEnable()
     {
-        previewButton = GetComponentInChildren<Button>();
+        previewButton = GetComponent<Button>();
 
         if (previewButton != null)
         {
@@ -35,30 +30,6 @@ public class ImageItem : MonoBehaviour
         if (previewButton != null)
         {
             previewButton.onClick.RemoveListener(HandlePreviewButtonClicked);
-        }
-    }
-
-    void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            pressStartTime = Time.time;
-            longPressTriggered = false;
-        }
-
-        if (Input.GetMouseButton(0) && !longPressTriggered)
-        {
-            if (Time.time - pressStartTime > longPressThreshold)
-            {
-                longPressTriggered = true;
-                HandlePreviewButtonClicked();
-            }
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            pressStartTime = 0;
-            longPressTriggered = false;
         }
     }
 

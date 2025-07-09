@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -44,21 +45,30 @@ public class ImageScreen : UIPage<ImageScreen>
 
     private void HandleSubmit()
     {
+        LoadingScreen.Instance.Show();
+
         string month = DateTime.Now.ToString("MMMM");
-        string zipFileName = $"Closing_Stock_Images_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-        GUIManager.Instance.ZipFile(currentImagePaths, zipFileName, (zipFilePath) =>
+        string zipFileName = $"Closing_Stock_Images_{timestamp}.zip";
+
+        byte[] zipBytes = GUIManager.Instance.GenerateZipBytes(currentImagePaths);
+
+        string path = GUIManager.Instance.SaveFile(zipFileName, month, zipBytes, "application/zip");
+
+        if (!string.IsNullOrEmpty(path))
         {
-            if (string.IsNullOrEmpty(zipFilePath))
-            {
-                Debug.LogError("Failed to create zip file.");
-                return;
-            }
+            Debug.Log("ZIP saved at: " + path);
+            GUIManager.Instance.ShowAndroidToast("ZIP saved successfully.");
+        }
+        else
+        {
+            GUIManager.Instance.ShowAndroidToast("Failed to save ZIP.");
+        }
 
-            Debug.Log($"Images zipped successfully: {zipFilePath}");
-            GUIManager.Instance.ShowAndroidToast($"Images zipped successfully.");
-        });
+        LoadingScreen.Instance.Hide();
     }
+
 
     private void ClearContainer(Transform container)
     {

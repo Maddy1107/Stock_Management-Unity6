@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+
 
 
 
@@ -91,9 +93,7 @@ public class ImageUploadPopup : UIPopup<ImageUploadPopup>
             yield break;
         }
 
-        imageFilePaths = Directory.GetFiles(folderPath)
-            .Where(file => file.EndsWith(".png") || file.EndsWith(".jpg") || file.EndsWith(".jpeg"))
-            .ToArray();
+        imageFilePaths = SafeGetImageFiles(folderPath);
 
         if (imageFilePaths.Length == 0)
         {
@@ -107,7 +107,29 @@ public class ImageUploadPopup : UIPopup<ImageUploadPopup>
         OnImagesPicked();
         LoadingScreen.Instance?.Hide();
     }
+
+    private string[] SafeGetImageFiles(string folderPath)
+    {
+        try
+        {
+            return Directory.EnumerateFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
+                .Where(path =>
+                {
+                    if (string.IsNullOrEmpty(path)) return false;
+                    string ext = Path.GetExtension(path).ToLowerInvariant();
+                    return ext == ".jpg" || ext == ".jpeg" || ext == ".png";
+                })
+                .Where(File.Exists) // Extra safety: skip broken symbolic links or access-denied
+                .ToArray();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("Error reading image files: " + ex.Message);
+            return new string[0];
+        }
+    }
 #endif
+
 
     private void OnImagesPicked()
     {

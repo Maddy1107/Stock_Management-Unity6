@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,10 +9,10 @@ public class StockProductScreen : ProductListbase
     protected override void OnEnable()
     {
         base.OnEnable();
-        
+
         if (submitButton != null)
             submitButton.onClick.AddListener(OnSubmitButtonClicked);
-            
+
         ResetProductScreen();
     }
 
@@ -21,7 +22,7 @@ public class StockProductScreen : ProductListbase
             submitButton.onClick.RemoveAllListeners();
     }
 
-    
+
     public void Show() => gameObject.SetActive(true);
     public void Hide() => gameObject.SetActive(false);
 
@@ -30,14 +31,11 @@ public class StockProductScreen : ProductListbase
         StockScreen.Instance.SubmitStockData();
     }
 
-    protected override void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false)
+    protected override void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false, Action<ProductItem> onClick = null)
     {
-        var itemGO = Instantiate(productPrefab, parent);
-        var item = itemGO.GetComponent<ProductItem>();
-        string displayName = displayIndex > 0 ? $"{displayIndex}. {name}" : name;
-        item.Initialize(displayName, name, isInMail);
-        GameEvents.OnToggleClicked += HandleToggleClicked;
+        base.CreateProductItem(name, parent, displayIndex, isInMail, HandleToggleClicked);
     }
+
 
     private void HandleToggleClicked(ProductItem item)
     {

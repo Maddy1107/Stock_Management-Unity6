@@ -20,7 +20,7 @@ public abstract class UIPopup<T> : UIPopupBase, IUIStackElement where T : UIPopu
         }
     }
 
-    [SerializeField] private Button closeButton;
+    public Button closeButton;
     private PopupAnimator animator;
 
     protected virtual void Awake()

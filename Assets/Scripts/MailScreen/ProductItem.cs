@@ -8,7 +8,7 @@ public class ProductItem : MonoBehaviour
 {
     [Header("UI Components")]
     [SerializeField] private TMP_Text nameText;
-    [SerializeField] private Button toggleButton;
+    public Button toggleButton;
     [SerializeField] private Sprite addSprite;
     [SerializeField] private Sprite removeSprite;
 
@@ -36,7 +36,7 @@ public class ProductItem : MonoBehaviour
         if (toggleButton == null)
             toggleButton = GetComponent<Button>();
 
-        SetupToggleButton();
+        //SetupToggleButton();
 
         IsInMail = isInMail; // auto-updates visuals
     }

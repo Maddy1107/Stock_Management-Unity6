@@ -112,7 +112,13 @@ public class Collapsible : MonoBehaviour
         BatchToggle(
             matchCondition: item => !item.GetProduct().received,
             action: item => item.MarkReceivedSilently,
-            "All items already marked received."
+            "All items already marked received.",
+            finalCallback: () =>
+            {
+                Debug.Log("✅ All items marked as received.");
+                UpdateMarkAllButtonState();
+                GUIManager.Instance.ShowAndroidToast("All items marked received!");
+            }
         );
     }
 
@@ -131,14 +137,22 @@ public class Collapsible : MonoBehaviour
         BatchToggle(
             matchCondition: item => item.GetProduct().received,
             action: item => item.UnmarkReceivedSilently,
-            "No items are marked as received."
+            "No items are marked as received.",
+            finalCallback: () =>
+        {
+            Debug.Log("✅ All items marked as not received.");
+            UpdateMarkAllButtonState();
+            GUIManager.Instance.ShowAndroidToast("All items marked not received!");
+        }
         );
     }
 #endif
 
-    private void BatchToggle(System.Predicate<ProductRequestItem> matchCondition,
-                            System.Func<ProductRequestItem, System.Action<System.Action>> action,
-                            string noMatchToast)
+    private void BatchToggle(
+    System.Predicate<ProductRequestItem> matchCondition,
+    System.Func<ProductRequestItem, System.Action<System.Action>> action,
+    string noMatchToast,
+    System.Action finalCallback = null)
     {
         int total = 0, completed = 0;
 
@@ -151,14 +165,23 @@ public class Collapsible : MonoBehaviour
                 {
                     completed++;
                     if (completed >= total)
+                    {
                         LoadingScreen.Instance.Hide();
+                        finalCallback?.Invoke();
+                    }
                 });
             }
         }
 
         if (total > 0)
+        {
             LoadingScreen.Instance.Show();
+        }
         else
+        {
             GUIManager.Instance.ShowAndroidToast(noMatchToast);
+            finalCallback?.Invoke(); // Optional: also run callback if nothing to do
+        }
     }
+
 }

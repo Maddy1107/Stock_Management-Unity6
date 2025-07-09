@@ -26,6 +26,12 @@ public class AboutPanel : UIPopup<AboutPanel>
         submitButton.onClick.RemoveListener(Submit);
     }
 
+    public override void Show()
+    {
+        base.Show();
+        closeButton.gameObject.SetActive(!string.IsNullOrEmpty(LoadSavedData()));
+    }
+
     public void Submit()
     {
         string userName = nameInputField.text?.Trim();

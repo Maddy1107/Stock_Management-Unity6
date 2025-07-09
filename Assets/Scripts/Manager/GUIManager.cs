@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
+#if UNITY_ANDROID && !UNITY_EDITOR
+using UnityEngine.Android;
+using UnityEngine.Networking;
+#endif
 
 public class GUIManager : MonoBehaviour
 {
@@ -52,95 +53,101 @@ public class GUIManager : MonoBehaviour
 #endif
     }
 
-    public void ZipFile(string[] filepaths, string filename, Action<string> onSuccess = null, Action<Exception> onError = null)
+    public string SaveFile(string filename, string month, byte[] data, string mimeType = "application/octet-stream")
     {
-        string zipPath = GetZipFilePath(out bool allowOverwrite, filename);
-
-        if (string.IsNullOrEmpty(zipPath))
-        {
-            ShowAndroidToast("Cancelled or invalid folder.");
-            onError?.Invoke(new Exception("Cancelled or invalid folder."));
-            return;
-        }
-
-        if (File.Exists(zipPath) && !allowOverwrite)
-        {
-            ShowAndroidToast("Zipping cancelled.");
-            onError?.Invoke(new Exception("Zipping cancelled."));
-            return;
-        }
-
+#if UNITY_ANDROID && !UNITY_EDITOR
         try
         {
-            if (File.Exists(zipPath))
-                File.Delete(zipPath);
-
-            using FileStream zipStream = new(zipPath, FileMode.Create);
-            using ZipArchive archive = new(zipStream, ZipArchiveMode.Create);
-
-            foreach (string path in filepaths)
+            using (AndroidJavaClass environment = new AndroidJavaClass("android.os.Environment"))
+            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
             {
-                if (!File.Exists(path)) continue;
-                archive.CreateEntryFromFile(path, Path.GetFileName(path));
+                AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                AndroidJavaObject contentResolver = activity.Call<AndroidJavaObject>("getContentResolver");
+                AndroidJavaObject values = new AndroidJavaObject("android.content.ContentValues");
+
+                values.Call<AndroidJavaObject>("put", "relative_path", $"Download/ClosingStock/{month}/");
+                values.Call<AndroidJavaObject>("put", "title", filename);
+                values.Call<AndroidJavaObject>("put", "display_name", filename);
+                values.Call<AndroidJavaObject>("put", "mime_type", mimeType);
+                values.Call<AndroidJavaObject>("put", "is_pending", 1);
+
+                AndroidJavaObject mediaStore = new AndroidJavaClass("android.provider.MediaStore$Downloads");
+                AndroidJavaObject uri = contentResolver.Call<AndroidJavaObject>("insert", mediaStore.GetStatic<AndroidJavaObject>("EXTERNAL_CONTENT_URI"), values);
+
+                if (uri == null)
+                {
+                    Debug.LogError("Failed to get MediaStore URI.");
+                    return null;
+                }
+
+                // Write to output stream
+                AndroidJavaObject outputStream = contentResolver.Call<AndroidJavaObject>("openOutputStream", uri);
+                IntPtr streamPtr = outputStream.GetRawObject();
+
+                using (AndroidJavaObject bufferStream = new AndroidJavaObject("java.io.BufferedOutputStream", outputStream))
+                {
+                    bufferStream.Call("write", data);
+                    bufferStream.Call("flush");
+                    bufferStream.Call("close");
+                }
+
+                values.Call<AndroidJavaObject>("put", "is_pending", 0);
+                contentResolver.Call<int>("update", uri, values, null, null);
+
+                return uri.ToString(); // Can be returned for reference
             }
-
-            ShowAndroidToast("Images zipped successfully.");
-            Debug.Log($"Images zipped at: {zipPath}");
-
-#if UNITY_EDITOR
-            EditorUtility.RevealInFinder(zipPath);
-#endif
-            onSuccess?.Invoke(zipPath);
         }
         catch (Exception ex)
         {
-            Debug.LogError("Failed to zip images: " + ex.Message);
-            ShowAndroidToast("Failed to zip images.");
-            onError?.Invoke(ex);
-        }
-    }
-
-    private string GetZipFilePath(out bool allowOverwrite, string zipFileName)
-    {
-
-#if UNITY_EDITOR
-        allowOverwrite = true;
-
-        string selectedFolder = EditorUtility.SaveFolderPanel("Select Folder to Save ZIP", "", "");
-        if (string.IsNullOrEmpty(selectedFolder))
-        {
+            Debug.LogError("Error saving file on Android: " + ex.Message);
             return null;
         }
-
-        string zipPath = Path.Combine(selectedFolder, zipFileName);
-        if (File.Exists(zipPath))
-        {
-            bool confirmed = EditorUtility.DisplayDialog("File Exists",
-                $"A file named \"{zipFileName}\" already exists.\nDo you want to overwrite it?",
-                "Yes", "No");
-
-            allowOverwrite = confirmed;
-        }
-
-        return zipPath;
-
-#elif UNITY_ANDROID
-        string month = System.DateTime.Now.ToString("MMMM");
-        string folderPath = Path.Combine("/storage/emulated/0/Download/ClosingStock", month);
-        if (!Directory.Exists(folderPath))
-        {
-            Directory.CreateDirectory(folderPath);
-        }
-        string zipPath = Path.Combine(folderPath, zipFileName);
-
-        allowOverwrite = true; // No popup — just overwrite
-        return zipPath;
 #else
-        allowOverwrite = false;
-        return null;
+        // For Editor/PC
+        try
+        {
+            string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"ClosingStock/{month}");
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            string path = Path.Combine(folder, filename);
+            File.WriteAllBytes(path, data);
+            Debug.Log("Saved file to: " + path);
+            return path;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Error saving file in Editor: " + ex.Message);
+            return null;
+        }
 #endif
     }
 
+    public byte[] GenerateZipBytes(string[] filePaths)
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            {
+                foreach (string filePath in filePaths)
+                {
+                    if (!File.Exists(filePath))
+                        continue;
+
+                    string fileName = Path.GetFileName(filePath);
+                    var entry = archive.CreateEntry(fileName);
+
+                    using (var entryStream = entry.Open())
+                    using (var fileStream = File.OpenRead(filePath))
+                    {
+                        fileStream.CopyTo(entryStream);
+                    }
+                }
+            }
+
+            return memoryStream.ToArray();
+        }
+    }
 
     public void OpenEmail(string subject, string body)
     {

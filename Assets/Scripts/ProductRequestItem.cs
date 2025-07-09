@@ -89,6 +89,7 @@ public class ProductRequestItem : MonoBehaviour
             receivedToggle.interactable = true;
             statusText.text = "Not received";
 
+            GameEvents.InvokeOnMarkRecieved(currentProduct);
             LoadingScreen.Instance.Hide();
         },
         error =>
@@ -119,6 +120,7 @@ public class ProductRequestItem : MonoBehaviour
             receivedToggle.interactable = true;
             statusText.text = "Not received";
 
+            GameEvents.InvokeOnMarkRecieved(currentProduct);
             onComplete?.Invoke();
         },
         error =>

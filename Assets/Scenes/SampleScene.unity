@@ -1175,14 +1175,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1330592925267341512, guid: 8d08475467b58144b8ec96affd70a176, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -66.87842
-      objectReference: {fileID: 0}
-    - target: {fileID: 2533529168215192105, guid: 8d08475467b58144b8ec96affd70a176, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.00048828125
-      objectReference: {fileID: 0}
     - target: {fileID: 2814572262595638073, guid: 8d08475467b58144b8ec96affd70a176, type: 3}
       propertyPath: m_Name
       value: ProductStatusScreen

@@ -56,13 +56,21 @@ public class ProductDateGroupItem : MonoBehaviour
 
     private void OnProductMarkedReceived(DBAPI.ProductRequest req)
     {
-        // Only update if it belongs to this group
-        if (groupProductIds.Contains(req.id))
+        if (!groupProductIds.Contains(req.id))
+            return;
+
+        if (req.received)
         {
             receivedCount++;
-            UpdateReceivedLabel();
         }
+        else
+        {
+            receivedCount = Mathf.Max(0, receivedCount - 1);
+        }
+
+        UpdateReceivedLabel();
     }
+
 
     private void UpdateReceivedLabel()
     {

@@ -12,8 +12,6 @@ public class PreviousStock : UIPopup<PreviousStock>
     private void OnEnable()
     {
         openPickerButton.onClick.AddListener(OnPickerButtonClicked);
-        noDataText.gameObject.SetActive(true);
-        ResetPopup();
     }
 
     private void OnDisable()
@@ -21,6 +19,11 @@ public class PreviousStock : UIPopup<PreviousStock>
         openPickerButton.onClick.RemoveListener(OnPickerButtonClicked);
     }
 
+    public override void Show()
+    {
+        base.Show();
+        ResetPopup();
+    }
     private void OnPickerButtonClicked()
     {
         Calender.Instance.Show(CalenderType.MonthYearPicker, openPickerButton, OnMonthYearPicked);
@@ -82,5 +85,6 @@ public class PreviousStock : UIPopup<PreviousStock>
     {
         openPickerButton.GetComponentInChildren<TMP_Text>().text = "Select Month & Year";
         ClearItems();
+        noDataText.gameObject.SetActive(true);
     }
 }

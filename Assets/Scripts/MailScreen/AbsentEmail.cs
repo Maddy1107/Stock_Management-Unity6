@@ -179,8 +179,7 @@ public class AbsentEmail : MonoBehaviour
     private void OnCopyClicked()
     {
         string finalText = absentText.text;
-        string profileName = PlayerPrefs.GetString("SavedUsername");
-        string subjectText = $"Absence Report for {profileName}";
+        string subjectText = $"Missed Days/Checkout Notification";
 
         if (!string.IsNullOrWhiteSpace(finalText))
         {

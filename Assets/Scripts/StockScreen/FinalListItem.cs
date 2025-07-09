@@ -54,6 +54,6 @@ public class FinalListItem : MonoBehaviour
 
     private void OnProductNameClicked()
     {
-        GameEvents.InvokeOnEditToggleClicked(this);
+        StockUpdatePopup.Instance.Show(this.ProductName);
     }
 }

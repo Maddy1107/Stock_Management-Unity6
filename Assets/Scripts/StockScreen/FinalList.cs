@@ -150,9 +150,9 @@ public class FinalList : UIPopup<FinalList>
         );
     }
 
-    private void HandleEditClicked(FinalListItem item)
+    private void HandleEditClicked()
     {
-        StockUpdatePopup.Instance.Show(item.ProductName);
+        RefreshList();
     }
 
     public string GetFileName(string filename)

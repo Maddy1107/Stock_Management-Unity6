@@ -2,6 +2,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Text;
+using Unity.VisualScripting;
+using System;
 
 public class ProductMail : ProductListbase
 {
@@ -21,7 +23,6 @@ public class ProductMail : ProductListbase
             mailParent = mailContent.transform;
 
         buildEmailButton.onClick.AddListener(BuildEmailBody);
-        GameEvents.OnToggleClicked += HandleToggleClicked;
     }
 
     protected override void OnDisable()
@@ -70,10 +71,11 @@ public class ProductMail : ProductListbase
     }
 
 
-    protected override void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false)
+    protected override void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false, Action<ProductItem> onClick = null)
     {
-        base.CreateProductItem(name, parent, displayIndex, isInMail);
+        base.CreateProductItem(name, parent, displayIndex, isInMail, HandleToggleClicked);
     }
+
 
     private void HandleToggleClicked(ProductItem item)
     {

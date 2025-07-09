@@ -89,6 +89,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6b35e484af8371438de3666ccd1fac8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  previewButton: {fileID: 527597578415661041}
+  longPressThreshold: 0.6
 --- !u!114 &527597578415661041
 MonoBehaviour:
   m_ObjectHideFlags: 0

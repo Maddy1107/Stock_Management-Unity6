@@ -89,11 +89,18 @@ public abstract class ProductListbase : MonoBehaviour
         }
     }
 
-    protected virtual void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false)
+    protected virtual void CreateProductItem(string name, Transform parent, int displayIndex = -1, bool isInMail = false, Action<ProductItem> onClick = null)
     {
         var itemGO = Instantiate(productPrefab, parent);
         var item = itemGO.GetComponent<ProductItem>();
+
         string displayName = displayIndex > 0 ? $"{displayIndex}. {name}" : name;
         item.Initialize(displayName, name, isInMail);
+
+        item.toggleButton.onClick.RemoveAllListeners();
+
+        if (onClick != null)
+            item.toggleButton.onClick.AddListener(() => onClick(item));
     }
+
 }
