@@ -176,30 +176,4 @@ public class GUIManager : MonoBehaviour
         Debug.Log("This only works on a real Android device.");
 #endif
     }
-
-
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-    private void OnGUI()
-    {
-        const int buttonWidth = 400;
-        const int buttonHeight = 100;
-
-        // Bottom-right corner
-        Rect buttonRect = new Rect(
-            Screen.width - buttonWidth - 200,
-            Screen.height - buttonHeight - 200,
-            buttonWidth,
-            buttonHeight
-        );
-
-        if (GUI.Button(buttonRect, "Open Outlook"))
-        {
-            OpenEmail(
-    "Feedback for your app",
-    "Hey there!\n\nI just wanted to say..."
-);
-
-        }
-    }
-#endif
 }

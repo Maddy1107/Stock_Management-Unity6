@@ -59,10 +59,12 @@ public class ImageScreen : UIPage<ImageScreen>
         if (!string.IsNullOrEmpty(path))
         {
             Debug.Log("ZIP saved at: " + path);
+            DonePopup.Instance.Initialize("ZIP saved Successfully", true);
             GUIManager.Instance.ShowAndroidToast("ZIP saved successfully.");
         }
         else
         {
+            DonePopup.Instance.Initialize("Failed to save ZIP.", false);
             GUIManager.Instance.ShowAndroidToast("Failed to save ZIP.");
         }
 

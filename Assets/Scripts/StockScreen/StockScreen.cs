@@ -24,6 +24,7 @@ public class StockScreen : UIPage<StockScreen>
 
     void OnEnable()
     {
+        Reset();
         uploadButton.onClick.AddListener(HandleUploadButtonClicked);
     }
 
@@ -87,6 +88,7 @@ public class StockScreen : UIPage<StockScreen>
 
     public void Reset()
     {
+        excelFilePath.text = "No file selected";
         ProductDictionary.Clear();
         JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(tempStockUpdatepath));
     }
@@ -97,7 +99,7 @@ public class StockScreen : UIPage<StockScreen>
         {
             if (path == null)
             {
-                excelFilePath.text = "No file selected.";
+                excelFilePath.text = "No file selected";
                 Debug.Log("File selection cancelled");
                 return;
             }

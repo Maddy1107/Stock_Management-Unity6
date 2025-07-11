@@ -23,11 +23,14 @@ public class LoadingScreen : MonoBehaviour
         HideInstant();
     }
 
-    public void Show()
+    public void Show(string text = null)
     {
         gameObject.SetActive(true);
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
+
+        if (text != null)
+            SetLoadingText(text);
     }
 
     public void Hide()

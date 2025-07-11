@@ -91,7 +91,7 @@ public class FinalList : UIPopup<FinalList>
         string excelPath = StockScreen.Instance.ExcelFilePath;
         bool hasExcel = !string.IsNullOrEmpty(excelPath) && !excelPath.Equals("No file selected", StringComparison.OrdinalIgnoreCase);
 
-        string filename = hasExcel ? Path.GetFileName(excelPath) : GetFileName(StockScreen.templateFilePath);
+        string filename = hasExcel ? Path.GetFileName(excelPath) : $"{GetFileName(StockScreen.templateFilePath)}.xlsx";
 
         string userName = PlayerPrefs.GetString("SavedUserName");
         string sheetname = hasExcel ? userName.Split(' ')[0].ToUpper() : null;
@@ -113,9 +113,8 @@ public class FinalList : UIPopup<FinalList>
         {
             if (!string.IsNullOrEmpty(message))
             {
-                if (error) Debug.LogError(message);
-                else Debug.Log(message);
                 GUIManager.Instance.ShowAndroidToast(message);
+                DonePopup.Instance.Initialize(message, true ? !error : error);
             }
             LoadingScreen.Instance?.Hide();
         }
@@ -138,11 +137,15 @@ public class FinalList : UIPopup<FinalList>
                         () =>
                         {
                             Debug.Log("DB Upload Success");
-                            Finish($"Final list exported successfully: {filePath}");
+                            Finish($"Final list exported successfully");
                             Hide();
-                            MainMenuPanel.Instance.Show();
                         },
-                        err => Debug.LogError("DB Upload Error: " + err)
+                        err =>
+                        {
+                            Debug.LogError("DB Upload Error: " + err);
+                            Finish($"Error in Saving");
+                        }
+
                     );
                 }
             },

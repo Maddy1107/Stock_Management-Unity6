@@ -19,7 +19,12 @@ public class DBAPI : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private const string BaseUrl = /*"http://127.0.0.1:5000";*/"https://backendapi-flask.onrender.com";
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private const string BaseUrl = "http://127.0.0.1:5000"; // Local Flask for testing
+#else
+    private const string BaseUrl = "https://backendapi-flask.onrender.com"; // Production Flask
+#endif
+
 
     // 1. Upload monthly product data
     public void UploadProductData(Dictionary<string, string[]> data, Action onSuccess, Action<string> onError)

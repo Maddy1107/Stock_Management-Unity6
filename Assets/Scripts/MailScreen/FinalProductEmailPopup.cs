@@ -11,7 +11,6 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
     [SerializeField] private TMP_Text emailHeadText;
     [SerializeField] private TMP_Text emailFootText;
     [SerializeField] private Button copyButton;
-    [SerializeField] private Button saveButton;
     [SerializeField] private GameObject productTextPrefab;
     [SerializeField] private Transform productTextContainer;
 
@@ -21,19 +20,16 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
 
     private void OnEnable()
     {
-        copyButton.onClick.AddListener(CopyToClipboard);
-        saveButton.onClick.AddListener(SaveData);
+        copyButton.onClick.AddListener(SaveData);
     }
 
     private void OnDisable()
     {
         copyButton.onClick.RemoveAllListeners();
-        saveButton.onClick.RemoveAllListeners();
     }
 
-    public void SetEmailContent(List<string> products, string header, bool showSaveButton = true, string subject = "")
+    public void SetEmailContent(List<string> products, string header, string subject = "")
     {
-        saveButton.gameObject.SetActive(showSaveButton);
         productList = products;
         subjectText = subject;
 
@@ -74,12 +70,6 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
         return sb.ToString();
     }
 
-    private void CopyToClipboard()
-    {
-        GUIManager.Instance?.CopyToClipboard($"{subjectText}\n\n{emailBodyText}");
-        GUIManager.Instance?.OpenEmail(subjectText, emailBodyText);
-    }
-
     private void SaveData()
     {
         LoadingScreen.Instance.Show();
@@ -90,6 +80,10 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
                 LoadingScreen.Instance.Hide();
                 GUIManager.Instance.ShowAndroidToast("Products saved successfully.");
                 Debug.Log("Products saved successfully.");
+
+                GUIManager.Instance?.CopyToClipboard($"{subjectText}\n\n{emailBodyText}");
+                GUIManager.Instance?.OpenEmail(subjectText, emailBodyText);
+
             },
             onError: error =>
             {

@@ -102,7 +102,6 @@ public class Collapsible : MonoBehaviour
         FinalProductEmailPopup.Instance.SetEmailContent(
             new List<string>(receivedProductNames),
             "Below are the received products:",
-            false,
             "Products received"
         );
     }

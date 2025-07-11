@@ -20,7 +20,11 @@ public class ExcelAPI : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private const string BaseUrl = /*"http://127.0.0.1:5000";*/"https://backendapi-flask.onrender.com";
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private const string BaseUrl = "http://127.0.0.1:5000"; // Local Flask for testing
+#else
+    private const string BaseUrl = "https://backendapi-flask.onrender.com"; // Production Flask
+#endif
 
     private string ExportUrl = $"{BaseUrl}/export";
     private string ExportSheetUrl = $"{BaseUrl}/export-sheet";
@@ -42,82 +46,31 @@ public class ExcelAPI : MonoBehaviour
 
     private IEnumerator SendExcel(byte[] file, string filename, string jsonData, string sheetName, Action<string> onSuccess, Action<string> onError)
     {
-        string uri;
-
         WWWForm form = new WWWForm();
         form.AddBinaryData("file", file, filename + ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         form.AddField("filename", filename);
         form.AddField("data", jsonData);
 
-        if (!string.IsNullOrEmpty(sheetName))
-        {
-            uri = ExportSheetUrl;
-            form.AddField("sheet", sheetName);
-        }
-        else
-        {
-            uri = ExportUrl;
-        }
-
         string profileName = PlayerPrefs.GetString("SavedUserName");
+        string uri = string.IsNullOrEmpty(sheetName) ? ExportUrl : ExportSheetUrl;
+
+        if (!string.IsNullOrEmpty(sheetName))
+            form.AddField("sheet", sheetName);
 
         string url = $"{uri}/{profileName}";
-
         Debug.Log(url);
+
+        string month = DateTime.Now.ToString("MMMM");
 
         yield return APIClient.PostForm(url, form,
                 onSuccessBytes =>
                 {
-                    string savedPath = SaveExportedExcel(filename, onSuccessBytes, out string error);
+                    string savedPath = GUIManager.Instance.SaveFile(filename, month, onSuccessBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
                     if (!string.IsNullOrEmpty(savedPath))
                         onSuccess?.Invoke(savedPath);
                     else
-                        onError?.Invoke(error);
+                        onError?.Invoke("Failed");
                 },
                 onError);
-    }
-
-    /// <summary>
-    /// Saves the returned Excel file to the device.
-    /// </summary>
-    private string SaveExportedExcel(string filename, byte[] data, out string error)
-    {
-        error = null;
-#if UNITY_ANDROID && !UNITY_EDITOR
-        string downloadsPath = $"/storage/emulated/0/Download/ClosingStock/{DateTime.Now:MMMM}";
-        string fullPath = Path.Combine(downloadsPath, filename + ".xlsx");
-        try
-        {
-            if (!Directory.Exists(downloadsPath)) Directory.CreateDirectory(downloadsPath);
-            if (File.Exists(fullPath)) File.Delete(fullPath);
-            File.WriteAllBytes(fullPath, data);
-            return fullPath;
-        }
-        catch (Exception ex)
-        {
-            error = ex.Message;
-            return null;
-        }
-#elif UNITY_EDITOR
-        string savePath = UnityEditor.EditorUtility.SaveFilePanel("Save Excel", "", filename, "xlsx");
-        if (!string.IsNullOrEmpty(savePath))
-        {
-            try
-            {
-                File.WriteAllBytes(savePath, data);
-                return savePath;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
-        }
-        error = "User cancelled export.";
-        return null;
-#else
-        error = "Unsupported platform.";
-        return null;
-#endif
     }
 }
