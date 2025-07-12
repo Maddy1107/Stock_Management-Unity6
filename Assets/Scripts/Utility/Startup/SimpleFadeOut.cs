@@ -10,13 +10,18 @@ public class SimpleFadeOut : MonoBehaviour
     private void Start()
     {
         if (fadeOverlay != null)
+        {
+            fadeOverlay.enabled = true;
             StartCoroutine(FadeOut());
+        }
     }
 
     private IEnumerator FadeOut()
     {
         if (fadeOverlay == null)
             yield break;
+
+        fadeOverlay.raycastTarget = false;
 
         float t = 0f;
         float duration = 2f;

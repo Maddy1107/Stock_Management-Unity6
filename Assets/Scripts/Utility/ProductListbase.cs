@@ -95,6 +95,7 @@ public abstract class ProductListbase : MonoBehaviour
         var item = itemGO.GetComponent<ProductItem>();
 
         string displayName = displayIndex > 0 ? $"{displayIndex}. {name}" : name;
+        
         item.Initialize(displayName, name, isInMail);
 
         item.toggleButton.onClick.RemoveAllListeners();

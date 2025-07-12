@@ -157,7 +157,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -38}
-  m_SizeDelta: {x: -189.5259, y: -250.069}
+  m_SizeDelta: {x: -134.0685, y: -250.069}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6311366163282150557
 MonoBehaviour:
@@ -222,7 +222,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 157.1607}
+  m_SizeDelta: {x: 0, y: 177.5474}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6065421146797143575
 CanvasRenderer:
@@ -399,7 +399,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   closeButton: {fileID: 3467104208919294128}
   requireButton: {fileID: 3417484101096161434}
-  receiveButton: {fileID: 0}
   absentButton: {fileID: 682928844057143231}
 --- !u!225 &5214365849138206031
 CanvasGroup:
@@ -491,7 +490,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Select Email Type
+  m_text: Email Type
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
   m_sharedMaterial: {fileID: -9063029622434912667, guid: f456e0e0e4c45c44ba6a2570b70766a3, type: 2}
@@ -646,7 +645,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 58.43006}
-  m_SizeDelta: {x: -131.4047, y: 568.8528}
+  m_SizeDelta: {x: -249.1947, y: 568.8528}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1204146754372888443
 CanvasRenderer:
@@ -676,8 +675,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2692101316330617974, guid: c0e73a4e12747dd46b7ca90d2284fb29, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 7776480850731242304, guid: 4454caf787493e544bf0b333e0825ea1, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -720,8 +719,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -46.649937}
-  m_SizeDelta: {x: 0, y: -93.3}
+  m_AnchoredPosition: {x: 0.060791016, y: -53.075897}
+  m_SizeDelta: {x: -10.2473, y: -106.1519}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2903519218842903746
 CanvasRenderer:
@@ -751,7 +750,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7020922751645015488, guid: f0b4dc9b8fe390b4597ba9c379657d44, type: 3}
+  m_Sprite: {fileID: -7020922751645015488, guid: 2b7c7bbe6e70024428ec8f675093149b, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1068,7 +1067,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -52.80005, y: -3.1401}
+  m_AnchoredPosition: {x: -60, y: 6.9}
   m_SizeDelta: {x: 47.33441, y: 46.8949}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4549049811679128902

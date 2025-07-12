@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c565245094b56bb4e906bb430bd0702f
+guid: 4454caf787493e544bf0b333e0825ea1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -172529228431476746
-    second: Magnifying Glass_0
+      213: 7776480850731242304
+    second: Panel 1 BLUE_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -48,7 +48,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -70,7 +70,7 @@ TextureImporter:
   swizzle: 50462976
   cookieLightType: 0
   platformSettings:
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -83,7 +83,7 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -96,7 +96,7 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -113,38 +113,42 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Magnifying Glass_0
+      name: Panel 1 BLUE_0
       rect:
         serializedVersion: 2
-        x: 27
+        x: 0
         y: 0
-        width: 202
-        height: 256
+        width: 512
+        height: 517
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 35, y: 35, z: 35, w: 110}
+      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6f738f1b49d0b9df0800000000000000
-      internalID: -172529228431476746
+      spriteID: 0439676d12c9beb60800000000000000
+      internalID: 7776480850731242304
       vertices: []
       indices: 
       edges: []
       weights: []
     outline: []
+    customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 581b2256f33227447bf553c6e78a6fb2
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
     nameFileIdTable:
-      Magnifying Glass_0: -172529228431476746
+      Panel 1 BLUE_0: 7776480850731242304
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
@@ -155,5 +159,5 @@ AssetOrigin:
   productId: 235559
   packageName: Violet Themed UI
   packageVersion: 1.2
-  assetPath: Assets/Plugins/Violet Theme Ui/Colored Icons/Magnifying Glass.png
+  assetPath: Assets/Plugins/Violet Theme Ui/NEW Panels/Panel 1 BLUE.png
   uploadId: 767621

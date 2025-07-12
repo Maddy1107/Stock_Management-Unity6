@@ -36,22 +36,9 @@ public class ProductItem : MonoBehaviour
         if (toggleButton == null)
             toggleButton = GetComponent<Button>();
 
-        //SetupToggleButton();
-
         IsInMail = isInMail; // auto-updates visuals
-    }
 
-    private void SetupToggleButton()
-    {
-        if (toggleButton == null) return;
-
-        toggleButton.onClick.RemoveAllListeners();
-        toggleButton.onClick.AddListener(HandleToggleClicked);
-    }
-
-    private void HandleToggleClicked()
-    {
-        GameEvents.InvokeOnToggleClicked(this);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
     }
 
     private void UpdateToggleVisual()
