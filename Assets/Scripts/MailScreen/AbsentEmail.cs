@@ -184,7 +184,7 @@ public class AbsentEmail : MonoBehaviour
         if (!string.IsNullOrWhiteSpace(finalText))
         {
             GUIManager.Instance.CopyToClipboard(finalText);
-            GUIManager.Instance.OpenEmail(subjectText, finalText);
+            GUIManager.Instance.ShareFilesOrJustText(subjectText, finalText);
         }
     }
 

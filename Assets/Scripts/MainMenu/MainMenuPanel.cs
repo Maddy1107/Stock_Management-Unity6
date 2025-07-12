@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -5,7 +6,7 @@ using UnityEngine.UI;
 public class MainMenuPanel : UIPage<MainMenuPanel>
 {
     [Header("Buttons")]
-    [SerializeField] private Button mailButton, stockButton, imagesButton, editNameButton, previousStockButton, scheduleButton;
+    [SerializeField] private Button mailButton, stockButton, imagesButton, editNameButton, previousStockButton, scheduleButton, sendEmail;
 
     [Header("Profile UI")]
     [SerializeField] private TMP_Text profileName;
@@ -63,6 +64,19 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
         editNameButton?.onClick.AddListener(() => AboutPanel.Instance?.Show());
         previousStockButton?.onClick.AddListener(() => PreviousStock.Instance?.Show());
         scheduleButton?.onClick.AddListener(() => ProductRequestScreen.Instance?.Show());
+        sendEmail?.onClick.AddListener(() =>
+        {
+            string subject = $"Closing Stock - {DateTime.Now.ToString("MMMM")}";
+
+            string userName = PlayerPrefs.GetString("savedUsername", "User");
+            string currentMonth = DateTime.Now.ToString("MMMM");
+
+            string body = $"Dear Team,\n\nBelow attached are the closing stock details for the month of {currentMonth}.\n\nThank you,\n{userName}";
+
+            GUIManager.Instance?.ShareFilesOrJustText(subject, body);
+        });
+
+
     }
 
     private void OnDisable()
@@ -73,5 +87,6 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
         editNameButton?.onClick.RemoveAllListeners();
         previousStockButton?.onClick.RemoveAllListeners();
         scheduleButton?.onClick.RemoveAllListeners();
+        sendEmail?.onClick.RemoveAllListeners();
     }
 }

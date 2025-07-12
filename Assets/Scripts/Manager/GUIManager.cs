@@ -11,6 +11,7 @@ using UnityEngine.Networking;
 public class GUIManager : MonoBehaviour
 {
     public static GUIManager Instance { get; private set; }
+    private List<string> tempPaths = new List<string>();
 
     private void Awake()
     {
@@ -55,6 +56,18 @@ public class GUIManager : MonoBehaviour
 
     public string SaveFile(string filename, string month, byte[] data, string mimeType = "application/octet-stream")
     {
+        string persistentPath = $"{Application.persistentDataPath}/stockdata/{filename}";
+
+        try
+        {
+            File.WriteAllBytes(persistentPath, data);
+            tempPaths.Add(persistentPath);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("❌ Failed to write to persistentDataPath: " + e.Message);
+        }
+
 #if UNITY_ANDROID && !UNITY_EDITOR
         try
         {
@@ -71,56 +84,34 @@ public class GUIManager : MonoBehaviour
                 values.Call<AndroidJavaObject>("put", "mime_type", mimeType);
                 values.Call<AndroidJavaObject>("put", "is_pending", 1);
 
-                AndroidJavaObject mediaStore = new AndroidJavaClass("android.provider.MediaStore$Downloads");
+                AndroidJavaClass mediaStore = new AndroidJavaClass("android.provider.MediaStore$Downloads");
                 AndroidJavaObject uri = contentResolver.Call<AndroidJavaObject>("insert", mediaStore.GetStatic<AndroidJavaObject>("EXTERNAL_CONTENT_URI"), values);
 
                 if (uri == null)
                 {
-                    Debug.LogError("Failed to get MediaStore URI.");
-                    return null;
+                    Debug.LogError("❌ Failed to insert into MediaStore.");
+                    return persistentPath;
                 }
 
-                // Write to output stream
                 AndroidJavaObject outputStream = contentResolver.Call<AndroidJavaObject>("openOutputStream", uri);
-                IntPtr streamPtr = outputStream.GetRawObject();
-
-                using (AndroidJavaObject bufferStream = new AndroidJavaObject("java.io.BufferedOutputStream", outputStream))
+                using (AndroidJavaObject bufferedStream = new AndroidJavaObject("java.io.BufferedOutputStream", outputStream))
                 {
-                    bufferStream.Call("write", data);
-                    bufferStream.Call("flush");
-                    bufferStream.Call("close");
+                    bufferedStream.Call("write", data);
+                    bufferedStream.Call("flush");
+                    bufferedStream.Call("close");
                 }
 
                 values.Call<AndroidJavaObject>("put", "is_pending", 0);
                 contentResolver.Call<int>("update", uri, values, null, null);
-
-                return uri.ToString(); // Can be returned for reference
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Debug.LogError("Error saving file on Android: " + ex.Message);
-            return null;
-        }
-#else
-        // For Editor/PC
-        try
-        {
-            string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"ClosingStock/{month}");
-            if (!Directory.Exists(folder))
-                Directory.CreateDirectory(folder);
-
-            string path = Path.Combine(folder, filename);
-            File.WriteAllBytes(path, data);
-            Debug.Log("Saved file to: " + path);
-            return path;
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("Error saving file in Editor: " + ex.Message);
-            return null;
+            Debug.LogError("⚠️ MediaStore save failed: " + e.Message);
         }
 #endif
+
+        return persistentPath;
     }
 
     public byte[] GenerateZipBytes(string[] filePaths)
@@ -144,36 +135,44 @@ public class GUIManager : MonoBehaviour
                     }
                 }
             }
-
             return memoryStream.ToArray();
         }
     }
 
-    public void OpenEmail(string subject, string body)
+    public void ShareFilesOrJustText(string subject, string message)
     {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        try
+        NativeShare share = new NativeShare()
+            .SetSubject(subject)
+            .SetText(message);
+
+        if (tempPaths != null && tempPaths.Count > 0)
         {
-            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            foreach (var path in tempPaths)
             {
-                AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-
-                string uriString = $"mailto:?subject={Uri.EscapeDataString(subject)}&body={Uri.EscapeDataString(body)}";
-                AndroidJavaObject uri = new AndroidJavaClass("android.net.Uri").CallStatic<AndroidJavaObject>("parse", uriString);
-
-                AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", "android.intent.action.SENDTO", uri);
-                intent.Call<AndroidJavaObject>("addFlags", 0x10000000); // FLAG_ACTIVITY_NEW_TASK
-
-                activity.Call("startActivity", intent);
+                if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                {
+                    share.AddFile(path);
+                }
             }
         }
-        catch (System.Exception e)
+
+        share.Share();
+    }
+
+
+    private void OnApplicationQuit()
+    {
+        foreach (string path in tempPaths)
         {
-            Debug.LogError("Failed to open email app: " + e.Message);
-            GUIManager.Instance.ShowAndroidToast("No email app found or failed to open.");
+            try
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("⚠️ Failed to delete: " + path + " Error: " + e.Message);
+            }
         }
-#else
-        Debug.Log("This only works on a real Android device.");
-#endif
     }
 }
