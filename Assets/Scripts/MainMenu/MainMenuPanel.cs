@@ -68,12 +68,12 @@ public class MainMenuPanel : UIPage<MainMenuPanel>
         {
             string subject = $"Closing Stock - {DateTime.Now.ToString("MMMM")}";
 
-            string userName = PlayerPrefs.GetString("savedUsername", "User");
+            string userName = PlayerPrefs.GetString("SavedUserName", "User");
             string currentMonth = DateTime.Now.ToString("MMMM");
 
             string body = $"Dear Team,\n\nBelow attached are the closing stock details for the month of {currentMonth}.\n\nThank you,\n{userName}";
 
-            GUIManager.Instance?.ShareFilesOrJustText(subject, body);
+            GUIManager.Instance?.CheckIfValidMail(subject, body);
         });
 
 

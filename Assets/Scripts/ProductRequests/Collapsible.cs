@@ -114,7 +114,7 @@ public class Collapsible : MonoBehaviour
             "All items already marked received.",
             finalCallback: () =>
             {
-                Debug.Log("✅ All items marked as received.");
+                Debug.Log("All items marked as received.");
                 UpdateMarkAllButtonState();
                 GUIManager.Instance.ShowAndroidToast("All items marked received!");
             }
@@ -139,7 +139,7 @@ public class Collapsible : MonoBehaviour
             "No items are marked as received.",
             finalCallback: () =>
         {
-            Debug.Log("✅ All items marked as not received.");
+            Debug.Log("All items marked as not received.");
             UpdateMarkAllButtonState();
             GUIManager.Instance.ShowAndroidToast("All items marked not received!");
         }

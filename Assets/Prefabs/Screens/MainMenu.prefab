@@ -1467,6 +1467,7 @@ MonoBehaviour:
   editNameButton: {fileID: 4897310455725095029}
   previousStockButton: {fileID: 3376270855295053320}
   scheduleButton: {fileID: 7099114163423158511}
+  sendEmail: {fileID: 6822358865014018461}
   profileName: {fileID: 225787887640852313}
 --- !u!1 &4250526006436204834
 GameObject:

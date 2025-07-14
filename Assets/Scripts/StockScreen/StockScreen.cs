@@ -77,7 +77,7 @@ public class StockScreen : UIPage<StockScreen>
     {
         if (ProductDictionary == null || ProductDictionary.Count == 0)
         {
-            Debug.LogWarning("⚠️ Product dictionary is empty. Nothing to write.");
+            Debug.LogWarning("Product dictionary is empty. Nothing to write.");
             GUIManager.Instance.ShowAndroidToast("No products to submit.");
             return;
         }
@@ -105,17 +105,16 @@ public class StockScreen : UIPage<StockScreen>
             }
 
             Debug.Log("Excel file picked at: " + path);
-
             HandlePickedExcelFile(path);
         },
-        new string[] { ".xlsx", ".xls" });
+        new string[] { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel" }); // .xlsx, .xls
     }
 
     private void HandlePickedExcelFile(string filePath)
     {
         if (excelFilePath != null)
         {
-            excelFilePath.text = filePath;
+            excelFilePath.text = Path.GetFileName(filePath);
         }
     }
 }

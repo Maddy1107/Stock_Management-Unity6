@@ -66,7 +66,7 @@ public class PreviousStock : UIPopup<PreviousStock>
             },
             onError: error =>
             {
-                Debug.LogError($"❌ Failed to fetch product data: {error}");
+                Debug.LogError($"Failed to fetch product data: {error}");
                 GUIManager.Instance.ShowAndroidToast("Unable to load data. Please try again.");
                 LoadingScreen.Instance.Hide();
             }

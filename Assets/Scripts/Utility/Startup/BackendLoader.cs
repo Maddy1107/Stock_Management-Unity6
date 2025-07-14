@@ -7,7 +7,7 @@ public class BackendLoader
     public Action<string> OnStatusUpdate;
     public Action<float> OnProgressUpdate;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
     private const string BaseUrl = "http://127.0.0.1:5000";
 #else
     private const string BaseUrl = "https://backendapi-flask.onrender.com";
@@ -37,14 +37,14 @@ public class BackendLoader
                 payload,
                 onSuccess: (res) =>
                 {
-                    Debug.Log("✅ SetEnv OK: " + res);
+                    Debug.Log("SetEnv OK: " + res);
                     setEnvDone = true;
                     progress = 0.4f;
                     OnProgressUpdate?.Invoke(progress);
                 },
                 onError: (err) =>
                 {
-                    Debug.LogWarning("❌ SetEnv failed: " + err);
+                    Debug.LogWarning("SetEnv failed: " + err);
                 });
 
             if (!setEnvDone)
@@ -60,14 +60,14 @@ public class BackendLoader
                 warmupUrl,
                 onSuccess: (res) =>
                 {
-                    Debug.Log("🔥 Warmup OK: " + res);
+                    Debug.Log("Warmup OK: " + res);
                     warmupDone = true;
                     progress = 1f;
                     OnProgressUpdate?.Invoke(progress);
                 },
                 onError: (err) =>
                 {
-                    Debug.LogWarning("⚠️ Warmup failed: " + err);
+                    Debug.LogWarning("Warmup failed: " + err);
                 });
 
             if (!warmupDone)

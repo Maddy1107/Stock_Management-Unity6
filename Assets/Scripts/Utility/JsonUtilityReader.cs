@@ -12,13 +12,13 @@ public static class JsonUtilityEditor
     {
         if (string.IsNullOrWhiteSpace(fullFilePath))
         {
-            Debug.LogError("❌ File path is null or empty.");
+            Debug.LogError("File path is null or empty.");
             return default;
         }
 
         if (!File.Exists(fullFilePath))
         {
-            Debug.LogError($"❌ File does not exist at: {fullFilePath}");
+            Debug.LogError($"File does not exist at: {fullFilePath}");
             return default;
         }
 
@@ -29,7 +29,7 @@ public static class JsonUtilityEditor
         }
         catch (Exception ex)
         {
-            Debug.LogError($"❌ Error reading JSON from file: {ex.Message}");
+            Debug.LogError($"Error reading JSON from file: {ex.Message}");
             return default;
         }
     }
@@ -41,13 +41,13 @@ public static class JsonUtilityEditor
     {
         if (string.IsNullOrWhiteSpace(fullFilePath))
         {
-            Debug.LogError("❌ File path is null or empty.");
+            Debug.LogError(" File path is null or empty.");
             return;
         }
 
         if (data == null)
         {
-            Debug.LogError("❌ Data is null, cannot write to file.");
+            Debug.LogError(" Data is null, cannot write to file.");
             return;
         }
 
@@ -61,11 +61,11 @@ public static class JsonUtilityEditor
 
             string json = JsonConvert.SerializeObject(data, Formatting.Indented);
             File.WriteAllText(fullFilePath, json);
-            Debug.Log($"✅ JSON written to: {fullFilePath}");
+            Debug.Log($"JSON written to: {fullFilePath}");
         }
         catch (Exception ex)
         {
-            Debug.LogError($"❌ Error writing JSON to file: {ex.Message}");
+            Debug.LogError($" Error writing JSON to file: {ex.Message}");
         }
     }
 
@@ -75,7 +75,7 @@ public static class JsonUtilityEditor
 
         if (jsonAsset == null)
         {
-            Debug.LogError($"❌ JSON file not found in Resources: {fileNameWithoutExtension}");
+            Debug.LogError($" JSON file not found in Resources: {fileNameWithoutExtension}");
             return default;
         }
 
@@ -85,7 +85,7 @@ public static class JsonUtilityEditor
         }
         catch (JsonException e)
         {
-            Debug.LogError($"❌ Failed to parse JSON: {e.Message}");
+            Debug.LogError($" Failed to parse JSON: {e.Message}");
             return default;
         }
     }
@@ -99,16 +99,16 @@ public static class JsonUtilityEditor
             try
             {
                 File.Delete(fullPath);
-                Debug.Log($"✅ Deleted file: {fullPath}");
+                Debug.Log($"Deleted file: {fullPath}");
             }
             catch (IOException e)
             {
-                Debug.LogError($"❌ Failed to delete file: {fullPath}. Exception: {e.Message}");
+                Debug.LogError($" Failed to delete file: {fullPath}. Exception: {e.Message}");
             }
         }
         else
         {
-            Debug.LogWarning($"⚠️ File not found to delete: {fullPath}");
+            Debug.LogWarning($"File not found to delete: {fullPath}");
         }
     }
 }

@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using UnityEngine;
+
 #if UNITY_ANDROID && !UNITY_EDITOR
 using UnityEngine.Android;
-using UnityEngine.Networking;
 #endif
 
 public class GUIManager : MonoBehaviour
 {
     public static GUIManager Instance { get; private set; }
-    private List<string> tempPaths = new List<string>();
+
+    private readonly List<string> tempPaths = new();
+    private string FolderPath => Path.Combine(Application.persistentDataPath, "stockdata");
 
     private void Awake()
     {
@@ -20,159 +22,180 @@ public class GUIManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
     }
 
     private void OnEnable()
     {
         MainMenuPanel.Instance?.Show();
+        DeleteAllFilesInFolder(FolderPath);
     }
 
-    public void CopyToClipboard(string stringToCopy)
-    {
-        GUIUtility.systemCopyBuffer = stringToCopy.Trim();
-        ShowAndroidToast("Copied to clipboard");
-    }
+    private void OnApplicationQuit() => DeleteAllFilesInFolder(FolderPath);
 
+    // 🔹 Toast
     public void ShowAndroidToast(string message)
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        using (AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer"))
+        using AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer");
+        AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+
+        activity.Call("runOnUiThread", new AndroidJavaRunnable(() =>
         {
-            AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-            activity.Call("runOnUiThread", new AndroidJavaRunnable(() =>
-            {
-                AndroidJavaClass toastClass = new("android.widget.Toast");
-                AndroidJavaObject toast = toastClass.CallStatic<AndroidJavaObject>(
-                    "makeText", activity, message, toastClass.GetStatic<int>("LENGTH_SHORT"));
-                toast.Call("show");
-            }));
-        }
+            using AndroidJavaClass toastClass = new("android.widget.Toast");
+            AndroidJavaObject toast = toastClass.CallStatic<AndroidJavaObject>(
+                "makeText", activity, message, toastClass.GetStatic<int>("LENGTH_SHORT"));
+            toast.Call("show");
+        }));
 #else
         Debug.Log("Toast: " + message);
 #endif
     }
 
+    // 🔹 Clipboard
+    public void CopyToClipboard(string text)
+    {
+        GUIUtility.systemCopyBuffer = text.Trim();
+        ShowAndroidToast("Copied to clipboard");
+    }
+
+    // 🔹 Save file to persistent path + MediaStore
     public string SaveFile(string filename, string month, byte[] data, string mimeType = "application/octet-stream")
     {
-        string persistentPath = $"{Application.persistentDataPath}/stockdata/{filename}";
+        string persistentPath = Path.Combine(FolderPath, filename);
 
         try
         {
+            Directory.CreateDirectory(FolderPath);
             File.WriteAllBytes(persistentPath, data);
             tempPaths.Add(persistentPath);
         }
         catch (Exception e)
         {
-            Debug.LogError("❌ Failed to write to persistentDataPath: " + e.Message);
+            Debug.LogError("Write failed: " + e.Message);
         }
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-        try
+    try
+    {
+        using AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer");
+        AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+        AndroidJavaObject contentResolver = activity.Call<AndroidJavaObject>("getContentResolver");
+        AndroidJavaObject values = new("android.content.ContentValues");
+
+        values.Call<AndroidJavaObject>("put", "relative_path", $"Download/ClosingStock/{month}/");
+        values.Call<AndroidJavaObject>("put", "title", filename);
+        values.Call<AndroidJavaObject>("put", "display_name", filename);
+        values.Call<AndroidJavaObject>("put", "mime_type", mimeType);
+        values.Call<AndroidJavaObject>("put", "is_pending", new AndroidJavaObject("java.lang.Integer", 1));
+
+        AndroidJavaClass mediaStore = new("android.provider.MediaStore$Downloads");
+        AndroidJavaObject uri = contentResolver.Call<AndroidJavaObject>(
+            "insert", mediaStore.GetStatic<AndroidJavaObject>("EXTERNAL_CONTENT_URI"), values);
+
+        if (uri == null)
         {
-            using (AndroidJavaClass environment = new AndroidJavaClass("android.os.Environment"))
-            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-            {
-                AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-                AndroidJavaObject contentResolver = activity.Call<AndroidJavaObject>("getContentResolver");
-                AndroidJavaObject values = new AndroidJavaObject("android.content.ContentValues");
-
-                values.Call<AndroidJavaObject>("put", "relative_path", $"Download/ClosingStock/{month}/");
-                values.Call<AndroidJavaObject>("put", "title", filename);
-                values.Call<AndroidJavaObject>("put", "display_name", filename);
-                values.Call<AndroidJavaObject>("put", "mime_type", mimeType);
-                values.Call<AndroidJavaObject>("put", "is_pending", 1);
-
-                AndroidJavaClass mediaStore = new AndroidJavaClass("android.provider.MediaStore$Downloads");
-                AndroidJavaObject uri = contentResolver.Call<AndroidJavaObject>("insert", mediaStore.GetStatic<AndroidJavaObject>("EXTERNAL_CONTENT_URI"), values);
-
-                if (uri == null)
-                {
-                    Debug.LogError("❌ Failed to insert into MediaStore.");
-                    return persistentPath;
-                }
-
-                AndroidJavaObject outputStream = contentResolver.Call<AndroidJavaObject>("openOutputStream", uri);
-                using (AndroidJavaObject bufferedStream = new AndroidJavaObject("java.io.BufferedOutputStream", outputStream))
-                {
-                    bufferedStream.Call("write", data);
-                    bufferedStream.Call("flush");
-                    bufferedStream.Call("close");
-                }
-
-                values.Call<AndroidJavaObject>("put", "is_pending", 0);
-                contentResolver.Call<int>("update", uri, values, null, null);
-            }
+            Debug.LogError("MediaStore URI failed.");
+            return persistentPath;
         }
-        catch (Exception e)
+
+        using AndroidJavaObject outputStream = contentResolver.Call<AndroidJavaObject>("openOutputStream", uri);
+        using AndroidJavaObject bufferStream = new("java.io.BufferedOutputStream", outputStream))
         {
-            Debug.LogError("⚠️ MediaStore save failed: " + e.Message);
+            bufferStream.Call("write", data);
+            bufferStream.Call("flush");
+            bufferStream.Call("close");
         }
+
+        // Mark as no longer pending
+        values.Call<AndroidJavaObject>("put", "is_pending", new AndroidJavaObject("java.lang.Integer", 0));
+        contentResolver.Call<int>("update", uri, values, null, null);
+    }
+    catch (Exception e)
+    {
+        Debug.LogError("MediaStore error: " + e.Message);
+    }
 #endif
-
         return persistentPath;
     }
 
+    // 🔹 ZIP generation
     public byte[] GenerateZipBytes(string[] filePaths)
     {
-        using (var memoryStream = new MemoryStream())
+        using MemoryStream memoryStream = new();
+        using ZipArchive archive = new(memoryStream, ZipArchiveMode.Create, true);
+
+        foreach (string file in filePaths)
         {
-            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-            {
-                foreach (string filePath in filePaths)
-                {
-                    if (!File.Exists(filePath))
-                        continue;
-
-                    string fileName = Path.GetFileName(filePath);
-                    var entry = archive.CreateEntry(fileName);
-
-                    using (var entryStream = entry.Open())
-                    using (var fileStream = File.OpenRead(filePath))
-                    {
-                        fileStream.CopyTo(entryStream);
-                    }
-                }
-            }
-            return memoryStream.ToArray();
+            if (!File.Exists(file)) continue;
+            var entry = archive.CreateEntry(Path.GetFileName(file));
+            using var entryStream = entry.Open();
+            using var fileStream = File.OpenRead(file);
+            fileStream.CopyTo(entryStream);
         }
+
+        return memoryStream.ToArray();
     }
 
+    // 🔹 Validate and Share
+    public void CheckIfValidMail(string subject, string message)
+    {
+        if (CheckTempFilesExist())
+            ShareFilesOrJustText(subject, message);
+    }
+
+    public bool CheckTempFilesExist()
+    {
+        if (!Directory.Exists(FolderPath))
+        {
+            ShowAndroidToast("No export folder found.");
+            return false;
+        }
+
+        bool hasXlsx = false, hasZip = false;
+
+        foreach (string file in Directory.GetFiles(FolderPath))
+        {
+            if (file.EndsWith(".xlsx")) hasXlsx = true;
+            if (file.EndsWith(".zip")) hasZip = true;
+        }
+
+        if (!hasXlsx && !hasZip) ShowAndroidToast("Missing both files.");
+        else if (!hasXlsx) ShowAndroidToast("Missing Closing stock file.");
+        else if (!hasZip) ShowAndroidToast("Missing Zip file.");
+
+        return hasXlsx && hasZip;
+    }
+
+    // 🔹 NativeShare
     public void ShareFilesOrJustText(string subject, string message)
     {
         NativeShare share = new NativeShare()
             .SetSubject(subject)
             .SetText(message);
 
-        if (tempPaths != null && tempPaths.Count > 0)
+        foreach (string path in tempPaths)
         {
-            foreach (var path in tempPaths)
-            {
-                if (!string.IsNullOrEmpty(path) && File.Exists(path))
-                {
-                    share.AddFile(path);
-                }
-            }
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                share.AddFile(path);
         }
 
         share.Share();
     }
 
-
-    private void OnApplicationQuit()
+    // 🔹 Cleanup
+    public static void DeleteAllFilesInFolder(string folderPath)
     {
-        foreach (string path in tempPaths)
+        if (!Directory.Exists(folderPath)) return;
+
+        try
         {
-            try
-            {
-                if (File.Exists(path))
-                    File.Delete(path);
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning("⚠️ Failed to delete: " + path + " Error: " + e.Message);
-            }
+            foreach (string file in Directory.GetFiles(folderPath))
+                File.Delete(file);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Deletion error: " + e.Message);
         }
     }
 }

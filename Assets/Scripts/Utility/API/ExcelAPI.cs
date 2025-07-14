@@ -20,7 +20,7 @@ public class ExcelAPI : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
     private const string BaseUrl = "http://127.0.0.1:5000"; // Local Flask for testing
 #else
     private const string BaseUrl = "https://backendapi-flask.onrender.com"; // Production Flask
