@@ -48,9 +48,8 @@ public class ImageScreen : UIPage<ImageScreen>
         LoadingScreen.Instance.Show();
 
         string month = DateTime.Now.ToString("MMMM");
-        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-        string zipFileName = $"Closing_Stock_Images_{timestamp}.zip";
+        string zipFileName = $"Closing_Stock_Images_{month}.zip";
 
         byte[] zipBytes = GUIManager.Instance.GenerateZipBytes(currentImagePaths);
 

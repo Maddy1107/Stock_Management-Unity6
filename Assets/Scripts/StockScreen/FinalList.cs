@@ -114,7 +114,7 @@ public class FinalList : UIPopup<FinalList>
             if (!string.IsNullOrEmpty(message))
             {
                 GUIManager.Instance.ShowAndroidToast(message);
-                DonePopup.Instance.Initialize(message, true ? !error : error);
+                DonePopup.Instance.Initialize(message, error);
             }
             LoadingScreen.Instance?.Hide();
         }
@@ -137,7 +137,7 @@ public class FinalList : UIPopup<FinalList>
                         () =>
                         {
                             Debug.Log("DB Upload Success");
-                            Finish($"Final list exported successfully");
+                            Finish($"Final list exported successfully",true);
                             Hide();
                         },
                         err =>

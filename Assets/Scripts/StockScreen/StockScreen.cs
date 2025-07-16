@@ -13,12 +13,9 @@ public class StockScreen : UIPage<StockScreen>
     public static string templateFilePath { get; private set; }
     public string ExcelFilePath
     {
-        get { return excelFilePath != null ? excelFilePath.text : string.Empty; }
-        private set { if (excelFilePath != null) excelFilePath.text = value; }
+        get { return excelPath != null ? excelPath : string.Empty; }
     }
-
-    private List<string> addedProducts;
-
+    private string excelPath;
     [SerializeField] private TMP_Text excelFilePath;
     [SerializeField] private Button uploadButton;
 
@@ -90,7 +87,6 @@ public class StockScreen : UIPage<StockScreen>
     {
         excelFilePath.text = "No file selected";
         ProductDictionary.Clear();
-        JsonUtilityEditor.DeleteFileFromTempCache(Path.GetFileNameWithoutExtension(tempStockUpdatepath));
     }
 
     private void HandleUploadButtonClicked()
@@ -107,7 +103,11 @@ public class StockScreen : UIPage<StockScreen>
             Debug.Log("Excel file picked at: " + path);
             HandlePickedExcelFile(path);
         },
+#if UNITY_EDITOR
+        new string[] { ".xlsx", ".xls" }); // .xlsx, .xls
+#else
         new string[] { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel" }); // .xlsx, .xls
+#endif
     }
 
     private void HandlePickedExcelFile(string filePath)
@@ -116,5 +116,6 @@ public class StockScreen : UIPage<StockScreen>
         {
             excelFilePath.text = Path.GetFileName(filePath);
         }
+        excelPath = filePath;
     }
 }

@@ -82,7 +82,7 @@ public class FinalProductEmailPopup : UIPopup<FinalProductEmailPopup>
                 Debug.Log("Products saved successfully.");
 
                 GUIManager.Instance?.CopyToClipboard($"{subjectText}\n\n{emailBodyText}");
-                GUIManager.Instance?.ShareFilesOrJustText(subjectText, emailBodyText);
+                GUIManager.Instance?.ShareFilesOrJustText(subjectText, emailBodyText, false);
 
             },
             onError: error =>

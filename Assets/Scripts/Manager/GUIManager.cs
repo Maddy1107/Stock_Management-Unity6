@@ -72,50 +72,9 @@ public class GUIManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("Write failed: " + e.Message);
+            Debug.LogError("Write failed to persistent path: " + e.Message);
         }
 
-#if UNITY_ANDROID && !UNITY_EDITOR
-    try
-    {
-        using AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer");
-        AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-        AndroidJavaObject contentResolver = activity.Call<AndroidJavaObject>("getContentResolver");
-        AndroidJavaObject values = new("android.content.ContentValues");
-
-        values.Call<AndroidJavaObject>("put", "relative_path", $"Download/ClosingStock/{month}/");
-        values.Call<AndroidJavaObject>("put", "title", filename);
-        values.Call<AndroidJavaObject>("put", "display_name", filename);
-        values.Call<AndroidJavaObject>("put", "mime_type", mimeType);
-        values.Call<AndroidJavaObject>("put", "is_pending", new AndroidJavaObject("java.lang.Integer", 1));
-
-        AndroidJavaClass mediaStore = new("android.provider.MediaStore$Downloads");
-        AndroidJavaObject uri = contentResolver.Call<AndroidJavaObject>(
-            "insert", mediaStore.GetStatic<AndroidJavaObject>("EXTERNAL_CONTENT_URI"), values);
-
-        if (uri == null)
-        {
-            Debug.LogError("MediaStore URI failed.");
-            return persistentPath;
-        }
-
-        using AndroidJavaObject outputStream = contentResolver.Call<AndroidJavaObject>("openOutputStream", uri);
-        using AndroidJavaObject bufferStream = new("java.io.BufferedOutputStream", outputStream))
-        {
-            bufferStream.Call("write", data);
-            bufferStream.Call("flush");
-            bufferStream.Call("close");
-        }
-
-        // Mark as no longer pending
-        values.Call<AndroidJavaObject>("put", "is_pending", new AndroidJavaObject("java.lang.Integer", 0));
-        contentResolver.Call<int>("update", uri, values, null, null);
-    }
-    catch (Exception e)
-    {
-        Debug.LogError("MediaStore error: " + e.Message);
-    }
-#endif
         return persistentPath;
     }
 
@@ -141,7 +100,7 @@ public class GUIManager : MonoBehaviour
     public void CheckIfValidMail(string subject, string message)
     {
         if (CheckTempFilesExist())
-            ShareFilesOrJustText(subject, message);
+            ShareFilesOrJustText(subject, message, true);
     }
 
     public bool CheckTempFilesExist()
@@ -168,18 +127,20 @@ public class GUIManager : MonoBehaviour
     }
 
     // 🔹 NativeShare
-    public void ShareFilesOrJustText(string subject, string message)
+    public void ShareFilesOrJustText(string subject, string message, bool useAttachment)
     {
         NativeShare share = new NativeShare()
             .SetSubject(subject)
             .SetText(message);
 
-        foreach (string path in tempPaths)
+        if (useAttachment)
         {
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
-                share.AddFile(path);
+            foreach (string path in tempPaths)
+            {
+                if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                    share.AddFile(path);
+            }
         }
-
         share.Share();
     }
 

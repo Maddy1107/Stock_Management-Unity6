@@ -106,9 +106,5 @@ public static class JsonUtilityEditor
                 Debug.LogError($" Failed to delete file: {fullPath}. Exception: {e.Message}");
             }
         }
-        else
-        {
-            Debug.LogWarning($"File not found to delete: {fullPath}");
-        }
     }
 }

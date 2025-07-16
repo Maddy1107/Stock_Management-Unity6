@@ -23,7 +23,6 @@ public class Calender : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     public void Show(CalenderType CurrentCalenderType, Button targetButton, System.Action<string, string> onMonthYearSelected = null)
