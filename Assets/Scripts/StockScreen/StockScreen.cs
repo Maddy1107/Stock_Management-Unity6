@@ -52,20 +52,41 @@ public class StockScreen : UIPage<StockScreen>
             return;
         }
 
-        int bottleCount;
-        if (int.TryParse(bottles, out bottleCount))
+        string[] productInfo;
+
+        if (string.IsNullOrWhiteSpace(bottles))
+        {
+            productInfo = new string[]
+            {
+                $"{value}ml",
+                ""
+            };
+        }
+        else if (int.TryParse(value, out int valueCount))
+        {
+            productInfo = new string[]
+            {
+                $"{valueCount}ml",
+                bottles
+            };
+        }
+        else if (int.TryParse(bottles, out int bottleCount))
         {
             string bottleLabel = bottleCount == 1 ? "bottle" : "bottles";
-            ProductDictionary[key] = new string[]
+            productInfo = new string[]
             {
-                $"{value[0]}ml",
-                $"{bottles} {bottleLabel}"
+                $"{value}ml",
+                $"{bottleCount} {bottleLabel}"
             };
         }
         else
         {
             Debug.LogError("Invalid bottle count.");
+            return; // Exit early if invalid
         }
+
+        ProductDictionary[key] = productInfo;
+
 
         JsonUtilityEditor.WriteJson(tempStockUpdatepath, ProductDictionary);
     }

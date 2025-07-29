@@ -55,7 +55,7 @@ public class StockUpdatePopup : UIPopup<StockUpdatePopup>
         string valueInput = newInputField.text.Trim();
         string bottleInput = bottleInputField.text.Trim();
 
-        if (string.IsNullOrEmpty(valueInput) || string.IsNullOrEmpty(bottleInput))
+        if (string.IsNullOrEmpty(valueInput))
         {
             GUIManager.Instance.ShowAndroidToast("Please enter a valid value.");
             return;
