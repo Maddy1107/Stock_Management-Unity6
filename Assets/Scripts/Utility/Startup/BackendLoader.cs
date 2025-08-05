@@ -10,7 +10,7 @@ public class BackendLoader
 #if UNITY_EDITOR
     private const string BaseUrl = "http://127.0.0.1:5000";
 #else
-    private const string BaseUrl = "https://backendapi-flask-1cgu.onrender.com";
+    private const string BaseUrl = "https://backendapi-flask.onrender.com";
 #endif
 
     private const float RetryDelay = 1.5f;
