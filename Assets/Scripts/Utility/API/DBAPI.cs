@@ -22,7 +22,7 @@ public class DBAPI : MonoBehaviour
 #if UNITY_EDITOR
     private const string BaseUrl = "http://127.0.0.1:5000"; // Local Flask for testing
 #else
-    private const string BaseUrl = "https://backendapi-flask.onrender.com"; // Production Flask
+    private const string BaseUrl = "https://backendapi-flask-1cgu.onrender.com"; // Production Flask
 #endif
 
 
