@@ -20,9 +20,11 @@ public class DBAPI : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    private const string BaseUrl = "http://127.0.0.1:5000"; // Local Flask for testing
+    private string BaseUrl = ApiConfig.EditorBaseUrl;
+#elif DEVELOPMENT_BUILD
+    private string BaseUrl = ApiConfig.DevBaseUrl;
 #else
-    private const string BaseUrl = "https://backendapi-flask.onrender.com"; // Production Flask
+    private string BaseUrl = ApiConfig.ProdBaseUrl; // Production Flask
 #endif
 
 
@@ -91,6 +93,8 @@ public class DBAPI : MonoBehaviour
     public void FetchRequestedProducts(Action<List<RequestGroup>> onSuccess, Action<string> onError)
     {
         string url = $"{BaseUrl}/requested-products";
+
+        Debug.Log("Fetching requested products from: " + url);
 
         StartCoroutine(APIClient.GetJSON(url,
             response =>

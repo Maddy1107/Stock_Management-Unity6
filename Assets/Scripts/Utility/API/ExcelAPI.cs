@@ -21,13 +21,14 @@ public class ExcelAPI : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    private const string BaseUrl = "http://127.0.0.1:5000"; // Local Flask for testing
+    private string BaseUrl = ApiConfig.EditorBaseUrl;
+#elif DEVELOPMENT_BUILD
+    private string BaseUrl = ApiConfig.DevBaseUrl;
 #else
-    private const string BaseUrl = "https://backendapi-flask.onrender.com"; // Production Flask
+    private string BaseUrl = ApiConfig.ProdBaseUrl; // Production Flask
 #endif
 
-    private string ExportUrl = $"{BaseUrl}/export";
-    private string ExportSheetUrl = $"{BaseUrl}/export-sheet";
+
 
     /// <summary>
     /// Exports an Excel file to the server with optional sheet name.
@@ -46,6 +47,9 @@ public class ExcelAPI : MonoBehaviour
 
     private IEnumerator SendExcel(byte[] file, string filename, string jsonData, string sheetName, Action<string> onSuccess, Action<string> onError)
     {
+        string ExportUrl = $"{BaseUrl}/export";
+        string ExportSheetUrl = $"{BaseUrl}/export-sheet";
+
         WWWForm form = new WWWForm();
         form.AddBinaryData("file", file, filename + ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         form.AddField("filename", filename);
