@@ -1,19 +1,28 @@
 using System;
 using System.Collections;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public static class ApiConfig
-{
-    public static string DevBaseUrl = "https://stock-dev-1ac3.onrender.com";
-    public static string ProdBaseUrl = "https://backendapi-flask.onrender.com";
-    public static string EditorBaseUrl = "http://127.0.0.1:5001";
-}
-
 public static class APIClient
 {
-    private const int DefaultTimeout = 10;
+
+    public static string BaseUrl
+    {
+        get
+        {
+#if UNITY_EDITOR
+            return "http://127.0.0.1:5001";//Editor
+#elif DEVELOPMENT_BUILD
+            return "https://stock-dev-1ac3.onrender.com";//Development
+#else
+            return "https://backendapi-flask.onrender.com";//Production
+#endif
+        }
+    }
+
+    private const int DefaultTimeout = 60; // seconds
     private const int MaxRetries = 1; // Number of retries on internal server error
 
     public static IEnumerator PostJSON(string url, string json, Action<string> onSuccess, Action<string> onError)

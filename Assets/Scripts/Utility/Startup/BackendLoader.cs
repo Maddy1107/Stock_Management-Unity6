@@ -7,21 +7,13 @@ public class BackendLoader
     public Action<string> OnStatusUpdate;
     public Action<float> OnProgressUpdate;
 
-#if UNITY_EDITOR
-    private string BaseUrl = ApiConfig.EditorBaseUrl;
-#elif DEVELOPMENT_BUILD
-    private string BaseUrl = ApiConfig.DevBaseUrl;
-#else
-    private string BaseUrl = ApiConfig.ProdBaseUrl;
-#endif
-
     private readonly float RetryDelay = 1.5f;
 
     public IEnumerator StartBackendSetup()
     {
         float progress = 0f;
         bool warmupDone = false;
-        string warmupUrl = $"{BaseUrl}/warmup";
+        string warmupUrl = $"{APIClient.BaseUrl}/warmup";
 
         while (!warmupDone)
         {

@@ -19,14 +19,6 @@ public class DBAPI : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-#if UNITY_EDITOR
-    private string BaseUrl = ApiConfig.EditorBaseUrl;
-#elif DEVELOPMENT_BUILD
-    private string BaseUrl = ApiConfig.DevBaseUrl;
-#else
-    private string BaseUrl = ApiConfig.ProdBaseUrl; // Production Flask
-#endif
-
 
     // 1. Upload monthly product data
     public void UploadProductData(Dictionary<string, string[]> data, Action onSuccess, Action<string> onError)
@@ -34,7 +26,7 @@ public class DBAPI : MonoBehaviour
         string month = DateTime.Now.ToString("MMM").ToUpper();
         string year = DateTime.Now.ToString("yyyy");
 
-        string url = $"{BaseUrl}/month-data?month={month}&year={year}";
+        string url = $"{APIClient.BaseUrl}/month-data?month={month}&year={year}";
         string json = JsonConvert.SerializeObject(data);
 
         StartCoroutine(APIClient.PostJSON(url, json,
@@ -46,7 +38,7 @@ public class DBAPI : MonoBehaviour
     // 2. Fetch monthly product data
     public void FetchProductData(string month, string year, Action<Dictionary<string, List<string>>> onSuccess, Action<string> onError)
     {
-        string url = $"{BaseUrl}/month-data/{month}?year={year}";
+        string url = $"{APIClient.BaseUrl}/month-data/{month}?year={year}";
 
         StartCoroutine(APIClient.GetJSON(url,
             response =>
@@ -73,7 +65,7 @@ public class DBAPI : MonoBehaviour
     // 3. Request products (new table)
     public void RequestProducts(List<string> productNames, Action onSuccess, Action<string> onError)
     {
-        string url = $"{BaseUrl}/request-products";
+        string url = $"{APIClient.BaseUrl}/request-products";
 
         var body = new List<SimpleProductRequest>();
         foreach (var name in productNames)
@@ -92,7 +84,7 @@ public class DBAPI : MonoBehaviour
     // 4. Fetch all requested products (grouped by date)
     public void FetchRequestedProducts(Action<List<RequestGroup>> onSuccess, Action<string> onError)
     {
-        string url = $"{BaseUrl}/requested-products";
+        string url = $"{APIClient.BaseUrl}/requested-products";
 
         Debug.Log("Fetching requested products from: " + url);
 
@@ -116,7 +108,7 @@ public class DBAPI : MonoBehaviour
     // 5. Mark a specific request as received
     public void MarkRequestReceived(int requestId, Action onSuccess, Action<string> onError)
     {
-        string url = $"{BaseUrl}/mark-received/{requestId}";
+        string url = $"{APIClient.BaseUrl}/mark-received/{requestId}";
 
         StartCoroutine(APIClient.PostJSON(url, "", // No body needed
             response => { Debug.Log("Marked as received"); onSuccess?.Invoke(); },
@@ -126,7 +118,7 @@ public class DBAPI : MonoBehaviour
 
     public void MarkRequestNotReceived(int requestId, Action onSuccess, Action<string> onError)
     {
-        string url = $"{BaseUrl}/mark-not-received/{requestId}";
+        string url = $"{APIClient.BaseUrl}/mark-not-received/{requestId}";
 
         StartCoroutine(APIClient.PostJSON(url, "", // No body needed
             response => { Debug.Log("Marked as received"); onSuccess?.Invoke(); },

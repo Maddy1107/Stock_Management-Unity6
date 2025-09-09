@@ -20,15 +20,6 @@ public class ExcelAPI : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-#if UNITY_EDITOR
-    private string BaseUrl = ApiConfig.EditorBaseUrl;
-#elif DEVELOPMENT_BUILD
-    private string BaseUrl = ApiConfig.DevBaseUrl;
-#else
-    private string BaseUrl = ApiConfig.ProdBaseUrl; // Production Flask
-#endif
-
-
 
     /// <summary>
     /// Exports an Excel file to the server with optional sheet name.
@@ -47,8 +38,8 @@ public class ExcelAPI : MonoBehaviour
 
     private IEnumerator SendExcel(byte[] file, string filename, string jsonData, string sheetName, Action<string> onSuccess, Action<string> onError)
     {
-        string ExportUrl = $"{BaseUrl}/export";
-        string ExportSheetUrl = $"{BaseUrl}/export-sheet";
+        string ExportUrl = $"{APIClient.BaseUrl}/export";
+        string ExportSheetUrl = $"{APIClient.BaseUrl}/export-sheet";
 
         WWWForm form = new WWWForm();
         form.AddBinaryData("file", file, filename + ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
