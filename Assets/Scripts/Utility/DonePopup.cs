@@ -36,8 +36,8 @@ public class DonePopup : UIPopup<DonePopup>
 
     public void OnOkButtonPressed()
     {
-        if (isSuccess)
-            MainMenuPanel.Instance.Show();
+        // if (isSuccess)
+        //     MainMenuPanel.Instance.Show();
         Hide();
     }
 }

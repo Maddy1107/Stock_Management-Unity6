@@ -137,8 +137,8 @@ public class FinalList : UIPopup<FinalList>
                         () =>
                         {
                             Debug.Log("DB Upload Success");
-                            Finish($"Final list exported successfully",true);
-                            Hide();
+                            Finish($"Final list exported successfully", true);
+                            //Hide();
                         },
                         err =>
                         {
